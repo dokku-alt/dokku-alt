@@ -6,7 +6,7 @@ endpoints when you push code to it.
 
 ## Requirements
 
-You need a Linux server with git and sshd installed.
+You need a Linux server with `git` and `sshd` installed.
 
 ## Installing
 
@@ -14,7 +14,8 @@ On your server, run:
 
     $ curl https://raw.github.com/progrium/gitreceive/master/installer | bash
 
-This will install `gitreceive` into /usr/local/bin
+This will install `gitreceive` into `/usr/local/bin`. Alternatively,
+clone this repo and put `gitreceive` wherever you want.
 
 ## Using gitreceive
 
@@ -40,10 +41,21 @@ By default it will POST all the data to a RequestBin:
       -F contents=@- \
       --silent $URL
     
+The username is just a name associated with a public key. The
+fingerprint of the key is sent so you can authenticate against the
+public key you might have for that user. 
+
+The repo contents are streamed into `STDIN` as an uncompressed tar archive. You can put them into a directory on the server with a line like this in your receiver script:
+
+    mkdir -p /some/path && cat | tar -x -C /some/path
+
 
 #### Create a user by uploading a public key from your laptop
 
     $ cat ~/.ssh/id_rsa.pub | ssh you@yourserver.com "gitreceive upload-key progrium"
+
+The username is just an arbitrary name associated with the key, mostly
+for use in your system for auth, etc.
 
 #### Add a remote to a local repository
 
@@ -73,6 +85,7 @@ feedback to the user and affect workflow. Use `gitreceive` to:
 * Deploy on any arbitrary platform
 * Run your build/test system as a separate remote
 * Integrate custom systems into your workflow
+* Build your own Heroku
 * Push code anywhere
 
 ## License
