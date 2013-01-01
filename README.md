@@ -104,9 +104,9 @@ feedback to the user and affect workflow. Use `gitreceive` to:
 * Build your own Heroku
 * Push code anywhere
 
-I used to work at Twilio. Imagine pushing a repo
-with a TwiML file to a repo with a phone number for a name. And then it
-runs that TwiML on Twilio and shows you the result. 
+I used to work at Twilio. Imagine pushing a repo with a TwiML file to a
+gitreceive repo with a phone number for a name. And then it runs that
+TwiML on Twilio and shows you the result, all from the `git push`. 
 
 Another idea: When it's so easy to handle pushed code, how about
 creating a screen in the office that will display whatever code is
