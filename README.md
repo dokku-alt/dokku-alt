@@ -1,7 +1,7 @@
 gitreceive
 ==========
 
-Tool that sets up a git server for running scripts or hitting HTTP
+A tool that sets up a git user that let's you run scripts or hit HTTP
 endpoints when you push code to it.
 
 ## Requirements
