@@ -8,7 +8,7 @@ case "$1" in
 # Public commands
 
   init) # gitreceive init
-    useradd -d $GITHOME $GITUSER
+    useradd -d $GITHOME $GITUSER || true
     mkdir -p $GITHOME/.ssh
     touch $GITHOME/.ssh/authorized_keys
     cat > $GITHOME/receiver <<EOF
@@ -16,14 +16,12 @@ case "$1" in
 URL=http://requestb.in/rlh4znrl
 curl \\
   -X 'POST' \\
-  -F "repository=\$1" \\ 
+  -F "repository=\$1" \\
   -F "revision=\$2" \\
   -F "username=\$3" \\
   -F "fingerprint=\$4" \\
-  \$URL
-#cat > /tmp/received
-sleep 4
-echo "Ok, done"
+  -F contents=@- \\
+  --silent \$URL
 EOF
     chmod +x $GITHOME/receiver
     chown -R $GITUSER $GITHOME
@@ -46,7 +44,7 @@ EOF
     if [ ! -d $REPO_PATH ]; then
       mkdir -p $REPO_PATH
       cd $REPO_PATH
-      git init --bare
+      git init --bare > /dev/null
     fi
     cd $GITHOME
     PRERECEIVE_HOOK="$REPO_PATH/hooks/pre-receive"
@@ -64,7 +62,7 @@ EOF
       # Only run this script for the master branch. You can remove this 
       # if block if you wish to run it for others as well.
       if [[ $refname = "refs/heads/master" ]] ; then
-        echo "----> Receiving $RECEIVE_REPO @ $newrev ... "
+        echo "----> Receiving $RECEIVE_REPO ... "
  
         git archive $newrev | $GITHOME/receiver "$RECEIVE_REPO" "$newrev" "$RECEIVE_USER" "$RECEIVE_FINGERPRINT"  
  
