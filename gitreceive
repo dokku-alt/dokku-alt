@@ -14,12 +14,12 @@ case "$1" in
     cat > $GITHOME/receiver <<EOF
 #!/bin/bash
 URL=http://requestb.in/rlh4znrl
-curl \
-  -X 'POST' \
-  -F "repository=\$1" \ 
-  -F "revision=\$2" \
-  -F "username=\$3" \
-  -F "fingerprint=\$4" \
+curl \\
+  -X 'POST' \\
+  -F "repository=\$1" \\ 
+  -F "revision=\$2" \\
+  -F "username=\$3" \\
+  -F "fingerprint=\$4" \\
   \$URL
 #cat > /tmp/received
 sleep 4
@@ -41,7 +41,7 @@ EOF
   run) 
     export RECEIVE_USER=$2
     export RECEIVE_FINGERPRINT=$3
-    eval $(echo $SSH_ORIGINAL_COMMAND | awk '{print "RECEIVE_REPO="$2}')
+    eval $(echo $SSH_ORIGINAL_COMMAND | awk '{print "export RECEIVE_REPO="$2}')
     REPO_PATH="$GITHOME/$RECEIVE_REPO"
     if [ ! -d $REPO_PATH ]; then
       mkdir -p $REPO_PATH
@@ -64,7 +64,7 @@ EOF
       # Only run this script for the master branch. You can remove this 
       # if block if you wish to run it for others as well.
       if [[ $refname = "refs/heads/master" ]] ; then
-        echo "----> Receiving $newrev ... "
+        echo "----> Receiving $RECEIVE_REPO @ $newrev ... "
  
         git archive $newrev | $GITHOME/receiver "$RECEIVE_REPO" "$newrev" "$RECEIVE_USER" "$RECEIVE_FINGERPRINT"  
  
