@@ -109,6 +109,10 @@ feedback to the user and affect workflow. Use `gitreceive` to:
 This whole system is contained in a single bash script less than 100
 lines long. Let's keep it simple, but I'm definitely open to contribution!
 
+## Big Thanks
+
+DotCloud
+
 ## License
 
 MIT
