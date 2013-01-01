@@ -1,7 +1,7 @@
 gitreceive
 ==========
 
-A tool for creating a git user that creates respositories on the fly and let's you run scripts or hit HTTP endpoints when you push code to them. 
+Creats a ssh+git user that creates respositories on the fly and let's you run scripts or hit HTTP endpoints when you push code. 
 
 Build your own Heroku. Push code anywhere. 
 
