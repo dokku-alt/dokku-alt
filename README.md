@@ -98,11 +98,19 @@ receiver script run any other script on the server.
 You can use `gitreceive` not only to trigger code on `git push`, but to provide
 feedback to the user and affect workflow. Use `gitreceive` to:
 
-* Deploy on any arbitrary platform
-* Run your build/test system as a separate remote
+* Put a `git push` deploy interface in front of App Engine
+* Run your company build/test system as a separate remote
 * Integrate custom systems into your workflow
 * Build your own Heroku
 * Push code anywhere
+
+I used to work at Twilio. Imagine pushing a repo
+with a TwiML file to a repo with a phone number for a name. And then it
+runs that TwiML on Twilio and shows you the result. 
+
+Another idea: When it's so easy to handle pushed code, how about
+creating a screen in the office that will display whatever code is
+pushed to it.
 
 ## Contribute
 
