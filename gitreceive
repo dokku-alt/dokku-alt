@@ -47,8 +47,8 @@ EOF
       mkdir -p $REPO_PATH
       cd $REPO_PATH
       git init --bare
-      cd -
     fi
+    cd $GITHOME
     PRERECEIVE_HOOK="$REPO_PATH/hooks/pre-receive"
     cat > $PRERECEIVE_HOOK <<EOF
 #!/bin/bash
