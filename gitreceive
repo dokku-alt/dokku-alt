@@ -14,7 +14,7 @@ case "$1" in
     cat > $GITHOME/receiver <<EOF
 #!/bin/bash
 URL=http://requestb.in/rlh4znrl
-echo "----> Posting to $URL ..."
+echo "----> Posting to \$URL ..."
 curl \\
   -X 'POST' \\
   -F "repository=\$1" \\
