@@ -14,6 +14,7 @@ case "$1" in
     cat > $GITHOME/receiver <<EOF
 #!/bin/bash
 URL=http://requestb.in/rlh4znrl
+echo "----> Posting to $URL ..."
 curl \\
   -X 'POST' \\
   -F "repository=\$1" \\
@@ -25,6 +26,7 @@ curl \\
 EOF
     chmod +x $GITHOME/receiver
     chown -R $GITUSER $GITHOME
+    echo "Created receiver script in $GITHOME for user '$GITUSER'."
     ;;
 
   upload-key) # gitreceive upload-key <username>
@@ -33,6 +35,7 @@ EOF
     AUTHORIZED_KEYS=$GITHOME/.ssh/authorized_keys
     KEY_PREFIX="command=\"$SELF run $2 $FINGERPRINT\",no-agent-forwarding,no-pty,no-user-rc,no-X11-forwarding,no-port-forwarding"
     echo "$KEY_PREFIX $KEY" >> $AUTHORIZED_KEYS
+    echo $FINGERPRINT
     ;;
 
 # Internal commands
@@ -73,7 +76,7 @@ EOF
         fi
       fi
     done
-    exit 1 # for debugging
+    #exit 1 # for debugging
     ;;
 
   *)
