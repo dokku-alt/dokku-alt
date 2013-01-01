@@ -1,9 +1,11 @@
 gitreceive
 ==========
 
-A tool that sets up a git user that let's you run scripts or hit HTTP
-endpoints when you push code to it. Build your own Heroku. Push code
-anywhere.
+A tool for creating a git user that creates respositories on the fly and let's you run scripts or hit HTTP endpoints when you push code to them. 
+
+Build your own Heroku. Push code anywhere. 
+
+It's just not a `post-receive` hook. It's a powerful wrapper around `pre-receive` giving you easy access to the code that was pushed while still being able to send output back to the git user.
 
 ## Requirements
 
