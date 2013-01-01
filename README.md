@@ -29,7 +29,7 @@ This automatically makes a user and home directory if it doesn't exist.
     $ gitreceive init
     Created receiver script in /home/git for user 'git'.
 
-You can change the user by setting `GITUSER=somethingelse` in the
+You use a different user by setting `GITUSER=somethingelse` in the
 environment before using `gitreceive`.
 
 #### Modify the receiver script
@@ -51,7 +51,7 @@ As an example receiver script, it will POST all the data to a RequestBin:
     
 The username is just a name associated with a public key. The
 fingerprint of the key is sent so you can authenticate against the
-public key you might have for that user. 
+public key that you may have for that user. 
 
 The repo contents are streamed into `STDIN` as an uncompressed archive (tar file). You can extract them into a directory on the server with a line like this in your receiver script:
 
@@ -90,12 +90,12 @@ The repository `example.git` will be created on the fly when you push.
 The receiver script did not attempt to silence the output of curl, so
 the respones of "ok" from RequestBin is shown. Use this to your
 advantage! You can even use chunked-transfer encoding to stream back
-progress in realtime if you kept using HTTP. Alternatively, you can have the
+progress in realtime if you wanted to keep using HTTP. Alternatively, you can have the
 receiver script run any other script on the server.
 
 ## So what?
 
-You can use `gitreceive` not only to trigger code, but to provide
+You can use `gitreceive` not only to trigger code on `git push`, but to provide
 feedback to the user and affect workflow. Use `gitreceive` to:
 
 * Deploy on any arbitrary platform
