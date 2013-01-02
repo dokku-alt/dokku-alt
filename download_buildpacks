@@ -1,0 +1,14 @@
+#!/bin/bash
+mkdir -p buildpacks && cd buildpacks
+xargs -L 1 git clone <<EOF
+https://github.com/heroku/heroku-buildpack-ruby.git
+https://github.com/heroku/heroku-buildpack-nodejs.git
+https://github.com/heroku/heroku-buildpack-clojure.git
+https://github.com/heroku/heroku-buildpack-python.git
+https://github.com/heroku/heroku-buildpack-java.git
+https://github.com/heroku/heroku-buildpack-gradle.git
+https://github.com/heroku/heroku-buildpack-grails.git
+https://github.com/heroku/heroku-buildpack-scala.git
+https://github.com/heroku/heroku-buildpack-play.git
+EOF
+
