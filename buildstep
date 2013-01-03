@@ -21,7 +21,9 @@ cat | tar -x -C $build_dir
 build_layer=`mktemp /tmp/buildstep.layer.XXXX`
 cd $layer_stage
 tar -zcf $build_layer .
-trap "rm -rf $build_layer" EXIT
+mv $build_layer "$build_layer.tgz"
+build_layer="$build_layer.tgz"
+#trap "rm -rf $build_layer" EXIT
 
 # run the build!
 docker run \
