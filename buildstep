@@ -29,4 +29,4 @@ build_layer="$build_layer.tgz"
 docker run \
   -L layer://base \
   -L "file://$build_layer" \
-  --export -- /app/builder
+  --export -- /build/builder
