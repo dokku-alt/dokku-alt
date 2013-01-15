@@ -33,4 +33,4 @@ trap "rm -rf $build_layer" EXIT
 docker run \
   -L layer://base \
   -L "file://$build_layer" \
-  --export -- /build/builder
+  --export-file /tmp/slug.tgz -- /build/builder
