@@ -14,16 +14,20 @@ cp -r buildpacks/* $buildpacks_dir
 # build directory with build script and app src
 build_dir="$layer_stage/build"
 mkdir $build_dir
-cp $1 $build_dir
+cp "$1" $build_dir
 cat | tar -x -C $build_dir
 
-# create the layer
+# create the build layer
 build_layer=`mktemp /tmp/buildstep.layer.XXXX`
 cd $layer_stage
 tar -zcf $build_layer .
 mv $build_layer "$build_layer.tgz"
 build_layer="$build_layer.tgz"
-#trap "rm -rf $build_layer" EXIT
+
+# pre-cleanup
+cd ~
+rm -rf $layer_stage
+trap "rm -rf $build_layer" EXIT
 
 # run the build!
 docker run \
