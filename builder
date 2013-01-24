@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 artifact_target=/tmp/slug.tgz
 build_root=/build
 cache_root=/cache
