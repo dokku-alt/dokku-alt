@@ -1,4 +1,0 @@
-# this is to be used with:
-# curl https://raw.github.com/progrium/gitreceive/master/installer | bash
-curl --silent https://raw.github.com/progrium/gitreceive/master/gitreceive > /usr/local/bin/gitreceive
-chmod +x /usr/local/bin/gitreceive

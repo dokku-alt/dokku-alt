@@ -13,12 +13,7 @@ You need a Linux server with `git` and `sshd` installed.
 
 ## Installing
 
-On your server, run:
-
-    $ curl https://raw.github.com/progrium/gitreceive/master/installer | bash
-
-This will install `gitreceive` into `/usr/local/bin`. Alternatively,
-clone this repo and put `gitreceive` wherever you want.
+On your server, download https://raw.github.com/progrium/gitreceive/master/gitreceive to a location on your $PATH and make it executable.
 
 ## Using gitreceive
 
