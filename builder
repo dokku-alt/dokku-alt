@@ -57,7 +57,9 @@ else
 fi
 
 #echo "Default process types for $buildpack_name -> " $(echo "$default_types" | cut -d: -f1 | tr $'\n' ',' | sed -e 's/,$//')
-echo cat "$build_root/Procfile" | head -1
 
-echo "Finished"
+echo "#!/bin/bash" > /app/start
+cat Procfile | grep "web:" | cut -d: -f2 >> /app/start
+chmod +x /app/start
+
 
