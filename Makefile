@@ -1,8 +1,8 @@
 all:
-  docker-build
+  dockerbuild
   ./buildpacks-fetch
   ./dockerize
 
-docker-build:
+dockerbuild:
   wget https://raw.github.com/dotcloud/docker/master/contrib/docker-build/docker-build
   chmod +x docker-build
