@@ -3,8 +3,8 @@ run 	apt-get update
 run 	apt-get install -y curl
 run 	apt-get install -y git
 
-add buildpacks /buildpacks
-copy builder /buildpacks/builder
+add buildpacks	/buildpacks
+copy builder	/buildpacks/builder
 
 # Ruby buildpack dependencies
 run apt-get install -y ruby1.9.1-dev
