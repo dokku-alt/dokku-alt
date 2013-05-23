@@ -9,11 +9,20 @@ docker attach $ID
 docker commit $ID $APP > /dev/null
 echo "-----> Build complete!"
 echo "-----> Deploying $1 ..."
-ID=$(docker run -d -p 5000 -e PORT=5000 $APP /bin/bash -c "cd /app && ./start")
-echo $ID > "$HOME/$1/CONTAINER"
-PORT=$(docker inspect $ID | ruby -e 'require"json";puts JSON.parse(STDIN.read)["NetworkSettings"]["PortMapping"]["5000"]')
-echo $PORT > "$HOME/$1/PORT"
+if [[ -f "$HOME/$1/PORT" ]]; then
+	OLDID=$(< "$HOME/$1/CONTAINER")
+	docker kill $OLDID
+	PORT=$(< "$HOME/$1/PORT")
+	ID=$(docker run -d -p ":$PORT" -e "PORT=$PORT" $APP /bin/bash -c "cd /app && ./start")
+	echo $ID > "$HOME/$1/CONTAINER"
+else
+	ID=$(docker run -d -p 5000 -e PORT=5000 $APP /bin/bash -c "cd /app && ./start")
+	echo $ID > "$HOME/$1/CONTAINER"
+	PORT=$(docker inspect $ID | ruby -e 'require"json";puts JSON.parse(STDIN.read)["NetworkSettings"]["PortMapping"]["5000"]')
+	echo $PORT > "$HOME/$1/PORT"
+fi
 echo
 echo "-----> Application deployed:"
 echo "       http://$(hostname -i | cut -d' ' -f3):$PORT"
-exit 1 #debug
+echo
+#exit 1 #debug
