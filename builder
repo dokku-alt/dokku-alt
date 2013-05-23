@@ -9,8 +9,8 @@ buildpack_root=/buildpacks
 buildpacks=($buildpack_root/heroku-*)
 selected_buildpack=
 
-mkdir -p $build_root
-cat | tar -x -C $build_root
+#mkdir -p $build_root
+#cat | tar -x -C $build_root
 
 if [ -f "$build_root/.env" ]; then
   . "$build_root/.env"

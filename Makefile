@@ -5,5 +5,5 @@ build:
 	./buildpacks-fetch
 	./dockerize
 
-builder:
+update:
 	cat builder | docker run -i -a stdin progrium/buildstep "/bin/sh -c cat > /buildpacks/builder; chmod +x /buildpacks/builder"

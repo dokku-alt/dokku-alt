@@ -1,15 +1,13 @@
 #!/bin/bash
 set -e
 echo "----> Building $1 ..."
-echo "run"
-ID=$(cat | docker run -i -a stdin progrium/buildstep /buildpacks/builder)
-echo "attach"
+APP="app/$1"
+ID=$(cat | docker run -i -a stdin progrium/buildstep /bin/bash -c "mkdir -p /app && tar -xC /app")
+docker commit $ID $APP
+ID=$(docker run -d $APP /buildpacks/builder)
 docker attach $ID &
-echo "wait"
 docker wait $ID
-echo "kill"
 docker kill $ID
-echo "commit"
-docker commit $ID $1
+docker commit $ID $APP
 echo "----> Build complete!"
 exit 1 #debug
