@@ -5,9 +5,7 @@ APP="app/$1"
 ID=$(cat | docker run -i -a stdin progrium/buildstep /bin/bash -c "mkdir -p /app && tar -xC /app")
 docker commit $ID $APP
 ID=$(docker run -d $APP /buildpacks/builder)
-docker attach $ID &
-docker wait $ID
-docker kill $ID
+docker attach $ID
 docker commit $ID $APP
 echo "----> Build complete!"
 exit 1 #debug

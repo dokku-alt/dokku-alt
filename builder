@@ -57,6 +57,7 @@ else
 fi
 
 #echo "Default process types for $buildpack_name -> " $(echo "$default_types" | cut -d: -f1 | tr $'\n' ',' | sed -e 's/,$//')
+echo cat "$build_root/Procfile" | head -1
 
 echo "Finished"
 
