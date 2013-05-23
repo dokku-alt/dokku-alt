@@ -74,7 +74,7 @@ def add(base, src, dst, author=None):
 	if src.startswith('http://'):
 		tar = subprocess.Popen(["curl", src], stdout=subprocess.PIPE).stdout
 	else:
-		tar = subprocess.Popen(["tar", "-c", src], stdout=subprocess.PIPE).stdout
+		tar = subprocess.Popen(["tar", "-c", '.'], cwd=src, stdout=subprocess.PIPE).stdout
 	if dst == "":
 		raise Exception("Missing argument to push")
 	return run_and_commit(base, "mkdir -p '{0}' && tar -C '{0}' -x".format(dst), stdin=tar, author=author)
