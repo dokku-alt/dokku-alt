@@ -1,3 +1,5 @@
 #!/bin/bash
-ID=$(./docker-build < Dockerfile)
+echo "Building..."
+ID=$(./docker-build < Dockerfile | tail -n 1)
 docker tag $ID progrium/buildstep
+echo "Saved as progrium/buildstep"

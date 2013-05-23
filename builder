@@ -6,7 +6,7 @@ build_root=/app
 cache_root=/cache
 buildpack_root=/buildpacks
 
-buildpacks=($buildpack_root/*)
+buildpacks=($buildpack_root/heroku-*)
 selected_buildpack=
 
 mkdir -p $build_root
@@ -56,7 +56,7 @@ else
   procfile=$(echo "$default_types" | sed -e 's/^/  /')
 fi
 
-echo "Default process types for $buildpack_name -> " $(echo "$default_types" | cut -d: -f1 | tr $'\n' ',' | sed -e 's/,$//')
+#echo "Default process types for $buildpack_name -> " $(echo "$default_types" | cut -d: -f1 | tr $'\n' ',' | sed -e 's/,$//')
 
 echo "Finished"
 
