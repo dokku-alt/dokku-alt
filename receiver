@@ -2,6 +2,10 @@
 set -e
 echo "----> Building $1 ..."
 cd /home/git/buildstep
-cat | ./buildstep ./builder > "/home/git/inspect/$1.tgz"
+ID=$(cat | docker run -i -a stdin progrium/buildstep /buildpacks/builder)
+docker attach $ID &
+docker wait $ID
+docker kill $ID
+docker commit $ID $1
 echo "----> Build complete!"
 exit 1 #debug

@@ -2,13 +2,14 @@
 
 set -e
 
-artifact_target=/tmp/slug.tgz
-build_root=/build
+build_root=/app
 cache_root=/cache
 buildpack_root=/buildpacks
 
 buildpacks=($buildpack_root/*)
 selected_buildpack=
+
+cat | tar -x -C $build_root
 
 if [ -f "$build_root/.env" ]; then
   . "$build_root/.env"
@@ -56,12 +57,5 @@ fi
 
 echo "Default process types for $buildpack_name -> " $(echo "$default_types" | cut -d: -f1 | tr $'\n' ',' | sed -e 's/,$//')
 
-if [ -f "$build_root/.slugignore" ]; then
-  tar --exclude='.git' -X "$build_root/.slugignore" -C $build_root -czf $artifact_target .
-else
-  tar --exclude='.git' -C $build_root -czf $artifact_target .
-fi
-
-artifact_size=$(du -Sh $artifact_target | cut -d' ' -f1)
-echo "Compiled artifact size is $artifact_size"
+echo "Finished"
 
