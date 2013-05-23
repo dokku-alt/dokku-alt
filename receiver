@@ -1,11 +1,15 @@
 #!/bin/bash
 set -e
 echo "----> Building $1 ..."
-cd /home/git/buildstep
+echo "run"
 ID=$(cat | docker run -i -a stdin progrium/buildstep /buildpacks/builder)
+echo "attach"
 docker attach $ID &
+echo "wait"
 docker wait $ID
+echo "kill"
 docker kill $ID
+echo "commit"
 docker commit $ID $1
 echo "----> Build complete!"
 exit 1 #debug
