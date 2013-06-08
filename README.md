@@ -1,6 +1,6 @@
 # Buildstep
 
-Heroku-style application builds using Docker and Buildpacks
+Heroku-style application builds using Docker and Buildpacks. Used by [Dokku](https://github.com/progrium/dokku) to make a mini-Heroku.
 
 ## Requirements
 
