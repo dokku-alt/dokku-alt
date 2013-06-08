@@ -1,12 +1,12 @@
 
 all: build
 
-build: buildpacks container
+build: container
 
 buildpacks:
 	tasks/buildpacks-fetch
 
-container:
+container: buildpacks
 	tasks/container-build
 
 update:

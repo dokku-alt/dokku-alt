@@ -1,7 +1,7 @@
 #!/bin/bash
-echo "Building..."
+echo "Building container..."
 ID_FILE=$(mktemp)
-vendor/docker-build < Dockerfile | while read line; do 
+python -u vendor/docker-build < Dockerfile | while read line; do 
   [[ $last ]] && echo $last
   echo "$line" > $ID_FILE
   last=$line
@@ -10,4 +10,4 @@ ID=$(<"$ID_FILE")
 rm $ID_FILE
 docker tag $ID progrium/buildstep
 echo
-echo "Saved as progrium/buildstep"
+echo "Saved container as progrium/buildstep"
