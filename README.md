@@ -12,7 +12,7 @@ Heroku-style application builds using Docker and Buildpacks
 The buildstep script uses a buildstep base container that needs to be built. It must be created before
 you can use the buildstep script. To create it, run:
 
-  $ make build
+    $ make build
 
 This will create a container called `progrium/buildstep` that contains all supported buildpacks and the
 builder script that will actually perform the build using the buildpacks.
@@ -23,7 +23,7 @@ Running the buildstep script will take an application tar via STDIN and an appli
 an argument. It will put the application in a new container based on `progrium/buildstep` with the specified name. 
 Then it runs the builder script inside the container. The resulting container has a built app ready to go.
 
-  $ cat myapp.tar | ./buildstep myapp
+    $ cat myapp.tar | ./buildstep myapp
 
 ## Adding Buildpacks
 
