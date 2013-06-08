@@ -21,9 +21,15 @@ builder script that will actually perform the build using the buildpacks.
 
 Running the buildstep script will take an application tar via STDIN and an application container name as
 an argument. It will put the application in a new container based on `progrium/buildstep` with the specified name. 
-Then it runs the builder script inside the container. The resulting container has a built app ready to go.
+Then it runs the builder script inside the container. 
 
     $ cat myapp.tar | ./buildstep myapp
+
+The resulting container has a built app ready to go. The builder script also parses the Procfile and produces
+a starter script for the web role, however this is might not belong here (and it only does it for web, so it's
+kind of a limited feature). For now, it makes it easy to start an app container:
+
+    $ docker run -d myapp /bin/bash -c "cd /app && ./start"
 
 ## Adding Buildpacks
 
