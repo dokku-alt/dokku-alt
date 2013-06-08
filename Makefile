@@ -1,9 +1,13 @@
 
 all: build
 
-build:
-	./buildpacks-fetch
-	./dockerize
+build: buildpacks container
+
+buildpacks:
+	tasks/buildpacks-fetch
+
+container:
+	tasks/container-build
 
 update:
-	cat builder | docker run -i -a stdin progrium/buildstep /bin/sh -c "cat > /buildpacks/builder; chmod +x /buildpacks/builder"
+	cat build-dir/builder | docker run -i -a stdin progrium/buildstep /bin/sh -c "cat > /build/builder; chmod +x /build/builder"

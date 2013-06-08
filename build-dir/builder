@@ -4,9 +4,9 @@ set -e
 
 build_root=/app
 cache_root=/cache
-buildpack_root=/buildpacks
+buildpack_root=/build/buildpacks
 
-buildpacks=($buildpack_root/heroku-*)
+buildpacks=($buildpack_root/*)
 selected_buildpack=
 
 #mkdir -p $build_root

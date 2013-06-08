@@ -1,0 +1,5 @@
+#!/bin/bash
+rm -rf build-dir/buildpacks
+mkdir -p build-dir/buildpacks
+cd build-dir/buildpacks
+xargs -L 1 git clone < ../buildpacks.txt
