@@ -9,18 +9,15 @@ buildpack_root=/build/buildpacks
 buildpacks=($buildpack_root/*)
 selected_buildpack=
 
-#mkdir -p $build_root
-#cat | tar -x -C $build_root
+mkdir -p $cache_root
 
-if [ -f "$build_root/.env" ]; then
-  . "$build_root/.env"
-fi
+# This is to get a custom buildpack. Probably should use profile.d though
+[[ -f "$build_root/.env" ]] && . "$build_root/.env"
 
 if [ -n "$BUILDPACK_URL" ]; then
   echo "Fetching custom buildpack"
   buildpack="$buildpack_root/custom"
   rm -rf "$buildpack"
-
   git clone --depth=1 "$BUILDPACK_URL" "$buildpack"
   selected_buildpack="$buildpack"
   buildpack_name=$($buildpack/bin/detect "$build_root") && selected_buildpack=$buildpack
@@ -37,29 +34,24 @@ else
   exit 1
 fi
 
-mkdir -p $cache_root
-
 $selected_buildpack/bin/compile "$build_root" "$cache_root"
 
 echo "Discovering process types"
-release_output=$($selected_buildpack/bin/release "$build_root" "$cache_root") 
-default_types=$(echo "$release_output" | sed -ne '/^default/,/(\z|^[a-z])/  {
-    /^[a-z]/n
-    s/  //p
-}')
+$selected_buildpack/bin/release "$build_root" "$cache_root" > /app/.release
 
-procfile=
-if [ -f "$build_root/Procfile" ]; then
-  procfile=$(cat "$build_root/Procfile" | sed 's/^/  /')
-  echo "Procfile declares types -> " $(cat "$build_root/Procfile" | cut -d: -f1 | tr $'\n' ',' | sed -e 's/,$//')
+[[ -f "$build_root/Procfile" ]] && echo "Procfile declares types -> $(ruby -e "require 'yaml';puts YAML.load_file('$build_root/Procfile').keys().join(', ')")"
+echo "Default process types for $buildpack_name -> $(ruby -e "require 'yaml';puts YAML.load_file('$build_root/.release')['default_process_types'].keys().join(', ')")"
+
+cat > /start <<EOF
+#!/bin/bash
+cd /app
+[[ -d .profile.d ]] && source .profile.d/*
+if [[ -f Procfile ]]; then
+    ruby -e "require 'yaml';puts YAML.load_file('Procfile')['\$1']" | bash
 else
-  procfile=$(echo "$default_types" | sed -e 's/^/  /')
+    ruby -e "require 'yaml';puts YAML.load_file('.release')['default_process_types']['\$1']" | bash
 fi
-
-#echo "Default process types for $buildpack_name -> " $(echo "$default_types" | cut -d: -f1 | tr $'\n' ',' | sed -e 's/,$//')
-
-echo "#!/bin/bash" > /app/start
-cat "$build_root/Procfile" | grep "web:" | cut -d: -f2 >> /app/start
-chmod +x /app/start
+EOF
+chmod +x /start
 
 

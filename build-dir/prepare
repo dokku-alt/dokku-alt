@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# Prepares the "stack" to run apps and the environment to run buildpacks
+#
+
+apt-get update
+
+# Common tools
+apt-get install -y curl
+apt-get install -y git
+apt-get install -y mercurial
+apt-get install -y ruby1.9.1-dev
+
+# Common database clients/libs
+apt-get install -y postgresql
+apt-get install -y postgresql-server-dev-9.1
+apt-get install -y sqlite3
+apt-get install -y libsqlite-dev
+apt-get install -y mysql-client
+
+# Other common libraries
+apt-get install -y libssl0.9.8
+apt-get install -y nodejs
+
+# Buildpack dependencies:
+
+# Ruby
+apt-get install -y rubygems
+update-alternatives --set ruby /usr/bin/ruby1.9.1
+update-alternatives --set gem /usr/bin/gem1.9.1
+gem install bundler
+cd /build/buildpacks/heroku-buildpack-ruby && bundle install
+
+
