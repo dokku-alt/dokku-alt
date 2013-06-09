@@ -41,10 +41,6 @@ application environment will need to Dockerfile. Then add the buildpack Git URL 
 
 You'll then have to re-build.
 
-## Contributors
-
- * Jeff Lindsay <progrium@gmail.com>
-
 ## License
 
 MIT
