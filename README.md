@@ -26,10 +26,9 @@ Then it runs the builder script inside the container.
     $ cat myapp.tar | ./buildstep myapp
 
 The resulting container has a built app ready to go. The builder script also parses the Procfile and produces
-a starter script for the web role, however this is might not belong here (and it only does it for web, so it's
-kind of a limited feature). For now, it makes it easy to start an app container:
+a starter script that takes a process type. Run your app with:
 
-    $ docker run -d myapp /bin/bash -c "cd /app && ./start"
+    $ docker run -d myapp /bin/bash -c "cd /start web"
 
 ## Adding Buildpacks
 
