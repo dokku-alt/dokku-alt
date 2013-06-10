@@ -65,7 +65,6 @@ EOF
       # Only run this script for the master branch. You can remove this 
       # if block if you wish to run it for others as well.
       if [[ $refname = "refs/heads/master" ]] ; then
-        echo "----> Receiving $RECEIVE_REPO ... "
  
         git archive $newrev | $GITHOME/receiver "$RECEIVE_REPO" "$newrev" "$RECEIVE_USER" "$RECEIVE_FINGERPRINT"  
  
