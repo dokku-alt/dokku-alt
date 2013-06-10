@@ -28,7 +28,7 @@ Then it runs the builder script inside the container.
 The resulting container has a built app ready to go. The builder script also parses the Procfile and produces
 a starter script that takes a process type. Run your app with:
 
-    $ docker run -d myapp /bin/bash -c "cd /start web"
+    $ docker run -d myapp /bin/bash -c "/start web"
 
 ## Adding Buildpacks
 
