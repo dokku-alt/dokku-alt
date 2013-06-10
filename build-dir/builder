@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e
 
 build_root=/app
@@ -10,12 +9,13 @@ buildpacks=($buildpack_root/*)
 selected_buildpack=
 
 mkdir -p $cache_root
+mkdir -p $build_root/.profile.d
 
 # This is to get a custom buildpack. Probably should use profile.d though
 [[ -f "$build_root/.env" ]] && . "$build_root/.env"
 
 if [ -n "$BUILDPACK_URL" ]; then
-  echo "Fetching custom buildpack"
+  echo "       Fetching custom buildpack"
   buildpack="$buildpack_root/custom"
   rm -rf "$buildpack"
   git clone --depth=1 "$BUILDPACK_URL" "$buildpack"
@@ -28,28 +28,34 @@ else
 fi
 
 if [ -n "$selected_buildpack" ]; then
-  echo "$buildpack_name app detected"
+  echo "       $buildpack_name app detected"
 else
-  echo "Unable to select a buildpack"
+  echo "       Unable to select a buildpack"
   exit 1
 fi
 
 $selected_buildpack/bin/compile "$build_root" "$cache_root"
 
-echo "Discovering process types"
+echo "-----> Discovering process types"
 $selected_buildpack/bin/release "$build_root" "$cache_root" > /app/.release
 
-[[ -f "$build_root/Procfile" ]] && echo "Procfile declares types -> $(ruby -e "require 'yaml';puts YAML.load_file('$build_root/Procfile').keys().join(', ')")"
-echo "Default process types for $buildpack_name -> $(ruby -e "require 'yaml';puts YAML.load_file('$build_root/.release')['default_process_types'].keys().join(', ')")"
+if [[ -f "$build_root/Procfile" ]]; then 
+  types=$(ruby -e "require 'yaml';puts YAML.load_file('$build_root/Procfile').keys().join(', ')")
+  echo "       Procfile declares types -> $types"
+fi
+default_types=$(ruby -e "require 'yaml';puts (YAML.load_file('$build_root/.release')['default_process_types'] || {}).keys().join(', ')")
+[[ $default_types ]] && echo "       Default process types for $buildpack_name -> $default_types"
+
+ruby -e "require 'yaml';(YAML.load_file('$build_root/.release')['config_vars'] || {}).each{|k,v| puts \"#{k}=#{v}\"}" > $build_root/.profile.d/config_vars
 
 cat > /start <<EOF
 #!/bin/bash
-cd /app
-[[ -d .profile.d ]] && source .profile.d/*
+source $build_root/.profile.d/*
+cd $build_root
 if [[ -f Procfile ]]; then
     ruby -e "require 'yaml';puts YAML.load_file('Procfile')['\$1']" | bash
 else
-    ruby -e "require 'yaml';puts YAML.load_file('.release')['default_process_types']['\$1']" | bash
+    ruby -e "require 'yaml';puts (YAML.load_file('.release')['default_process_types'] || {})['\$1']" | bash
 fi
 EOF
 chmod +x /start
