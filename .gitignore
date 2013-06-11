@@ -1,2 +1,2 @@
 *.tgz
-buildpacks/*
+build-dir/buildpacks/*
