@@ -1,0 +1,36 @@
+#!/bin/bash
+set -e
+
+SELF=`which $0`
+HOME_DIR=${HOME_DIR:-"/home"}
+
+case "$1" in
+  create) # sshcommand create <user> <command>
+    USER="$2"; COMMAND="$3"
+    USERHOME="$HOME_DIR/$USER"
+    useradd -d $USERHOME $USER || true
+    mkdir -p "$USERHOME/.ssh"
+    touch $USERHOME/.ssh/authorized_keys
+    echo "$COMMAND" > "$USERHOME/.sshcommand"
+    chown -R $USER $USERHOME
+    ;;
+
+  acl-add) # sshcommand acl-add <user> <name> <key>
+    USER="$2"; NAME="$3"; KEY="$4"
+    FINGERPRINT=$(ssh-keygen -lf /dev/stdin <<< $(echo $KEY) | awk '{print $2}')
+    COMMAND=$(<$HOME_DIR/$USER/.sshcommand)
+    KEY_PREFIX="command=\"FINGERPRINT=$FINGERPRINT NAME=$NAME $COMMAND \$SSH_ORIGINAL_COMMAND\",no-agent-forwarding,no-pty,no-user-rc,no-X11-forwarding,no-port-forwarding"
+    # we rewrite the comment to the name of the key so we can reference/delete it
+    KEY=$(echo "$KEY" | awk -v name="$NAME" '{print $1" "$2" name:"name"::"}')
+    echo "$KEY_PREFIX $KEY" >> "$HOME_DIR/$USER/.ssh/authorized_keys"
+    echo $FINGERPRINT
+    ;;
+
+  acl-remove) # sshcommand acl-remove <user> <name>
+    USER="$2"; NAME="$3"
+    sed --in-place "/name:$NAME::/d" "$HOME_DIR/$USER/.ssh/authorized_keys"
+
+  *)
+    echo "Usage: sshcommand <command> <args...>"
+    ;;
+esac

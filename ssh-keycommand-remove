@@ -1,4 +1,0 @@
-#!/bin/bash
-eval user_home="~$1"
-eval authorized_keys="$user_home/.ssh/authorized_keys"
-sed --in-place "/$2/d" $authorized_keys

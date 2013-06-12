@@ -1,5 +1,0 @@
-#!/bin/bash
-eval user_home="~$1"
-authorized_keys="$user_home/.ssh/authorized_keys"
-key_prefix="command=\"$2\",no-agent-forwarding,no-pty,no-user-rc,no-X11-forwarding,no-port-forwarding"
-echo "$key_prefix $(cat)" >> $authorized_keys 
