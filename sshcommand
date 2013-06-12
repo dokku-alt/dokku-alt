@@ -19,7 +19,7 @@ case "$1" in
     USER="$2"; NAME="$3"
     KEY=$(cat)
     FINGERPRINT=$(ssh-keygen -lf /dev/stdin <<< $(echo $KEY) | awk '{print $2}')
-    KEY_PREFIX="command=\"FINGERPRINT=$FINGERPRINT NAME=$NAME \$(<$HOME_DIR/$USER/.sshcommand) \$SSH_ORIGINAL_COMMAND\",no-agent-forwarding,no-user-rc,no-X11-forwarding,no-port-forwarding"
+    KEY_PREFIX="command=\"FINGERPRINT=$FINGERPRINT NAME=$NAME \`cat $HOME_DIR/$USER/.sshcommand\` \$SSH_ORIGINAL_COMMAND\",no-agent-forwarding,no-user-rc,no-X11-forwarding,no-port-forwarding"
     echo "$KEY_PREFIX $KEY" >> "$HOME_DIR/$USER/.ssh/authorized_keys"
     echo $FINGERPRINT
     ;;
