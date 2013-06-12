@@ -20,8 +20,7 @@ case "$1" in
     # we rewrite the comment to the name of the key so we can reference/delete it
     KEY=$(cat | awk -v name="$NAME" '{print $1" "$2" name:"name"::"}')
     FINGERPRINT=$(ssh-keygen -lf /dev/stdin <<< $(echo $KEY) | awk '{print $2}')
-    COMMAND=$(<$HOME_DIR/$USER/.sshcommand)
-    KEY_PREFIX="command=\"FINGERPRINT=$FINGERPRINT NAME=$NAME $COMMAND \$SSH_ORIGINAL_COMMAND\",no-agent-forwarding,no-pty,no-user-rc,no-X11-forwarding,no-port-forwarding"
+    KEY_PREFIX="command=\"FINGERPRINT=$FINGERPRINT NAME=$NAME \$(<$HOME_DIR/$USER/.sshcommand) \$SSH_ORIGINAL_COMMAND\",no-agent-forwarding,no-user-rc,no-X11-forwarding,no-port-forwarding"
     echo "$KEY_PREFIX $KEY" >> "$HOME_DIR/$USER/.ssh/authorized_keys"
     echo $FINGERPRINT
     ;;
