@@ -29,6 +29,7 @@ case "$1" in
   acl-remove) # sshcommand acl-remove <user> <name>
     USER="$2"; NAME="$3"
     sed --in-place "/name:$NAME::/d" "$HOME_DIR/$USER/.ssh/authorized_keys"
+    ;;
 
   *)
     echo "Usage: sshcommand <command> <args...>"
