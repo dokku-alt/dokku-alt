@@ -17,8 +17,7 @@ case "$1" in
 
   acl-add) # sshcommand acl-add <user> <name>
     USER="$2"; NAME="$3"
-    # we rewrite the comment to the name of the key so we can reference/delete it
-    KEY=$(cat | awk -v name="$NAME" '{print $1" "$2" name:"name"::"}')
+    KEY=$(cat)
     FINGERPRINT=$(ssh-keygen -lf /dev/stdin <<< $(echo $KEY) | awk '{print $2}')
     KEY_PREFIX="command=\"FINGERPRINT=$FINGERPRINT NAME=$NAME \$(<$HOME_DIR/$USER/.sshcommand) \$SSH_ORIGINAL_COMMAND\",no-agent-forwarding,no-user-rc,no-X11-forwarding,no-port-forwarding"
     echo "$KEY_PREFIX $KEY" >> "$HOME_DIR/$USER/.ssh/authorized_keys"
@@ -27,7 +26,7 @@ case "$1" in
 
   acl-remove) # sshcommand acl-remove <user> <name>
     USER="$2"; NAME="$3"
-    sed --in-place "/name:$NAME::/d" "$HOME_DIR/$USER/.ssh/authorized_keys"
+    sed --in-place "/ NAME=$NAME /d" "$HOME_DIR/$USER/.ssh/authorized_keys"
     ;;
 
   *)
