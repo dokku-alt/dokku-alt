@@ -1,11 +1,17 @@
 #!/bin/bash
 set -e
 
+shopt -s nocasematch #For case insensitive string matching, for the first parameter
+
 SELF=`which $0`
 HOME_DIR=${HOME_DIR:-"/home"}
 
 case "$1" in
   create) # sshcommand create <user> <command>
+    if [[ $# -ne 3 ]]; then
+      echo "Usage : sshcommand create username command"
+      exit -1
+    fi
     USER="$2"; COMMAND="$3"
     USERHOME="$HOME_DIR/$USER"
     useradd -d $USERHOME $USER || true
@@ -16,6 +22,10 @@ case "$1" in
     ;;
 
   acl-add) # sshcommand acl-add <user> <name>
+    if [[ $# -ne 3 ]]; then
+      echo "Usage : sshcommand acl-add username command"
+      exit -1
+    fi
     USER="$2"; NAME="$3"
     KEY=$(cat)
     FINGERPRINT=$(ssh-keygen -lf /dev/stdin <<< $(echo $KEY) | awk '{print $2}')
@@ -25,8 +35,18 @@ case "$1" in
     ;;
 
   acl-remove) # sshcommand acl-remove <user> <name>
+    if [[ $# -ne 3 ]]; then
+      echo "Usage : sshcommand acl-remove username command"
+      exit -1
+    fi
     USER="$2"; NAME="$3"
     sed --in-place "/ NAME=$NAME /d" "$HOME_DIR/$USER/.ssh/authorized_keys"
+    ;;
+
+  help) # sshcommand help
+    echo "Usage : sshcommand create username command"
+    echo "        sshcommand acl-add username command"
+    echo "        sshcommand acl-remove username command"
     ;;
 
   *)
