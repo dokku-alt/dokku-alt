@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 DIR="$1"; NAME="$2"
 BASE=$(<"$DIR/base.txt")
 
@@ -7,7 +8,7 @@ indent() { sed "s/^/       /"; }
 echo "=====> Building container..."
 
 echo "-----> Pulling base image..."
-docker pull "$BASE"
+docker pull "$BASE" | indent
 
 echo "-----> Installing build directory..."
 ID=$(cd "$1" && tar -c . | docker run -i -a stdin "$BASE" /bin/sh -c "mkdir -p '/build' && tar -C '/build' -x")
