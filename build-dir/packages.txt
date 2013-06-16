@@ -9,7 +9,6 @@ dnsutils
 ed
 enssl-dev
 git
-ia32-libs
 imagemagick
 iputils-tracepath
 libevent-dev
