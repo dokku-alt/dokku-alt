@@ -1,18 +1,19 @@
 #!/bin/bash
 DIR="$1"; NAME="$2"
-
 indent() { sed "s/^/       /"; }
 
 echo "=====> Building container..."
 
 echo "-----> Installing build directory..."
 ID=$(cd "$1" && tar -c . | docker run -i -a stdin ubuntu:quantal /bin/sh -c "mkdir -p '/build' && tar -C '/build' -x")
-docker wait $ID
+docker wait $ID > /dev/null
 ID=$(docker commit $ID)
 
 echo "-----> Running prepare script..."
 ID=$(docker run -d $ID /bin/sh -c /build/prepare)
 docker attach $ID | indent
+
+echo "-----> Committing changes..."
 ID=$(docker commit $ID)
 docker tag $ID "$NAME"
 

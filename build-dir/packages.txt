@@ -14,7 +14,7 @@ iputils-tracepath
 libevent-dev
 libglib2.0-dev
 libjpeg-dev
-libmagick9-dev
+graphicsmagick-libmagick-dev-compat
 libmysqlclient-dev
 libpq-dev
 libsqlite-dev
