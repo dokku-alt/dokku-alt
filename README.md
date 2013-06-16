@@ -29,7 +29,7 @@ Let's take the core benefits of hooks and re-structure it slightly:
  1. Like hook scripts, plugins are active by being in a certain place. But they can be named anything
  1. Multiple plugins can handle a hook. Either for fanout event triggering, or for filter pipelining
  
-And plugins are still just shell scripts that implement a simple protocol:
+And plugins are still just shell scripts. They just implement a simple protocol:
 
     #!/bin/bash
     case "$1" in
@@ -60,7 +60,7 @@ You'd instead trigger like this:
 The `pluginhook` command simply loops through all plugin scripts found in the path defined by the environment
 variable `PLUGIN_PATH` and passes the same arguments. This means installing a plugin is as simple as putting
 it in your `PLUGIN_PATH`. The result is that any plugin that implements the `post-commit` hook will have its 
-implementation run, and any plugin that does will just exit and be ignored.
+implementation run, and any plugin that doesn't will just exit and be ignored.
 
 ## Filter pipelining with plugins
 
@@ -68,6 +68,59 @@ You don't just get a "broadcast" mechanism for arguments. You also get stream pi
 into pluginhook, it will be passed *through* each plugin, letting each plugin act as a filtering process. By clearly
 defining how a hook should be used and how it can play well with others, this becomes very powerful infrastructure.
 
+Here is a plugin we'll call `upper` that implements a `text` hook:
+
+    #!/bin/bash
+    case "$1" in
+      text)
+        cat | python -c "import sys;sys.stdout.write(sys.stdin.read().upper())"
+        ;;
+
+      *)
+        exit 1
+        ;;
+    esac
+  
+Here is a plugin we'll call `reverse` that also implements a `text` hook:
+
+    #!/bin/bash
+    case "$1" in
+      text)
+        cat | ruby -e "puts STDIN.read.strip.reverse"
+        ;;
+
+      *)
+        exit 1
+        ;;
+    esac
+    
+One plugin uses Python, the other uses Ruby, but they're both used when you run with pluginhook:
+
+    $ echo "hello world" | pluginhook text
+    DLROW OLLEH
+
+Only plugins that implement a hook are used as filters, so there's no need to implement pass-through hooks if a
+plugin doesn't care about a hook.
+
 If ordering is important, you can always rename your plugins to start with a number, which will define an order of
 execution. A plugin author might care about when it is run, but it's up to the user to take their advice or decide
-to run it in a different position in the order, just by renaming the plugin script.
+to run it in a different position in the order, by simply renaming the plugin script.
+
+## Shell scripts aren't just Bash
+
+Like hook scripts, plugins don't have to be implemented in Bash or any shell scripting language. They just have
+to implement the protocol and define their interpreter with `#!`. 
+
+## pluginhook implementation
+
+You can see the implementation for this is simple. 20 lines of Bash. While this is usable, if it gets popular
+it might make sense to re-implement in C or Go with the intention of actually streaming between plugins instead
+of writing to files and variables. Currently all output is buffered, which is not ideal.
+
+## Author
+
+Jeff Lindsay <progrium@gmail.com>
+
+## License
+
+MIT

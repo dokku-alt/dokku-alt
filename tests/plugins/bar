@@ -9,6 +9,10 @@ case "$1" in
     echo "bar pre-deploy"
     ;;
   
+  text)
+    cat | ruby -e "puts STDIN.read.strip.reverse"
+    ;;
+  
   *)
     exit 1
     ;;

@@ -9,6 +9,10 @@ case "$1" in
     echo "foo post-build"
     ;;  
     
+  text)
+    cat | python -c "import sys;sys.stdout.write(sys.stdin.read().upper())"
+    ;;
+    
   *)
     exit 1
     ;;
