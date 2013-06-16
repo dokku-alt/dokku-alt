@@ -7,8 +7,15 @@
 # SYSTEM PACKAGES
 #
 apt-get update
-xargs -L 1 apt-get install -y --force-yes < /build/packages.txt
+xargs apt-get install -y --force-yes < /build/packages.txt
 apt-get clean
+
+#
+# SUPPORTED BUILDPACKS
+#
+mkdir -p /build/buildpacks
+cd /build/buildpacks
+xargs -L 1 git clone < /build/buildpacks.txt
 
 #
 # MISC
@@ -19,11 +26,3 @@ update-alternatives --set ruby /usr/bin/ruby1.9.1
 update-alternatives --set gem /usr/bin/gem1.9.1
 gem install bundler
 cd /build/buildpacks/heroku-buildpack-ruby && bundle install
-
-
-#
-# SUPPORTED BUILDPACKS
-#
-mkdir -p /build/buildpacks
-cd /build/buildpacks
-xargs -L 1 git clone < /build/buildpacks.txt
