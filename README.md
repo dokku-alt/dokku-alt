@@ -36,7 +36,7 @@ Buildstep needs to support a buildpack by installing packages needed to run the 
 it builds. For example, the Python buildpack would need Python to be installed.
 
 To add a new buildpack to builstep, add commands to install the necessary packages that the buildpack and built
-application environment will need to Dockerfile. Then add the buildpack Git URL to the file build-dir/buildpacks.txt
+application environment will need to stack/packages.txt and stack/prepare. Then add the buildpack Git URL to the file stack/buildpacks.txt
 
 You'll then have to re-build.
 

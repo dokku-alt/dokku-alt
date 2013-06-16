@@ -1,11 +1,16 @@
 #!/bin/bash
 DIR="$1"; NAME="$2"
+BASE=$(<"$DIR/base.txt")
+
 indent() { sed "s/^/       /"; }
 
 echo "=====> Building container..."
 
+echo "-----> Pulling base image..."
+docker pull "$BASE"
+
 echo "-----> Installing build directory..."
-ID=$(cd "$1" && tar -c . | docker run -i -a stdin ubuntu:quantal /bin/sh -c "mkdir -p '/build' && tar -C '/build' -x")
+ID=$(cd "$1" && tar -c . | docker run -i -a stdin "$BASE" /bin/sh -c "mkdir -p '/build' && tar -C '/build' -x")
 docker wait $ID > /dev/null
 ID=$(docker commit $ID)
 

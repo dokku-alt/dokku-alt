@@ -1,13 +1,5 @@
 
 all: build
 
-build: container
-
-container: ubuntu-image
-	tasks/container-build build-dir progrium/buildstep
-
-ubuntu-image:
-	docker pull ubuntu:quantal
-
-update:
-	cat build-dir/builder | docker run -i -a stdin progrium/buildstep /bin/sh -c "cat > /build/builder; chmod +x /build/builder"
+build: 
+	build.sh stack progrium/buildstep
