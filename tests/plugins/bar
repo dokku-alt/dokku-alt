@@ -1,0 +1,15 @@
+#!/bin/bash
+case "$1" in
+  pre-build)
+    cat
+    echo "bar pre-build $2 $3 $4 $5"
+    ;;
+
+  pre-deploy)
+    echo "bar pre-deploy"
+    ;;
+  
+  *)
+    exit 1
+    ;;
+esac

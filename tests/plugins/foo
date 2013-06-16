@@ -1,0 +1,15 @@
+#!/bin/bash
+case "$1" in
+  pre-build)
+    cat
+    echo "foo pre-build $@"
+    ;;
+
+  post-build)
+    echo "foo post-build"
+    ;;  
+    
+  *)
+    exit 1
+    ;;
+esac
