@@ -2,4 +2,4 @@
 all: build
 
 build: 
-	build.sh stack progrium/buildstep
+	./build.sh ./stack progrium/buildstep
