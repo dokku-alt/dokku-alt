@@ -27,7 +27,7 @@ Let's take the core benefits of hooks and re-structure it slightly:
 
  1. Instead of focusing on hook scripts, we focus on plugins -- groups of hook implementations
  1. Like hook scripts, plugins are active by being in a certain place. But they can be named anything
- 1. Multiple plugins can handle a hook. Either for fanout event triggering, or for filter pipelining
+ 1. Multiple plugins can handle a hook. Either for fanout event triggering, or for pipeline filtering
  
 And plugins are still just shell scripts. They just implement a simple protocol:
 
@@ -62,7 +62,7 @@ variable `PLUGIN_PATH` and passes the same arguments. This means installing a pl
 it in your `PLUGIN_PATH`. The result is that any plugin that implements the `post-commit` hook will have its 
 implementation run, and any plugin that doesn't will just exit and be ignored.
 
-## Filter pipelining with plugins
+## Pipeline filtering with plugins
 
 You don't just get a "broadcast" mechanism for arguments. You also get stream pipelining. If you pipe a stream
 into pluginhook, it will be passed *through* each plugin, letting each plugin act as a filtering process. By clearly
