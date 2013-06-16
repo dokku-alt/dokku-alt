@@ -17,6 +17,7 @@ libmysqlclient-dev
 libpq-dev
 libsqlite-dev
 libssl-dev
+libssl0.9.8
 libxml2-dev
 libxslt-dev
 mercurial
