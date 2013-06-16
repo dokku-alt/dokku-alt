@@ -4,7 +4,7 @@ all: build
 build: container
 
 container: ubuntu-image
-	tasks/container-build
+	tasks/container-build build-dir progrium/buildstep
 
 ubuntu-image:
 	docker pull ubuntu:quantal
