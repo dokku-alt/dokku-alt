@@ -2,12 +2,10 @@ autoconf
 bind9-host
 bison
 build-essential
-coreutils
 curl
 daemontools
 dnsutils
 ed
-enssl-dev
 git
 imagemagick
 iputils-tracepath
@@ -35,6 +33,5 @@ ruby1.9.1-dev
 rubygems
 socat
 sqlite3
-tar
 telnet
 zlib1g-dev
