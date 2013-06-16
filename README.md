@@ -99,7 +99,7 @@ One plugin uses Python, the other uses Ruby, but they're both used when you run 
     $ echo "hello world" | pluginhook text
     DLROW OLLEH
 
-Only plugins that implement a hook are used as filters, so there's no need to implement pass-through hooks if a
+Only plugins that implement a hook are used as filters for that hook, so there's no need to implement pass-through hooks if a
 plugin doesn't care about a hook.
 
 If ordering is important, you can always rename your plugins to start with a number, which will define an order of
