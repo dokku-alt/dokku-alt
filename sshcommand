@@ -43,13 +43,11 @@ case "$1" in
     sed --in-place "/ NAME=$NAME /d" "$HOME_DIR/$USER/.ssh/authorized_keys"
     ;;
 
-  help) # sshcommand help
+  help|*) # sshcommand help
     echo "Usage : sshcommand create username command"
     echo "        sshcommand acl-add username command"
     echo "        sshcommand acl-remove username command"
+    echo "        sshcommand help # shows this usage message"
     ;;
 
-  *)
-    echo "Usage: sshcommand <command> <args...>"
-    ;;
 esac
