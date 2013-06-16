@@ -3,10 +3,7 @@ all: build
 
 build: container
 
-buildpacks:
-	tasks/buildpacks-fetch
-
-container: ubuntu-image buildpacks
+container: ubuntu-image
 	tasks/container-build
 
 ubuntu-image:

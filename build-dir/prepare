@@ -3,29 +3,24 @@
 # Prepares the "stack" to run apps and the environment to run buildpacks
 #
 
+#
+# SYSTEM PACKAGES
+#
 apt-get update
+xargs -L 1 apt-get install -y --force-yes < /build/packages.txt
 
-# Common tools
-apt-get install -y curl
-apt-get install -y git
-apt-get install -y mercurial
-apt-get install -y ruby1.9.1-dev
+#
+# SUPPORTED BUILDPACKS
+#
+mkdir -p /build/buildpacks
+cd /build/buildpacks
+xargs -L 1 git clone < /build/buildpacks.txt
 
-# Common database clients/libs
-apt-get install -y postgresql
-apt-get install -y postgresql-server-dev-9.1
-apt-get install -y sqlite3
-apt-get install -y libsqlite-dev
-apt-get install -y mysql-client
+#
+# MISC
+#
 
-# Other common libraries
-apt-get install -y libssl0.9.8
-apt-get install -y nodejs
-
-# Buildpack dependencies:
-
-# Ruby
-apt-get install -y rubygems
+# Ruby buildpack system configuration
 update-alternatives --set ruby /usr/bin/ruby1.9.1
 update-alternatives --set gem /usr/bin/gem1.9.1
 gem install bundler
