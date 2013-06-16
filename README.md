@@ -43,7 +43,7 @@ And plugins are still just shell scripts. They just implement a simple protocol:
     esac
     
 A switch on the first argument is used to determine the hook. The rest of the arguments are whatever
-arguments are passed for that hook. It also receives STDIN if the hook passes it. For any hook you
+arguments are passed for that hook. It also receives STDIN if the trigger passes it. For any hook you
 don't care about in this plugin, you exit non-zero. 
 
 ## Triggering plugin hooks
