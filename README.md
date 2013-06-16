@@ -113,7 +113,7 @@ to implement the protocol and define their interpreter with `#!`.
 
 ## pluginhook implementation
 
-You can see the implementation for this is simple. 20 lines of Bash. While this is usable, if it gets popular
+You can see the implementation for this is simple. 20 lines of Bash. While this is usable, at some point
 it might make sense to re-implement in C or Go with the intention of actually streaming between plugins instead
 of writing to files and variables. Currently all output is buffered, which is not ideal.
 
