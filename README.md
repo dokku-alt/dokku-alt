@@ -49,7 +49,7 @@ don't care about in this plugin, you exit non-zero.
 ## Triggering plugin hooks
 
 You use the `pluginhook` command to trigger hooks as if you might call a traditional hook script directly.
-Where before you might have triggered calling something like:
+Where before you might have triggered by calling something like:
 
     hooks/post-commit $REV $USER
 
