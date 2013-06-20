@@ -1,9 +1,12 @@
 #!/bin/bash
 set -e
 
-build_root=/app
+app_root=/app
+build_root=/build/app
 cache_root=/cache
 buildpack_root=/build/buildpacks
+
+cp -r /app /build
 
 buildpacks=($buildpack_root/*)
 selected_buildpack=
@@ -12,7 +15,7 @@ mkdir -p $cache_root
 mkdir -p $build_root/.profile.d
 
 # This is to get a custom buildpack. Probably should use profile.d though
-[[ -f "$build_root/.env" ]] && . "$build_root/.env"
+[[ -f "$app_root/.env" ]] && . "$app_root/.env"
 
 if [ -n "$BUILDPACK_URL" ]; then
   echo "       Fetching custom buildpack"
@@ -37,9 +40,9 @@ fi
 $selected_buildpack/bin/compile "$build_root" "$cache_root"
 
 echo "-----> Discovering process types"
-$selected_buildpack/bin/release "$build_root" "$cache_root" > /app/.release
+$selected_buildpack/bin/release "$app_root" "$cache_root" > /build/app/.release
 
-if [[ -f "$build_root/Procfile" ]]; then 
+if [[ -f "$build_root/Procfile" ]]; then
   types=$(ruby -e "require 'yaml';puts YAML.load_file('$build_root/Procfile').keys().join(', ')")
   echo "       Procfile declares types -> $types"
 fi
@@ -50,8 +53,10 @@ ruby -e "require 'yaml';(YAML.load_file('$build_root/.release')['config_vars'] |
 
 cat > /start <<EOF
 #!/bin/bash
-source $build_root/.profile.d/*
-cd $build_root
+export HOME=/app
+for file in $app_root/.profile.d/*; do source \$file; done
+hash -r
+cd $app_root
 if [[ -f Procfile ]]; then
     ruby -e "require 'yaml';puts YAML.load_file('Procfile')['\$1']" | bash
 else
@@ -60,4 +65,5 @@ fi
 EOF
 chmod +x /start
 
-
+rm -fR /app
+mv /build/app /
