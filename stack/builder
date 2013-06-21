@@ -49,6 +49,7 @@ fi
 default_types=$(ruby -e "require 'yaml';puts (YAML.load_file('$build_root/.release')['default_process_types'] || {}).keys().join(', ')")
 [[ $default_types ]] && echo "       Default process types for $buildpack_name -> $default_types"
 
+mkdir -p $build_root/.profile.d
 ruby -e "require 'yaml';(YAML.load_file('$build_root/.release')['config_vars'] || {}).each{|k,v| puts \"#{k}=#{v}\"}" > $build_root/.profile.d/config_vars
 
 cat > /start <<EOF
