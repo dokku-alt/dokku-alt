@@ -13,16 +13,16 @@ case "$1" in
     touch $GITHOME/.ssh/authorized_keys
     cat > $GITHOME/receiver <<EOF
 #!/bin/bash
-URL=http://requestb.in/rlh4znrl
-echo "----> Posting to \$URL ..."
-curl \\
-  -X 'POST' \\
-  -F "repository=\$1" \\
-  -F "revision=\$2" \\
-  -F "username=\$3" \\
-  -F "fingerprint=\$4" \\
-  -F contents=@- \\
-  --silent \$URL
+#URL=http://requestb.in/rlh4znrl
+#echo "----> Posting to \$URL ..."
+#curl \\
+#  -X 'POST' \\
+#  -F "repository=\$1" \\
+#  -F "revision=\$2" \\
+#  -F "username=\$3" \\
+#  -F "fingerprint=\$4" \\
+#  -F contents=@- \\
+#  --silent \$URL
 EOF
     chmod +x $GITHOME/receiver
     chown -R $GITUSER $GITHOME
