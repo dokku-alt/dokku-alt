@@ -47,7 +47,7 @@ a starter script that takes a process type. Run your app with:
 Buildstep needs to support a buildpack by installing packages needed to run the build and to run the application
 it builds. For example, the Python buildpack would need Python to be installed.
 
-To add a new buildpack to builstep, add commands to install the necessary packages that the buildpack and built
+To add a new buildpack to buildstep, add commands to install the necessary packages that the buildpack and built
 application environment will need to stack/packages.txt and stack/prepare. Then add the buildpack Git URL to the file stack/buildpacks.txt
 
 You'll then have to re-build.
