@@ -24,9 +24,7 @@ You'd instead trigger like this:
 
     pluginhook post-commit $REV $USER
 
-The `pluginhook` command simply loops through all plugin directories found in the path defined by the environment
-variable `PLUGIN_PATH` and passes the same arguments. This means installing a plugin is as simple as putting
-it in your `PLUGIN_PATH`. The result is that any plugin that has the `post-commit` hook script will be run.
+The `pluginhook` command simply loops through all plugin directories found in the path defined by the environment variable `PLUGIN_PATH` and passes the same arguments to any hook scripts by that name. This means installing a plugin is as simple as putting it in your `PLUGIN_PATH`. Then any plugin that has the `post-commit` hook script will be run.
 
 ## Pipeline filtering with plugins
 
