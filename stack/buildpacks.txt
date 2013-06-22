@@ -5,3 +5,4 @@ https://github.com/heroku/heroku-buildpack-play.git
 https://github.com/heroku/heroku-buildpack-python.git
 https://github.com/heroku/heroku-buildpack-php.git
 https://github.com/kr/heroku-buildpack-go.git
+https://github.com/oortcloud/heroku-buildpack-meteorite.git
