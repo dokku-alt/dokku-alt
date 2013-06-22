@@ -8,7 +8,7 @@ before_script:
   - "gem install travis-artifacts"
 after_success:
   - "./package.sh"
-  - "travis-artifacts upload --path package/pluginhook_0.1_amd64.deb"
+  - "cd package && travis-artifacts upload --target-path artifacts --path pluginhook_0.1_amd64.deb"
 env:
   global:
   - ARTIFACTS_AWS_REGION=us-east-1
