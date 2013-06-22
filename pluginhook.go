@@ -16,14 +16,15 @@ func main() {
 		log.Fatal("[ERROR] Unable to locate plugins: set $PLUGIN_PATH\n")
 		os.Exit(1)
 	}
+	if len(os.Args) < 2 {
+		log.Fatal("[ERROR] Hook name argument is required\n")
+		os.Exit(1)
+	}
 	cmds := make([]exec.Cmd, 0)
-	var matches, _ = filepath.Glob(fmt.Sprintf("%s/*", pluginPath))
-	for _, plugin := range matches {
-		hook := fmt.Sprintf("%s/%s", plugin, os.Args[1])
-		if _, err := os.Stat(hook); err == nil {
-			cmd := exec.Command(hook, os.Args[2:]...)
-			cmds = append(cmds, *cmd)
-		}
+	var matches, _ = filepath.Glob(fmt.Sprintf("%s/*/%s", pluginPath, os.Args[1]))
+	for _, hook := range matches {
+		cmd := exec.Command(hook, os.Args[2:]...)
+		cmds = append(cmds, *cmd)
 	}
 	done := make(chan bool, len(cmds))
 	for i := len(cmds)-1; i >= 0; i-- {
