@@ -3,6 +3,8 @@ language: go
 go:
   - 1.1
 script: go get "code.google.com/p/go.crypto/ssh/terminal" && make test
+before_install:
+  - git clone https://github.com/sstephenson/bats.git /tmp/bats && sudo /tmp/bats/install.sh /usr/local
 env:
   global:
   - ARTIFACTS_AWS_REGION=us-east-1
