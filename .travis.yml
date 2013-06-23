@@ -2,13 +2,7 @@
 language: go
 go:
   - 1.1
-script: go get "code.google.com/p/go.crypto/ssh/terminal" && go build
-before_script:
-  - "gem install fpm"
-  - "gem install travis-artifacts"
-after_success:
-  - "./package.sh"
-  - "cd package && travis-artifacts upload --target-path artifacts --path pluginhook_0.1_amd64.deb"
+script: go get "code.google.com/p/go.crypto/ssh/terminal" && make test
 env:
   global:
   - ARTIFACTS_AWS_REGION=us-east-1
