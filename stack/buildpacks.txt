@@ -7,3 +7,4 @@ https://github.com/heroku/heroku-buildpack-php.git
 https://github.com/kr/heroku-buildpack-go.git
 https://github.com/miyagawa/heroku-buildpack-perl.git
 https://github.com/heroku/heroku-buildpack-scala
+https://github.com/igrigorik/heroku-buildpack-dart.git
