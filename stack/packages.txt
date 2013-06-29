@@ -15,7 +15,7 @@ libjpeg-dev
 graphicsmagick-libmagick-dev-compat
 libmysqlclient-dev
 libpq-dev
-libsqlite-dev
+libsqlite3-dev
 libssl-dev
 libssl0.9.8
 libxml2-dev
