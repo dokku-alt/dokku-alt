@@ -9,4 +9,5 @@ docker commit $ID $NAME > /dev/null
 # Run the builder script and attach to view output
 ID=$(docker run -d $NAME /build/builder)
 docker attach $ID
+test $(docker wait $ID) -eq 0
 docker commit $ID $NAME > /dev/null
