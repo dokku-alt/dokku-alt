@@ -11,7 +11,6 @@ case "$1" in
     useradd -d $GITHOME $GITUSER || true
     mkdir -p $GITHOME/.ssh
     touch $GITHOME/.ssh/authorized_keys
-    chmod a=rw $GITHOME/.ssh/authorized_keys
     cat > $GITHOME/receiver <<EOF
 #!/bin/bash
 #URL=http://requestb.in/rlh4znrl
