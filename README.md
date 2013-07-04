@@ -57,7 +57,7 @@ The repo contents are streamed into `STDIN` as an uncompressed archive (tar file
 
 We just pipe it into the `gitreceive upload-key` command via SSH:
 
-    $ cat ~/.ssh/id_rsa.pub | ssh you@yourserver.com "gitreceive upload-key progrium"
+    $ cat ~/.ssh/id_rsa.pub | ssh you@yourserver.com "sudo gitreceive upload-key progrium"
 
 The username argument is just an arbitrary name associated with the key, mostly
 for use in your system for auth, etc.
