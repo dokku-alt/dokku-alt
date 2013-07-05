@@ -18,6 +18,7 @@ Buildpacks should generally just work, but many of them make assumptions about t
  * [Python](https://github.com/heroku/heroku-buildpack-python)
  * [PHP](https://github.com/heroku/heroku-buildpack-php.git)
  * [Go](https://github.com/kr/heroku-buildpack-go.git)
+ * [Dart](https://github.com/igrigorik/heroku-buildpack-dart.git)
 
 ## Building Buildstep
 
