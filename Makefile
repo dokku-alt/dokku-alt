@@ -7,8 +7,8 @@ install:
 check-docker:
 	which docker || exit 1
 
-test-image: check-docker
-	docker images | grep progrium/gitreceive-tester
-
-test: test-image
-	cat -c . | docker run -i progrium/gitreceive-tester
+test: check-docker
+	cp gitreceive tests
+	docker build -t progrium/gitreceive-tests tests
+	rm tests/gitreceive
+	docker run progrium/gitreceive-tests
