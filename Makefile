@@ -1,5 +1,7 @@
 VERSION = 0.1.0
 
+REMOTE_DIR ?= /tmp/gitreceive
+
 install:
 	cp gitreceive /usr/local/bin/gitreceive
 	chmod +x /usr/local/bin/gitreceive
@@ -12,3 +14,6 @@ test: check-docker
 	docker build -t progrium/gitreceive-tests tests
 	rm tests/gitreceive
 	docker run progrium/gitreceive-tests
+
+remote:
+	tar -c . | ssh ${REMOTE} "rm -rf ${REMOTE_DIR} && mkdir -p ${REMOTE_DIR} && cd ${REMOTE_DIR} && tar -xf - && make ${TARGET}"

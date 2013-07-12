@@ -1,2 +1,13 @@
 #!/bin/bash
+set -e
+
+mkdir -p /var/run/sshd && /usr/sbin/sshd
+
+cp /root/.ssh/id_rsa.pub /root/.ssh/authorized_keys
+cat <<EOF > /root/.ssh/config
+Host localhost
+    UserKnownHostsFile=/dev/null
+    StrictHostKeyChecking=no
+EOF
+
 /usr/local/bin/bats /gitreceive.bats
