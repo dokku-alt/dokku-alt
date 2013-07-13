@@ -16,4 +16,4 @@ test: check-docker
 	docker run progrium/gitreceive-tests
 
 remote:
-	tar -c . | ssh ${REMOTE} "rm -rf ${REMOTE_DIR} && mkdir -p ${REMOTE_DIR} && cd ${REMOTE_DIR} && tar -xf - && make ${TARGET}"
+	tar -c . | ssh -o "StrictHostKeyChecking=no" ${REMOTE} "rm -rf ${REMOTE_DIR} && mkdir -p ${REMOTE_DIR} && cd ${REMOTE_DIR} && tar -xf - && make ${TARGET}"
