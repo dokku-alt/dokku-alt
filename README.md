@@ -2,11 +2,11 @@ gitreceive
 ==========
 [![Build Status](https://travis-ci.org/progrium/gitreceive.png?branch=master)](https://travis-ci.org/progrium/gitreceive)
 
-Creates an ssh+git user that creates repositories on the fly and lets you run scripts or hit HTTP endpoints when you push code. 
+Creates an ssh+git user that accepts on the fly repository pushes and triggers a hook script. 
 
-Build your own Heroku. Push code anywhere. 
+Push code anywhere. Extend your Git workflow.
 
-It's just not a `post-receive` hook. It's a powerful wrapper around `pre-receive` giving you easy access to the code that was pushed while still being able to send output back to the git user.
+gitreceive dynamically creates bare repositories with a special `pre-receive` hook that triggers your own general gitreceive hook giving you easy access to the code that was pushed while still being able to send output back to the git user.
 
 ## Requirements
 
