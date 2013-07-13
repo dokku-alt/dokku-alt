@@ -1,5 +1,6 @@
 gitreceive
 ==========
+[![Build Status](https://travis-ci.org/progrium/gitreceive.png?branch=master)](https://travis-ci.org/progrium/gitreceive)
 
 Creates an ssh+git user that creates repositories on the fly and lets you run scripts or hit HTTP endpoints when you push code. 
 
