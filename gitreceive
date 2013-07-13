@@ -56,7 +56,7 @@ EOF
 cat | $SELF hook
 EOF
     chmod +x $PRERECEIVE_HOOK
-    eval $SSH_ORIGINAL_COMMAND
+    eval "git-shell -c \"$SSH_ORIGINAL_COMMAND\""
     ;;
 
   hook)
