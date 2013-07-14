@@ -6,7 +6,7 @@ This repository will provide various Dockerfiles for building images as used in 
 ```bash
     
 # start the database
-PGSQL=(docker run -p 5432 -d synthomat/pgsql /usr/bin/start_pgsql.sh YOURPASSWORD)
+PGSQL=$(docker run -p 5432 -d synthomat/pgsql /usr/bin/start_pgsql.sh YOURPASSWORD)
 
 # verify it is running
 docker ps $PGSQL
