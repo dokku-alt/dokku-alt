@@ -13,6 +13,7 @@ libevent-dev
 libglib2.0-dev
 libjpeg-dev
 graphicsmagick-libmagick-dev-compat
+libmagickwand-dev
 libmysqlclient-dev
 libpq-dev
 libsqlite3-dev
