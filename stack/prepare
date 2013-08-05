@@ -15,7 +15,7 @@ apt-get clean
 #
 mkdir -p /build/buildpacks
 cd /build/buildpacks
-xargs -L 1 git clone < /build/buildpacks.txt
+xargs -L 1 git clone --depth=1 < /build/buildpacks.txt
 
 #
 # MISC
