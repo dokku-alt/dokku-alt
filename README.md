@@ -12,8 +12,8 @@ PGSQL=$(docker run -p 5432 -d synthomat/pgsql /usr/bin/start_pgsql.sh YOURPASSWO
 docker ps $PGSQL
 
 # grab the IP
-docker inspect $PGSQL
+PGSQL_IP=$(docker inspect $PGSQL | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
 
 # connect through the client
-psql -h $GRABBED_IP -Uroot -d postgres
+psql -h $PGSQL_IP -Uroot -d postgres
 ```
