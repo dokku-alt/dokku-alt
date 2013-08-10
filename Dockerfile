@@ -13,3 +13,4 @@ RUN	rm /usr/sbin/policy-rc.d
 
 ADD	. /usr/bin
 RUN	chmod +x /usr/bin/start_pgsql.sh
+RUN	chmod +x /usr/bin/prepare_pgsql.sh
