@@ -1,0 +1,56 @@
+#!/bin/bash
+set -e; 
+if [[ -z $2 ]]; then
+    echo "You must specify an app name"
+fi
+
+case "$1" in
+
+  pg:create)
+    NAME=pg/$2;
+    PASSWORD=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 16)
+    ID=$(docker run -p 5432 -d dokku/postgresql /usr/bin/prepare_pgsql.sh $PASSWORD)
+    docker wait $ID > /dev/null
+    ID=$(docker commit $ID)
+    docker tag $ID $NAME
+    ID=$(docker run -p 5432 -d $NAME /usr/bin/start_pgsql.sh $PASSWORD)
+    IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+    echo
+    echo "-----> PostgreSQL container created: $NAME"
+    echo "       Host: $IP"
+    echo "       User: 'root'"
+    echo "       Password: '$PASSWORD'"
+    echo "       Database: 'db'"
+    echo
+    ;;
+
+  pg:delete)
+    NAME=pg/$2;
+    ID=$(docker ps -a | grep "$NAME" |  awk '{print $1}')
+    docker stop $ID
+    IMAGE=$(docker images | grep "$NAME" |  awk '{print $3}')
+    docker rmi $IMAGE
+    ;;
+
+  pg:port)
+    NAME=pg/$2
+    ID=$(docker ps -a | grep "$NAME" |  awk '{print $1}')
+    echo "$NAME database port: $(docker port $ID 5432)"
+    ;;
+
+  pg:logs)
+    NAME=pg/$2;
+    ID=$(docker ps -a | grep "$NAME" |  awk '{print $1}')
+    docker logs $ID | tail -n 100
+    ;;
+
+  help)
+    cat && cat<<EOF
+    pg:create <app>       Create a postgresql container
+    pg:delete <app>       Stop the specified postgresql container and remove associated image
+    pg:port <app>         Display postgresql public port
+    pg:logs <app>         Display last logs from postgresql container
+EOF
+    ;;
+
+esac
