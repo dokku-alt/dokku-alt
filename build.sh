@@ -18,6 +18,7 @@ ID=$(docker commit $ID)
 echo "-----> Running prepare script..."
 ID=$(docker run -d $ID /bin/sh -c /build/prepare)
 docker attach $ID | indent
+sleep 5
 
 echo "-----> Committing changes..."
 ID=$(docker commit $ID)
