@@ -2,6 +2,6 @@
 
 APP="$1"; IMAGE="$2";
 if [[ -f "/tmp/db_pwd_$APP" ]]; then
-    dokku pg:link $APP pg/$APP 
+    dokku pg:link $APP $APP 
     dokku release $APP $IMAGE
 fi

@@ -39,7 +39,7 @@ case "$1" in
     docker tag $ID $DB_IMAGE
     # Run the container
     ID=$(docker run -p 5432 -d $DB_IMAGE /usr/bin/start_pgsql.sh)
-    dokku pg:link $APP $DB_IMAGE
+    dokku pg:link $APP $APP
     echo
     echo "-----> PostgreSQL container created: $DB_IMAGE"
     dokku pg:info $APP
@@ -80,7 +80,7 @@ case "$1" in
             echo "You must specify a database name"
             exit 1
         fi
-        DB_IMAGE="$3"
+        DB_IMAGE="pg/$3"
         # Check temporarily file
     	if [[ ! -f "/tmp/db_pwd_$APP" ]]; then
             echo "Database is already linked"
