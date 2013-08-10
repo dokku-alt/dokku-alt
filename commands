@@ -2,6 +2,7 @@
 set -e; 
 if [[ -z $2 ]]; then
     echo "You must specify an app name"
+    exit 1
 fi
 
 case "$1" in
