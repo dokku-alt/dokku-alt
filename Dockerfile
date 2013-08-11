@@ -14,6 +14,7 @@ RUN apt-get update
 RUN echo mysql-server-5.5 mysql-server/root_password password 'a_stronk_password' | debconf-set-selections
 RUN echo mysql-server-5.5 mysql-server/root_password_again password 'a_stronk_password' | debconf-set-selections
 RUN LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -y mariadb-server-5.5
+RUN rm -rf /var/lib/apt/lists/*
 
 # allow autostart again
 RUN	rm /usr/sbin/policy-rc.d

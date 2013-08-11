@@ -1,5 +1,6 @@
 #!/bin/bash
 
+sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
 mysqld_safe & sleep 5
 echo "CREATE DATABASE db;" | mysql -u root --password=a_stronk_password
 echo "UPDATE user set host=’%’ where user=’root’;" | mysql -u root --password=a_stronk_password -p 'mysql'
