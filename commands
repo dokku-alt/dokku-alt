@@ -38,7 +38,7 @@ case "$1" in
     ID=$(docker commit $ID)
     docker tag $ID $DB_IMAGE
     # Run the container
-    ID=$(docker run -p 5432 -d $DB_IMAGE /usr/bin/start_mariadb.sh)
+    ID=$(docker run -p 3306 -d $DB_IMAGE /usr/bin/start_mariadb.sh)
     dokku md:link $APP $APP
     echo
     echo "-----> MariaDB container created: $DB_IMAGE"
@@ -61,7 +61,7 @@ case "$1" in
     DB_IMAGE=md/$APP
     ID=$(docker ps -a | grep "$DB_IMAGE":latest |  awk '{print $1}')
     IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
-    PORT=$(docker port $ID 5432)
+    PORT=$(docker port $ID 3306)
     echo
     echo "       Host: $IP"
     echo "       User: 'root'"
