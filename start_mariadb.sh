@@ -1,4 +1,3 @@
 #!/bin/bash
 
-/usr/sbin/mysqld &
-sleep 5
+mysqld & tailf /var/log/mysql.log
