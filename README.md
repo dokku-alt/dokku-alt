@@ -1,5 +1,5 @@
-PostgreSQL plugin for Dokku
----------------------------
+MariaDB plugin for Dokku
+------------------------
 
 Project: https://github.com/progrium/dokku
 
@@ -8,7 +8,7 @@ Installation
 ------------
 ```
 cd /var/lib/dokku/plugins
-git clone https://github.com/Kloadut/dokku-pg-plugin postgresql
+git clone https://github.com/Kloadut/dokku-md-plugin mariadb
 dokku plugins-install
 ```
 
@@ -17,11 +17,11 @@ Commands
 --------
 ```
 $ dokku help
-     pg:create <app> [sql] Create a PostgreSQL container (optionnaly execute SQL statements)
-     pg:delete <app>       Delete specified PostgreSQL container
-     pg:info <app>         Display database informations
-     pg:link <app> <db>    Link an app to a PostgreSQL database
-     pg:logs <app>         Display last logs from PostgreSQL contain
+     md:create <app> [sql] Create a MariaDB container (optionnaly execute SQL statements)
+     md:delete <app>       Delete specified MariaDB container
+     md:info <app>         Display database informations
+     md:link <app> <db>    Link an app to a MariaDB database
+     md:logs <app>         Display last logs from MariaDB contain
 ```
 
 Simple usage
@@ -29,10 +29,10 @@ Simple usage
 
 Create a new DB:
 ```
-$ dokku pg:create foo            # Server side
-$ ssh dokku@server pg:create foo # Client side
+$ dokku md:create foo            # Server side
+$ ssh dokku@server md:create foo # Client side
 
------> PostgreSQL container created: pg/foo
+-----> MariaDB container created: md/foo
 
        Host: 172.16.0.104
        User: 'root'
@@ -58,8 +58,8 @@ remote: -----> Using Ruby version: ruby-2.0.0
 
 remote: -----> Deploying foo ...
 remote: 
-remote: -----> App foo linked to pg/foo database
-remote:        DATABASE_URL=postgres://root:RDSBYlUrOYMtndKb@172.16.0.104/db
+remote: -----> App foo linked to md/foo database
+remote:        DATABASE_URL=mysql://root:RDSBYlUrOYMtndKb@172.16.0.104/db
 remote: 
 remote: -----> Deploy complete!
 remote: -----> Cleaning up ...
@@ -74,25 +74,25 @@ Advanced usage
 
 Inititalize the database with SQL statements:
 ```
-cat init.sql | dokku pg:create foo
+cat init.sql | dokku md:create foo
 ```
 
 Deleting databases:
 ```
-dokku pg:delete foo
+dokku md:delete foo
 ```
 
 Linking an app to a specific database:
 ```
-dokku pg:link foo bar
+dokku md:link foo bar
 ```
 
-PostgreSQL logs (per database):
+MariaDB logs (per database):
 ```
-dokku pg:logs foo
+dokku md:logs foo
 ```
 
 Database informations:
 ```
-dokku pg:info foo
+dokku md:info foo
 ```
