@@ -17,11 +17,11 @@ Commands
 --------
 ```
 $ dokku help
-     pg:create <app> [sql] Create a PostgreSQL container (optionnaly execute SQL statements)
-     pg:delete <app>       Delete specified PostgreSQL container
-     pg:info <app>         Display database informations
-     pg:link <app> <db>    Link an app to a PostgreSQL database
-     pg:logs <app>         Display last logs from PostgreSQL contain
+     pg:create <app>     Create a PostgreSQL container
+     pg:delete <app>     Delete specified PostgreSQL container
+     pg:info <app>       Display database informations
+     pg:link <app> <db>  Link an app to a PostgreSQL database
+     pg:logs <app>       Display last logs from PostgreSQL contain
 ```
 
 Simple usage
