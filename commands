@@ -32,6 +32,10 @@ case "$1" in
         echo "PostgreSQL image not found... Did you run 'dokku plugins-install' ?"
         exit 1
     fi
+    # Stupid hack to fork
+    ID=$(docker run -d dokku/postgresql exit 0)
+    docker wait $ID > /dev/null
+    IMAGE=$(docker commit $ID)
     docker tag $IMAGE $DB_IMAGE
     # Launch container
     docker run -v /opt/postgresql -p 5432 -d $DB_IMAGE /usr/bin/start_pgsql.sh $DB_PASSWORD > /dev/null
