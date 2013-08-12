@@ -16,3 +16,5 @@ RUN	rm /usr/sbin/policy-rc.d
 
 ADD	. /usr/bin
 RUN	chmod +x /usr/bin/start_pgsql.sh
+RUN echo 'host all all 0.0.0.0/0 md5' >> /etc/postgresql/9.1/main/pg_hba.conf
+RUN sed -i -e"s/var\/lib/opt/g" /etc/postgresql/9.1/main/postgresql.conf
