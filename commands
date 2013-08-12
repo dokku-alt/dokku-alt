@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e; 
+set -e;
 
 # Check if name is specified
 if [[ $1 == md:* ]]; then
@@ -98,7 +98,7 @@ case "$1" in
         rm "/tmp/db_pwd_$APP"
     fi
     ;;
-    
+
   md:logs)
     DB_IMAGE=md/$APP
     ID=$(docker ps -a | grep "$DB_IMAGE" |  awk '{print $1}')
@@ -107,11 +107,11 @@ case "$1" in
 
   help)
     cat && cat<<EOF
-    md:create <app> [sql] Create a MariaDB container (optionnaly execute SQL statements)
-    md:delete <app>       Delete specified MariaDB container
-    md:info <app>         Display database informations
-    md:link <app> <db>    Link an app to a MariaDB database
-    md:logs <app>         Display last logs from MariaDB container
+    md:create <app>     Create a MariaDB container
+    md:delete <app>     Delete specified MariaDB container
+    md:info <app>       Display database informations
+    md:link <app> <db>  Link an app to a MariaDB database
+    md:logs <app>       Display last logs from MariaDB container
 EOF
     ;;
 
