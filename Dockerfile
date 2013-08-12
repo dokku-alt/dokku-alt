@@ -1,5 +1,3 @@
-# forked from https://gist.github.com/jpetazzo/5494158
-
 FROM	ubuntu:quantal
 MAINTAINER	kload "kload@kload.fr"
 
@@ -21,4 +19,4 @@ RUN	rm /usr/sbin/policy-rc.d
 
 ADD	. /usr/bin
 RUN	chmod +x /usr/bin/start_mariadb.sh
-RUN	chmod +x /usr/bin/prepare_mariadb.sh
+RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
