@@ -1,5 +1,8 @@
 #!/bin/bash
 
+cp -a /var/lib/mysql/* /opt/mysql/
+chown -R mysql:mysql /opt/mysql
+chmod -R 755 /opt/mysql
 mysqld
 echo "CREATE DATABASE db;" | mysql -u root --password=a_stronk_password
 echo "$2" | mysql -u root --password=a_stronk_password db
