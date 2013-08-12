@@ -34,7 +34,7 @@ case "$1" in
     fi
     docker tag $IMAGE $DB_IMAGE
     # Launch container
-    docker run -v /opt/mysql -p 5432 -d $DB_IMAGE /usr/bin/start_mariadb.sh $DB_PASSWORD > /dev/null
+    docker run -v /opt/postgresql -p 5432 -d $DB_IMAGE /usr/bin/start_pgsql.sh $DB_PASSWORD > /dev/null
     sleep 4
     # Link to a potential existing app
     dokku pg:link $APP $APP
