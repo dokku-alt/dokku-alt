@@ -92,8 +92,6 @@ case "$1" in
         URL="DATABASE_URL=mysql://root:$DB_PASSWORD@$IP/db"
         cat "/home/git/$APP/ENV" | grep "$URL" || echo "export $URL" >> "/home/git/$APP/ENV"
         echo
-        echo "-----> $URL"
-        echo
         echo "-----> $APP linked to $DB_IMAGE database"
         rm "/tmp/db_pwd_$APP"
     fi
