@@ -1,5 +1,6 @@
 #!/bin/bash
 
+mkdir -p /opt/mysql
 cp -a /var/lib/mysql/* /opt/mysql/
 chown -R mysql:mysql /opt/mysql
 chmod -R 755 /opt/mysql
