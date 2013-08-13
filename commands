@@ -29,10 +29,8 @@ case "$1" in
     fi
     # Check if an existing DB volume exists
     if [[ -d "/var/lib/docker/volumes/pg-$APP" ]]; then
-        echo "muh:exists"
         VOLUME="/var/lib/docker/volumes/pg-$APP/layer:/opt/postgresql"
     else
-        echo "muh"
         VOLUME="/opt/postgresql"
         # Generate a random password for DB user
         DB_PASSWORD=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 16)
@@ -50,11 +48,8 @@ case "$1" in
     sleep 4
     # Rename persistent volume
     if [[ ! -d "/var/lib/docker/volumes/pg-$APP" ]]; then
-        echo "meh"
         VOLUME_PATH=$(docker inspect $ID | grep "/var/lib/docker/volumes/" | awk '{print $2}' | sed -e"s/\/layer//" | sed -e's/"//g')
-        echo "$VOLUME_PATH"
         mv $VOLUME_PATH "/var/lib/docker/volumes/pg-$APP"
-        echo "mih"
         sleep 1
     fi
     # Link to a potential existing app
