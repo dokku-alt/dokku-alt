@@ -30,6 +30,8 @@ case "$1" in
     # Check if an existing DB volume exists
     if [[ -d "/var/lib/docker/volumes/pg-$APP" ]]; then
         VOLUME="/var/lib/docker/volumes/pg-$APP/layer:/opt/postgresql"
+        echo
+        echo "-----> Reusing pg/$APP database"
     else
         VOLUME="/opt/postgresql"
         # Generate a random password for DB user
