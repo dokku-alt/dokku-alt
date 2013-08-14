@@ -40,7 +40,15 @@ case "$1" in
         echo $DB_PASSWORD > "/tmp/db_pwd_$APP"
         chown git: "/tmp/db_pwd_$APP"
     fi
+    # Stop existing container with the same persistent DB
+    ID=$(docker ps | grep "$DB_IMAGE":latest |  awk '{print $1}')
+    if [[ ! -z "$ID" ]]; then
+        docker stop $ID > /dev/null
+    fi
     # Fork DB image
+    ID=$(docker run -d dokku/mariadb exit 0)
+    docker wait $ID > /dev/null
+    IMAGE=$(docker commit $ID)
     docker tag $IMAGE $DB_IMAGE
     # Launch container
     ID=$(docker run -v $VOLUME -p 3306 -d $DB_IMAGE /usr/bin/start_mariadb.sh $DB_PASSWORD)
