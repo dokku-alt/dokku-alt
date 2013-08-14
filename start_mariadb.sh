@@ -12,4 +12,4 @@ if [[ ! -z "$1" ]]; then
     echo "UPDATE mysql.user SET Password=PASSWORD('$1') WHERE User='root'; FLUSH PRIVILEGES;" | mysql -u root --password=a_stronk_password mysql
     echo "GRANT ALL ON *.* to root@'%' IDENTIFIED BY '$1'; FLUSH PRIVILEGES;" | mysql -u root --password="$1" mysql
 fi
-tailf /var/log/syslog
+tailf /var/log/mysql.log
