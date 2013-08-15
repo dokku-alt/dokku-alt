@@ -37,7 +37,10 @@ case "$1" in
         # Generate a random password for DB user
         DB_PASSWORD=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 16)
         # Temporarily store it to a file
-        mkdir -p /home/git/.postgresql
+        if [[ ! -d /home/git/.postgresql ]]; then
+            mkdir -p /home/git/.postgresql
+            chown -R git: /home/git/.postgresql
+        fi
         echo $DB_PASSWORD > "/home/git/.postgresql/pwd_$APP"
         chown git: "/home/git/.postgresql/pwd_$APP"
     fi
