@@ -37,7 +37,10 @@ case "$1" in
         # Generate a random password for DB user
         DB_PASSWORD=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 16)
         # Temporarily store it to a file
-        mkdir -p /home/git/.mariadb
+        if [[ ! -d /home/git/.mariadb ]]; then
+            mkdir -p /home/git/.mariadb
+            chown -R git: /home/git/.mariadb
+        fi
         echo $DB_PASSWORD > "/home/git/.mariadb/pwd_$APP"
         chown git: "/home/git/.mariadb/pwd_$APP"
     fi
