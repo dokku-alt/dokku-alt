@@ -17,11 +17,11 @@ Commands
 --------
 ```
 $ dokku help
-     md:create <app>     Create a MariaDB container
-     md:delete <app>     Delete specified MariaDB container
-     md:info <app>       Display database informations
-     md:link <app> <db>  Link an app to a MariaDB database
-     md:logs <app>       Display last logs from MariaDB contain
+     mariadb:create <app>     Create a MariaDB container
+     mariadb:delete <app>     Delete specified MariaDB container
+     mariadb:info <app>       Display database informations
+     mariadb:link <app> <db>  Link an app to a MariaDB database
+     mariadb:logs <app>       Display last logs from MariaDB contain
 ```
 
 Simple usage
@@ -29,10 +29,10 @@ Simple usage
 
 Create a new DB:
 ```
-$ dokku md:create foo            # Server side
-$ ssh dokku@server md:create foo # Client side
+$ dokku mariadb:create foo            # Server side
+$ ssh dokku@server mariadb:create foo # Client side
 
------> MariaDB container created: md/foo
+-----> MariaDB container created: mariadb/foo
 
        Host: 172.16.0.104
        User: 'root'
@@ -58,7 +58,7 @@ remote: -----> Using Ruby version: ruby-2.0.0
 
 remote: -----> Deploying foo ...
 remote: 
-remote: -----> App foo linked to md/foo database
+remote: -----> App foo linked to mariadb/foo database
 remote:        DATABASE_URL=mysql://root:RDSBYlUrOYMtndKb@172.16.0.104/db
 remote: 
 remote: -----> Deploy complete!
@@ -74,25 +74,25 @@ Advanced usage
 
 Inititalize the database with SQL statements:
 ```
-cat init.sql | dokku md:create foo
+cat init.sql | dokku mariadb:create foo
 ```
 
 Deleting databases:
 ```
-dokku md:delete foo
+dokku mariadb:delete foo
 ```
 
 Linking an app to a specific database:
 ```
-dokku md:link foo bar
+dokku mariadb:link foo bar
 ```
 
 MariaDB logs (per database):
 ```
-dokku md:logs foo
+dokku mariadb:logs foo
 ```
 
 Database informations:
 ```
-dokku md:info foo
+dokku mariadb:info foo
 ```
