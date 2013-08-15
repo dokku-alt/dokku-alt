@@ -17,11 +17,11 @@ Commands
 --------
 ```
 $ dokku help
-     pg:create <app>     Create a PostgreSQL container
-     pg:delete <app>     Delete specified PostgreSQL container
-     pg:info <app>       Display database informations
-     pg:link <app> <db>  Link an app to a PostgreSQL database
-     pg:logs <app>       Display last logs from PostgreSQL contain
+     postgresql:create <app>     Create a PostgreSQL container
+     postgresql:delete <app>     Delete specified PostgreSQL container
+     postgresql:info <app>       Display database informations
+     postgresql:link <app> <db>  Link an app to a PostgreSQL database
+     postgresql:logs <app>       Display last logs from PostgreSQL contain
 ```
 
 Simple usage
@@ -29,10 +29,10 @@ Simple usage
 
 Create a new DB:
 ```
-$ dokku pg:create foo            # Server side
-$ ssh dokku@server pg:create foo # Client side
+$ dokku postgresql:create foo            # Server side
+$ ssh dokku@server postgresql:create foo # Client side
 
------> PostgreSQL container created: pg/foo
+-----> PostgreSQL container created: postgresql/foo
 
        Host: 172.16.0.104
        User: 'root'
@@ -58,7 +58,7 @@ remote: -----> Using Ruby version: ruby-2.0.0
 
 remote: -----> Deploying foo ...
 remote: 
-remote: -----> App foo linked to pg/foo database
+remote: -----> App foo linked to postgresql/foo database
 remote:        DATABASE_URL=postgres://root:RDSBYlUrOYMtndKb@172.16.0.104/db
 remote: 
 remote: -----> Deploy complete!
@@ -74,25 +74,25 @@ Advanced usage
 
 Inititalize the database with SQL statements:
 ```
-cat init.sql | dokku pg:create foo
+cat init.sql | dokku postgresql:create foo
 ```
 
 Deleting databases:
 ```
-dokku pg:delete foo
+dokku postgresql:delete foo
 ```
 
 Linking an app to a specific database:
 ```
-dokku pg:link foo bar
+dokku postgresql:link foo bar
 ```
 
 PostgreSQL logs (per database):
 ```
-dokku pg:logs foo
+dokku postgresql:logs foo
 ```
 
 Database informations:
 ```
-dokku pg:info foo
+dokku postgresql:info foo
 ```
