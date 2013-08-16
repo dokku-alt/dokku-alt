@@ -49,6 +49,8 @@ The username is just a name associated with a public key. The
 fingerprint of the key is sent so you can authenticate against the
 public key that you may have for that user. 
 
+Commands do not have access to environment variables from the `/etc/profile` directory, so if you need access to them, you will need to maually `source /etc/profile` - or any other configuration file - within your receiver script.
+
 The repo contents are streamed into `STDIN` as an uncompressed archive (tar file). You can extract them into a directory on the server with a line like this in your receiver script:
 
     mkdir -p /some/path && cat | tar -x -C /some/path
