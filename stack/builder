@@ -66,5 +66,15 @@ fi
 EOF
 chmod +x /start
 
+cat > /run-cli <<EOF
+#!/bin/bash
+export HOME=/app
+for file in $app_root/.profile.d/*; do source \$file; done
+hash -r
+cd $app_root
+"\$@"
+EOF
+chmod +x /run-cli
+
 rm -fR /app
 mv /build/app /
