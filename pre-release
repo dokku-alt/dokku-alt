@@ -3,5 +3,4 @@
 APP="$1"; IMAGE="$2";
 if [[ -f "/home/git/.postgresql/pwd_$APP" ]]; then
     dokku postgresql:link $APP $APP
-    dokku release $APP $IMAGE
 fi
