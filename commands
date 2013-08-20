@@ -149,3 +149,4 @@ EOF
     ;;
 
 esac
+cat
