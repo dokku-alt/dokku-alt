@@ -52,6 +52,16 @@ default_types=$(ruby -e "require 'yaml';puts (YAML.load_file('$build_root/.relea
 mkdir -p $build_root/.profile.d
 ruby -e "require 'yaml';(YAML.load_file('$build_root/.release')['config_vars'] || {}).each{|k,v| puts \"#{k}=#{v}\"}" > $build_root/.profile.d/config_vars
 
+cat > /exec <<EOF
+#!/bin/bash
+export HOME=/app
+for file in $app_root/.profile.d/*; do source \$file; done
+hash -r
+cd $app_root
+"\$@"
+EOF
+chmod +x /exec
+
 cat > /start <<EOF
 #!/bin/bash
 export HOME=/app
