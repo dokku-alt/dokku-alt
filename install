@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Build MongoDB image
+docker build -q=true -t jeffutter/mongodb github.com/jeffutter/mongodb-docker

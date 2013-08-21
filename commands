@@ -1,0 +1,57 @@
+#!/bin/bash
+set -e;
+
+HOME=/home/git/.mongodb; export $HOME
+
+# Check if name is specified
+if [[ $1 == mongodb:* ]]; then
+    if [[ -z $2 ]]; then
+        echo "You must specify an app name"
+        exit 1
+    else
+        APP="$2"
+        # Check if app exists with the same name
+        if [[ -d "/home/git/$APP" ]]; then
+            APP_EXISTS=true
+        else
+            APP_EXISTS=false
+        fi
+    fi
+fi
+
+if [[ $APP_EXISTS == false ]]; then
+  echo "App must exist before creating mongodb storage for it"
+  exit 1
+fi
+
+
+APP_PATH=/home/git/$APP
+
+MONGODB_CONTAINER=`docker ps|grep "jeffutter/mongodb:latest"| cut -f 1 -d ' '`
+MONGODB_PORT=`docker port ${MONGODB_CONTAINER} 27017`
+
+case "$1" in
+  mongodb:create)
+    if [[ ! -f /home/git/$APP/ENV ]]; then
+      touch /home/git/$APP/ENV
+    fi
+    awk '/^MONGODB_PORT=/ {print "MONGODB_PORT='$MONGODB_PORT'"; found=1} !/^MONGODB_PORT=/ {print $0} END {if (!found) {print "MONGODB_PORT='$MONGODB_PORT'" }}' $APP_PATH/ENV > $APP_PATH/ENV.new
+    mv $APP_PATH/ENV.new $APP_PATH/ENV
+    awk '/^MONGODB_USERNAME=/ {print "MONGODB_USERNAME='$MONGODB_USERNAME'"; found=1} !/^MONGODB_USERNAME=/ {print $0} END {if (!found) {print "MONGODB_USERNAME='$MONGODB_USERNAME'" }}' $APP_PATH/ENV > $APP_PATH/ENV.new
+    mv $APP_PATH/ENV.new $APP_PATH/$APP/ENV
+    awk '/^MONGODB_PASSWORD=/ {print "MONGODB_PASSWORD='$MONGODB_PASSWORD'"; found=1} !/^MONGODB_PASSWORD=/ {print $0} END {if (!found) {print "MONGODB_PASSWORD='$MONGODB_PASSWORD'" }}' $APP_PATH/ENV > $APP_PATH/ENV.new
+    mv $APP_PATH/ENV.new $APP_PATH/ENV
+    chown git: $APP_PATH/ENV
+    ;;
+  mongodb:delete)
+    if [[ ! -f $APP_PATH/ENV ]]; then
+      touch $APP_PATH/ENV
+    fi
+    cat $APP_PATH/ENV | grep -V 'MONGODB_USERNAME' | grep -V 'MONGODB_PASSWORD' | grep -V 'MONGODB_PORT' > $APP_PATH/ENV.new
+    mv $APP_PATH/ENV.new $APP_PATH/ENV
+    chown git: $APP_PATH/ENV
+    ;;
+  mongodb:list)
+    ;;
+esac
+cat
