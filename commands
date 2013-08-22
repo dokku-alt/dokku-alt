@@ -55,7 +55,7 @@ case "$1" in
   mongodb:create)
     check_exists
 
-    MONGODB_PASSWORD=`openssl rand -base64 32`
+    MONGODB_PASSWORD=`openssl rand -base64 32|base64`
     echo $MONGODB_PASSWORD > ~/pass_$APP
 
     MONGODB_USERNAME=$APP
