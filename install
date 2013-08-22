@@ -16,5 +16,8 @@ docker run -d jeffutter/mongodb
 DOCKER_ID=`docker ps|grep "jeffutter/mongodb:latest"| cut -f 1 -d ' '`
 MONGO_PORT=`docker port ${DOCKER_ID} 27017`
 
-apt-get install -y mongodb-clients
+apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
+echo deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen > /etc/apt/sources.list.d/10gen.list
+apt-get update
+apt-get -y install mongodb-10gen
 mongo localhost:$MONGO_PORT/admin --eval "db.addUser(\"admin\", \"${ADMIN_PASS}\")"
