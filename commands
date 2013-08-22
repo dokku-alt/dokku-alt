@@ -68,7 +68,7 @@ case "$1" in
     set_dokku_env $APP_PATH/ENV MONGODB_PORT $MONGODB_PORT
     set_dokku_env $APP_PATH/ENV MONGODB_USERNAME $MONGODB_USERNAME
     set_dokku_env $APP_PATH/ENV MONGODB_PASSWORD $MONGODB_PASSWORD
-    set_dokku_env $APP_PATH/ENV DATABASE_URL "mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@localhost:${$MONGODB_PORT}/${MONGODB_DATABASE}"
+    set_dokku_env $APP_PATH/ENV DATABASE_URL "mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@localhost:${MONGODB_PORT}/${MONGODB_DATABASE}"
     chown git: $APP_PATH/ENV
     ;;
   mongodb:delete)
