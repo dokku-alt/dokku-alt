@@ -1,7 +1,7 @@
 #!/bin/bash
-set -e;
+#set -e;
 
-HOME=/home/git/.mongodb; export $HOME
+HOME=/home/git/.mongodb
 
 # Check if name is specified
 if [[ $1 == mongodb:* ]]; then
@@ -19,39 +19,73 @@ if [[ $1 == mongodb:* ]]; then
     fi
 fi
 
-if [[ $APP_EXISTS == false ]]; then
-  echo "App must exist before creating mongodb storage for it"
-  exit 1
-fi
+check_exists() {
+  if [[ $APP_EXISTS == false ]]; then
+    echo "App must exist before creating mongodb storage for it"
+    exit 1
+  fi
+}
 
+set_dokku_env() {
+  ENV_PATH=$1
+  ENV_VAR=$2
+  ENV_VAL=$3
+  awk '/^'$ENV_VAR'=/ {print "'$ENV_VAR'=\"'$ENV_VAL'\""; found=1} !/^'$ENV_VAR'=/ {print $0} END {if (!found) {print "'$ENV_VAR'=\"'$ENV_VAL'\"" }}' ${ENV_PATH} > ${ENV_PATH}.new
+  mv "${ENV_PATH}.new" ${ENV_PATH}
+  rm ${ENV_PATH}.new
+}
+
+clear_dokku_env() {
+  local ref=$1[@]
+  for x in ${!ref}; do
+    cat "${APP_PATH}/ENV" | grep -v ${x} > ${APP_PATH}/ENV.new
+    mv "${APP_PATH}/ENV.new" $APP_PATH/ENV
+    rm "${APP_PATH}/ENV.new"
+  done
+}
 
 APP_PATH=/home/git/$APP
 
 MONGODB_CONTAINER=`docker ps|grep "jeffutter/mongodb:latest"| cut -f 1 -d ' '`
 MONGODB_PORT=`docker port ${MONGODB_CONTAINER} 27017`
+ADMIN_PASS=`cat ~/admin_pw`
+MONGODB_DATABASE="${APP}-production"
 
 case "$1" in
   mongodb:create)
+    check_exists
+
+    MONGODB_PASSWORD=`openssl rand -base64 32`
+    echo $MONGODB_PASSWORD > ~/pass_$APP
+
+    MONGODB_USERNAME=$APP
+    mongo localhost:$MONGODB_PORT/$MONGODB_DATABASE --quiet -u admin -p$ADMIN_PASS --authenticationDatabase="admin" --eval "db.addUser(\"${MONGODB_USERNAME}\", \"${MONGODB_PASSWORD}\")"
+
     if [[ ! -f /home/git/$APP/ENV ]]; then
       touch /home/git/$APP/ENV
     fi
-    awk '/^MONGODB_PORT=/ {print "MONGODB_PORT='$MONGODB_PORT'"; found=1} !/^MONGODB_PORT=/ {print $0} END {if (!found) {print "MONGODB_PORT='$MONGODB_PORT'" }}' $APP_PATH/ENV > $APP_PATH/ENV.new
-    mv $APP_PATH/ENV.new $APP_PATH/ENV
-    awk '/^MONGODB_USERNAME=/ {print "MONGODB_USERNAME='$MONGODB_USERNAME'"; found=1} !/^MONGODB_USERNAME=/ {print $0} END {if (!found) {print "MONGODB_USERNAME='$MONGODB_USERNAME'" }}' $APP_PATH/ENV > $APP_PATH/ENV.new
-    mv $APP_PATH/ENV.new $APP_PATH/$APP/ENV
-    awk '/^MONGODB_PASSWORD=/ {print "MONGODB_PASSWORD='$MONGODB_PASSWORD'"; found=1} !/^MONGODB_PASSWORD=/ {print $0} END {if (!found) {print "MONGODB_PASSWORD='$MONGODB_PASSWORD'" }}' $APP_PATH/ENV > $APP_PATH/ENV.new
-    mv $APP_PATH/ENV.new $APP_PATH/ENV
+    set_dokku_env $APP_PATH/ENV MONGODB_DATABASE $MONGODB_DATABASE
+    set_dokku_env $APP_PATH/ENV MONGODB_PORT $MONGODB_PORT
+    set_dokku_env $APP_PATH/ENV MONGODB_USERNAME $MONGODB_USERNAME
+    set_dokku_env $APP_PATH/ENV MONGODB_PASSWORD $MONGODB_PASSWORD
     chown git: $APP_PATH/ENV
     ;;
   mongodb:delete)
+    check_exists
+
+    mongo localhost:$MONGODB_PORT/$MONGODB_DATABASE --quiet -u admin -p$ADMIN_PASS --authenticationDatabase="admin" --eval "printjson(db.dropDatabase())"
+
     if [[ ! -f $APP_PATH/ENV ]]; then
       touch $APP_PATH/ENV
     fi
-    cat $APP_PATH/ENV | grep -V 'MONGODB_USERNAME' | grep -V 'MONGODB_PASSWORD' | grep -V 'MONGODB_PORT' > $APP_PATH/ENV.new
-    mv $APP_PATH/ENV.new $APP_PATH/ENV
+
+    VARS=( "MONGODB_DATABASE" "MONGODB_USERNAME" "MONGODB_PASSWORD" "MONGODB_PORT" )
+    clear_dokku_env VARS 
+
     chown git: $APP_PATH/ENV
     ;;
   mongodb:list)
+    mongo localhost:$MONGODB_PORT --quiet -u admin -p$ADMIN_PASS --authenticationDatabase="admin" --eval "printjson(db.adminCommand('listDatabases'));" | grep name | cut -d \" -f 4 |grep -v admin | grep -v test
     ;;
 esac
 cat

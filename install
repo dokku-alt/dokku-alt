@@ -2,3 +2,19 @@
 
 # Build MongoDB image
 docker build -q=true -t jeffutter/mongodb github.com/jeffutter/mongodb-docker
+
+if [[ ! -d /home/git/.mongodb ]]; then
+  mkdir -p /home/git/.mongodb
+fi
+
+ADMIN_PASS=`openssl rand -base64 32`
+echo $ADMIN_PASS > /home/git/.mongodb/admin_pw
+
+chown -R git: /home/git/.mongodb
+
+docker run -d jeffutter/mongodb
+DOCKER_ID=`docker ps|grep "jeffutter/mongodb:latest"| cut -f 1 -d ' '`
+MONGO_PORT=`docker port ${DOCKER_ID} 27017`
+
+apt-get install -y mongodb-clients
+mongo localhost:$MONGO_PORT/admin --eval "db.addUser(\"admin\", \"${ADMIN_PASS}\")"
