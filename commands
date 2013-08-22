@@ -1,0 +1,123 @@
+#!/bin/bash
+set -e;
+
+# Check if name is specified
+if [[ $1 == redis:* ]]; then
+    if [[ -z $2 ]]; then
+        echo "You must specify an app name"
+        exit 1
+    else
+        APP="$2"
+        # Check if app exists with the same name
+        if [[ -d "/home/git/$APP" ]]; then
+            APP_EXISTS=true
+        else
+            APP_EXISTS=false
+        fi
+    fi
+fi
+
+case "$1" in
+
+  redis:create)
+    REDIS_IMAGE=redis/$APP
+    # Check if Redis container is installed
+    IMAGE=$(docker images | grep "luxifer/redis " |  awk '{print $3}')
+    if [[ -z $IMAGE ]]; then
+        echo "Redis image not found... Did you run 'dokku plugins-install' ?"
+        exit 1
+    fi
+    # Stop existing container with the same persistent Redis
+    ID=$(docker ps | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
+    if [[ ! -z "$ID" ]]; then
+        docker stop $ID > /dev/null
+    fi
+    # Fork Redis image
+    ID=$(docker run -d luxifer/redis exit 0)
+    docker wait $ID > /dev/null
+    IMAGE=$(docker commit $ID)
+    docker tag $IMAGE $REDIS_IMAGE
+    # Launch container
+    ID=$(docker run -p 6379 -d $REDIS_IMAGE /usr/bin/start_redis.sh)
+    sleep 4
+    # Rename persistent volume
+    if [[ ! -d "/var/lib/docker/volumes/redis-$APP" ]]; then
+        VOLUME_PATH=$(docker inspect $ID | grep "/var/lib/docker/volumes/" | awk '{print $2}' | sed -e"s/\/layer//" | sed -e's/"//g')
+        mv $VOLUME_PATH "/var/lib/docker/volumes/redis-$APP"
+        sleep 1
+    fi
+    # Link to a potential existing app
+    dokku redis:link $APP $APP
+    echo
+    echo "-----> Redis container created: $REDIS_IMAGE"
+    sleep 1
+    dokku redis:info $APP
+    ;;
+
+  redis:delete)
+    REDIS_IMAGE=redis/$APP
+    # Stop the container
+    ID=$(docker ps -a | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
+    if [[ ! -z $ID ]]; then
+        docker stop $ID
+    fi
+    # Remove image
+    IMAGE=$(docker images | grep "$REDIS_IMAGE " |  awk '{print $1}')
+    if [[ ! -z $IMAGE ]]; then
+        docker rmi $IMAGE
+    fi
+    # Remove persistent volume
+    if [[ -d "/var/lib/docker/volumes/redis-$APP" ]]; then
+        rm -rf "/var/lib/docker/volumes/redis-$APP"
+    fi
+    echo
+    echo "-----> Redis container deleted: $REDIS_IMAGE"
+    ;;
+
+  redis:info)
+    REDIS_IMAGE=redis/$APP
+    ID=$(docker ps -a | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
+    IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+    PORT=$(docker port $ID 3306)
+    echo
+    echo "       Host: $IP"
+    echo "       Public port: $PORT"
+    echo
+    ;;
+
+  redis:link)
+    if $APP_EXISTS; then
+        # Check argument
+        if [[ -z $3 ]]; then
+            echo "You must specify a container name"
+            exit 1
+        fi
+        REDIS_IMAGE="redis/$3"
+        ID=$(docker ps -a | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
+        IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+        # Write REDIS_IP to app's ENV file
+        URL="export REDIS_IP=$IP"
+        cat "/home/git/$APP/ENV" | grep "$URL" || echo "export $URL" >> "/home/git/$APP/ENV"
+        echo
+        echo "-----> $APP linked to $REDIS_IMAGE container"
+    fi
+    ;;
+
+  redis:logs)
+    REDIS_IMAGE=redis/$APP
+    ID=$(docker ps -a | grep "$REDIS_IMAGE" |  awk '{print $1}')
+    docker logs $ID | tail -n 100
+    ;;
+
+  help)
+    cat && cat<<EOF
+    redis:create <app>     Create a Redis container
+    redis:delete <app>     Delete specified Redis container
+    redis:info <app>       Display container informations
+    redis:link <app> <rd>  Link an app to a Redis container
+    redis:logs <app>       Display last logs from Redis container
+EOF
+    ;;
+
+esac
+cat
