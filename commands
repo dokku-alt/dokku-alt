@@ -47,9 +47,13 @@ clear_dokku_env() {
 APP_PATH=/home/git/$APP
 
 MONGODB_CONTAINER=`docker ps|grep "jeffutter/mongodb:latest"| cut -f 1 -d ' '`
-MONGODB_PORT=`docker port ${MONGODB_CONTAINER} 27017`
 ADMIN_PASS=`cat ~/admin_pw`
 MONGODB_DATABASE="${APP}-production"
+
+DB_IMAGE=jeffutter/mongodb
+ID=$(docker ps -a | grep "$DB_IMAGE":latest |  awk '{print $1}')
+MONGODB_PORT=$(docker port $ID 27017)
+MONGODB_IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
 
 case "$1" in
   mongodb:create)
@@ -61,6 +65,7 @@ case "$1" in
     MONGODB_USERNAME=$APP
     mongo localhost:$MONGODB_PORT/$MONGODB_DATABASE --quiet -u admin -p$ADMIN_PASS --authenticationDatabase="admin" --eval "db.addUser(\"${MONGODB_USERNAME}\", \"${MONGODB_PASSWORD}\")"
 
+    MONGODB_PORT=27017
     if [[ ! -f /home/git/$APP/ENV ]]; then
       touch /home/git/$APP/ENV
     fi
@@ -68,7 +73,7 @@ case "$1" in
     set_dokku_env $APP_PATH/ENV MONGODB_PORT $MONGODB_PORT
     set_dokku_env $APP_PATH/ENV MONGODB_USERNAME $MONGODB_USERNAME
     set_dokku_env $APP_PATH/ENV MONGODB_PASSWORD $MONGODB_PASSWORD
-    set_dokku_env $APP_PATH/ENV MONGOHQ_URL "mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@localhost:${MONGODB_PORT}/${MONGODB_DATABASE}"
+    set_dokku_env $APP_PATH/ENV MONGOHQ_URL "mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_IP}:${MONGODB_PORT}/${MONGODB_DATABASE}"
     chown git: $APP_PATH/ENV
     ;;
   mongodb:delete)
