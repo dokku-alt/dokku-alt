@@ -31,6 +31,7 @@ Vagrant.configure("2") do |config|
 
     chef.run_list = %w{
       recipe[docker]
+      recipe[dokku]
     }
   end
 

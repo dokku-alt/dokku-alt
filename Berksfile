@@ -8,3 +8,5 @@ cookbook "golang", github: "buth/chef-golang", ref: "lwrps"
 cookbook "lxc", github: "hw-cookbooks/lxc"
 cookbook "modules", github: "Youscribe/modules-cookbook"
 cookbook "docker", github: "bflad/chef-docker"
+cookbook 'dokku', '~> 1.0.0', path: 'cookbooks/dokku'
+
