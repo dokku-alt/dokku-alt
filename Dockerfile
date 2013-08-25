@@ -1,5 +1,5 @@
 FROM ubuntu:quantal
-MAINTAINER luxifer "luwifer666@gmail.com"
+MAINTAINER luxifer "luxifer666@gmail.com"
 
 RUN apt-get update
 RUN apt-get -y install redis-server
