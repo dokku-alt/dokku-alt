@@ -93,5 +93,9 @@ case "$1" in
   mongodb:list)
     mongo localhost:$MONGODB_PORT --quiet -u admin -p$ADMIN_PASS --authenticationDatabase="admin" --eval "printjson(db.adminCommand('listDatabases'));" | grep name | cut -d \" -f 4 |grep -v admin | grep -v test
     ;;
+  *)
+    echo "Command Not Found"
+    exit 1
+    ;;
 esac
 cat
