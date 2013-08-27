@@ -43,7 +43,7 @@ clear_dokku_env() {
 
 app_path=/home/git/$APP
 
-admin_pass=`cat ~/admin_pw`
+admin_pass=$(cat ~/admin_pw)
 mongodb_database="${APP}-production"
 
 db_image=jeffutter/mongodb
@@ -88,10 +88,6 @@ case "$1" in
     ;;
   mongodb:list)
     mongo localhost:$mongodb_port --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "printjson(db.adminCommand('listDatabases'));" | grep name | cut -d \" -f 4 |grep -v admin | grep -v test
-    ;;
-  *)
-    echo "Command Not Found"
-    exit 1
     ;;
 esac
 
