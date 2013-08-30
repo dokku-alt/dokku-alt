@@ -30,7 +30,7 @@ set_dokku_env() {
   env_path=$1
   env_var=$2
   env_val=$3
-  ex -sc "\"g/export ${env_var}=/d|x\"" "$env_path"
+  ex -s -c "g/export ${env_var}=/d" -c "x" "$env_path"
   echo "export ${env_var}=\"${env_val}\"" >> "$env_path"
 }
 
