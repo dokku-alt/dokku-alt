@@ -5,4 +5,4 @@ RUN apt-get update
 RUN apt-get -y install redis-server
 
 ADD . /bin
-RUN chmod +x /usr/bin/start_redis.sh
+RUN chmod +x /bin/start_redis.sh
