@@ -4,7 +4,7 @@
 HOME=/home/git/.mongodb
 
 # Check if name is specified
-if [[ $1 == mongodb:* ]]; then
+if [[ $1 == mongodb:* ]] && [[ $1 != mongodb:list ]]; then
     if [[ -z $2 ]]; then
         echo "You must specify an app name"
         exit 1
@@ -88,6 +88,13 @@ case "$1" in
     ;;
   mongodb:list)
     mongo localhost:$mongodb_port --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "printjson(db.adminCommand('listDatabases'));" | grep name | cut -d \" -f 4 |grep -v admin | grep -v test
+    ;;
+  help)
+    cat && cat<<EOF
+    mongodb:create <app> Create a Mongo database
+    mongodb:delete <app> Delete specified Mongo database
+    mongodb:list         List all databases
+EOF
     ;;
 esac
 
