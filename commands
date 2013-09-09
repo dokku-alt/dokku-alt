@@ -4,7 +4,7 @@
 HOME=/home/git/.mongodb
 
 # Check if name is specified
-if [[ $1 == mongodb:* ]]; then
+if [[ $1 == mongodb:* ]] && [[ $1 != mongodb:list ]]; then
     if [[ -z $2 ]]; then
         echo "You must specify an app name"
         exit 1
