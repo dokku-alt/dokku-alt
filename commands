@@ -69,7 +69,7 @@ case "$1" in
     set_dokku_env $app_path/ENV MONGODB_PORT $mongodb_port
     set_dokku_env $app_path/ENV MONGODB_USERNAME $mongodb_username
     set_dokku_env $app_path/ENV MONGODB_PASSWORD $mongodb_password
-    set_dokku_env $app_path/ENV MONGOHQ_URL "mongodb://${mongodb_username}:${mongodb_password}@${mongodb_ip}:${mongodb_port}/${mongodb_database}"
+    set_dokku_env $app_path/ENV MONGO_URL "mongodb://${mongodb_username}:${mongodb_password}@${mongodb_ip}:${mongodb_port}/${mongodb_database}"
     chown git: $app_path/ENV
     ;;
   mongodb:delete)
@@ -81,8 +81,8 @@ case "$1" in
       touch $app_path/ENV
     fi
 
-    VARS=( "MONGODB_DATABASE" "MONGODB_USERNAME" "MONGODB_PASSWORD" "MONGODB_PORT"  "MONGOHQ_URL")
-    clear_dokku_env VARS 
+    VARS=( "MONGODB_DATABASE" "MONGODB_USERNAME" "MONGODB_PASSWORD" "MONGODB_PORT"  "MONGO_URL")
+    clear_dokku_env VARS
 
     chown git: $app_path/ENV
     ;;
