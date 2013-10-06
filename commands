@@ -104,11 +104,12 @@ case "$1" in
     if [[ "$id" != "" ]]; then
       echo "MongoDB container already running with ID: ${id}"
     else
-      docker run -d -v /home/git/.mongodb/data:/tmp/mongo jeffutter/mongodb /usr/bin/mongod --dbpath=/tmp/mongo
+      docker run -d -v /home/git/.mongodb/data:/tmp/mongo jeffutter/mongodb /usr/bin/mongod --dbpath=/tmp/mongo --auth
     fi
     ;;
   mongodb:stop)
-    docker stop "$id"
+    check_container
+    mongo localhost:$mongodb_port/admin --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "db.shutdownServer()"
     ;;
   mongodb:status)
     if [[ "$id" != "" ]]; then
