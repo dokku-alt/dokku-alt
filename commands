@@ -3,25 +3,31 @@
 
 HOME=/home/git/.mongodb
 
-# Check if name is specified
-if [[ $1 == mongodb:* ]] && [[ $1 != mongodb:list ]]; then
-    if [[ -z $2 ]]; then
-        echo "You must specify an app name"
-        exit 1
-    else
-        APP="$2"
-        # Check if app exists with the same name
-        if [[ -d "/home/git/$APP" ]]; then
-            app_exists=true
-        else
-            app_exists=false
-        fi
-    fi
-fi
-
 check_exists() {
   if [[ $app_exists == false ]]; then
     echo "App must exist before creating mongodb storage for it"
+    exit 1
+  fi
+}
+
+check_app() {
+  if [[ -z $2 ]]; then
+    echo "You must specify an app name"
+    exit 1
+  else
+    APP="$2"
+    # Check if app exists with the same name
+    if [[ -d "/home/git/$APP" ]]; then
+      app_exists=true
+    else
+      app_exists=false
+    fi
+  fi
+}
+
+check_container() {
+  if [[ "$id" == "" ]]; then
+    echo "MongoDB container not started cannot continue. Start with dokku mongodb:start"
     exit 1
   fi
 }
@@ -46,13 +52,15 @@ app_path=/home/git/$APP
 admin_pass=$(cat ~/admin_pw)
 mongodb_database="${APP}-production"
 
-db_image=jeffutter/mongodb
-id=$(docker ps -a | grep "$db_image":latest |  awk '{print $1}')
+db_image="jeffutter/mongodb"
+id=$(docker ps | grep "$db_image":latest |  awk '{print $1}')
 mongodb_port=$(docker port ${id} 27017)
 mongodb_ip=$(docker inspect ${id} | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
 
 case "$1" in
   mongodb:create)
+    check_container
+    check_app
     check_exists
 
     mongodb_password=$(openssl rand -base64 32|base64)
@@ -73,6 +81,8 @@ case "$1" in
     chown git: $app_path/ENV
     ;;
   mongodb:delete)
+    check_container
+    check_app
     check_exists
 
     mongo localhost:$mongodb_port/$mongodb_database --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "printjson(db.dropDatabase())"
@@ -87,12 +97,33 @@ case "$1" in
     chown git: $app_path/ENV
     ;;
   mongodb:list)
+    check_container
     mongo localhost:$mongodb_port --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "printjson(db.adminCommand('listDatabases'));" | grep name | cut -d \" -f 4 |grep -v admin | grep -v test
+    ;;
+  mongodb:start)
+    if [[ "$id" != "" ]]; then
+      echo "MongoDB container already running with ID: ${id}"
+    else
+      docker run -d -v /home/git/.mongodb/data:/tmp/mongo jeffutter/mongodb /usr/bin/mongod --dbpath=/tmp/mongo
+    fi
+    ;;
+  mongodb:stop)
+    docker stop "$id"
+    ;;
+  mongodb:status)
+    if [[ "$id" != "" ]]; then
+      echo "MongoDB container running with ID: ${id}"
+    else
+      echo "MongoDB container not running"
+    fi
     ;;
   help)
     cat && cat<<EOF
     mongodb:create <app> Create a Mongo database
     mongodb:delete <app> Delete specified Mongo database
+    mongodb:start        Start the MongoDB docker container if it isn't running
+    mongodb:start        Stop the MongoDB docker container
+    mongodb:status       Shows status of MongoDB
     mongodb:list         List all databases
 EOF
     ;;

@@ -36,6 +36,6 @@ Vagrant.configure("2") do |config|
   end
 
 
-  #config.vm.synced_folder "./", "/var/lib/dokku/plugins/mongodb"
+  config.vm.synced_folder "./", "/var/lib/dokku/plugins/mongodb"
   config.vm.synced_folder host_cache_path, guest_cache_path
 end

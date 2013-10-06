@@ -5,6 +5,7 @@ docker build -q=true -t jeffutter/mongodb github.com/jeffutter/mongodb-docker
 
 if [[ ! -d /home/git/.mongodb ]]; then
   mkdir -p /home/git/.mongodb
+  mkdir -p /home/git/.mongodb/data
 fi
 
 admin_pass=$(openssl rand -base64 32|base64)
@@ -12,12 +13,13 @@ echo $admin_pass > /home/git/.mongodb/admin_pw
 
 chown -R git: /home/git/.mongodb
 
-docker run -d jeffutter/mongodb
-id=`docker ps|grep "jeffutter/mongodb:latest"| cut -f 1 -d ' '`
-mongo_port=`docker port ${id} 27017`
+docker run -d -v /home/git/.mongodb/data:/tmp/mongo jeffutter/mongodb /usr/bin/mongod --dbpath=/tmp/mongo
+id=$(docker ps|grep "jeffutter/mongodb:latest"| cut -f 1 -d ' ')
+mongo_port=$(docker port ${id} 27017)
 
 apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
 echo deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen > /etc/apt/sources.list.d/10gen.list
 apt-get update
 apt-get -y install mongodb-10gen
 mongo localhost:$mongo_port/admin --eval "db.addUser(\"admin\", \"${admin_pass}\")"
+docker stop "$id"
