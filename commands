@@ -123,7 +123,7 @@ case "$1" in
     mongodb:create <app> Create a Mongo database
     mongodb:delete <app> Delete specified Mongo database
     mongodb:start        Start the MongoDB docker container if it isn't running
-    mongodb:start        Stop the MongoDB docker container
+    mongodb:stop         Stop the MongoDB docker container
     mongodb:status       Shows status of MongoDB
     mongodb:list         List all databases
 EOF
