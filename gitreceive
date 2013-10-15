@@ -29,10 +29,11 @@ EOF
     echo "Created receiver script in $GITHOME for user '$GITUSER'."
     ;;
 
-  upload-key) # gitreceive upload-key <username>
+  upload-key) # sudo gitreceive upload-key <username>
     KEY=$(cat)
     FINGERPRINT=$(ssh-keygen -lf /dev/stdin <<< $(echo $KEY) | awk '{print $2}')
     AUTHORIZED_KEYS=$GITHOME/.ssh/authorized_keys
+    # When this key is used, use the ssh 'forced command' feature to have 'gitreceive run' to run instead.
     KEY_PREFIX="command=\"$SELF run $2 $FINGERPRINT\",no-agent-forwarding,no-pty,no-user-rc,no-X11-forwarding,no-port-forwarding"
     echo "$KEY_PREFIX $KEY" >> $AUTHORIZED_KEYS
     echo $FINGERPRINT
@@ -42,6 +43,7 @@ EOF
   run) 
     export RECEIVE_USER=$2
     export RECEIVE_FINGERPRINT=$3
+    # ssh provides the original requested command in $SSH_ORIGINAL_COMMAND
     eval $(echo $SSH_ORIGINAL_COMMAND | awk '{print "export RECEIVE_REPO="$2}')
     REPO_PATH="$GITHOME/$RECEIVE_REPO"
     if [ ! -d $REPO_PATH ]; then
