@@ -21,9 +21,6 @@ xargs -L 1 git clone --depth=1 < /build/buildpacks.txt
 # MISC
 #
 
-# Temporarily replace bpwatch in the python buildpack, waiting on https://github.com/heroku/heroku-buildpack-python/pull/101
-[[ -f /build/buildpacks/heroku-buildpack-python/vendor/bpwatch/bpwatch ]] && echo -e '#!/bin/sh\nexit' > /build/buildpacks/heroku-buildpack-python/vendor/bpwatch/bpwatch
-
 # Ruby buildpack system configuration
 update-alternatives --set ruby /usr/bin/ruby1.9.1
 update-alternatives --set gem /usr/bin/gem1.9.1
