@@ -83,7 +83,7 @@ Redis logs (per container):
 dokku redis:logs foo
 ```
 
-Redis informations:
+Redis information:
 ```
 dokku redis:info foo
 ```
