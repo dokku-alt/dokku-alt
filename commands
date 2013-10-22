@@ -1,6 +1,8 @@
 #!/bin/bash
 #set -e;
 
+app_name=$2
+
 HOME=/home/git/.mongodb
 
 check_exists() {
@@ -11,11 +13,11 @@ check_exists() {
 }
 
 check_app() {
-  if [[ -z $2 ]]; then
+  if [[ -z $app_name ]]; then
     echo "You must specify an app name"
     exit 1
   else
-    APP="$2"
+    APP="$app_name"
     # Check if app exists with the same name
     if [[ -d "/home/git/$APP" ]]; then
       app_exists=true
@@ -26,7 +28,7 @@ check_app() {
 }
 
 check_container() {
-  if [[ "$id" == "" ]]; then
+  if [[ -z "$id" ]]; then
     echo "MongoDB container not started cannot continue. Start with dokku mongodb:start"
     exit 1
   fi
