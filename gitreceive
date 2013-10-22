@@ -44,7 +44,7 @@ EOF
     export RECEIVE_USER=$2
     export RECEIVE_FINGERPRINT=$3
     # ssh provides the original requested command in $SSH_ORIGINAL_COMMAND
-    eval $(echo $SSH_ORIGINAL_COMMAND | awk '{print "export RECEIVE_REPO="$2}')
+    export RECEIVE_REPO="$(echo $SSH_ORIGINAL_COMMAND | awk '{print $2}')"
     REPO_PATH="$GITHOME/$RECEIVE_REPO"
     if [ ! -d $REPO_PATH ]; then
       mkdir -p $REPO_PATH
@@ -58,7 +58,7 @@ EOF
 cat | $SELF hook
 EOF
     chmod +x $PRERECEIVE_HOOK
-    eval "git-shell -c \"$SSH_ORIGINAL_COMMAND\""
+    git-shell -c "$SSH_ORIGINAL_COMMAND"
     ;;
 
   hook)
