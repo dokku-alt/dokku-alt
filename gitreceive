@@ -44,7 +44,7 @@ EOF
     export RECEIVE_USER=$2
     export RECEIVE_FINGERPRINT=$3
     # ssh provides the original requested command in $SSH_ORIGINAL_COMMAND
-    export RECEIVE_REPO="$(echo $SSH_ORIGINAL_COMMAND | awk '{print $2}')"
+    export RECEIVE_REPO="$(echo $SSH_ORIGINAL_COMMAND | awk '{print $2}' | perl -pe 's/(?<!\\)'\''//g' | sed 's/\\'\''/'\''/g')"
     REPO_PATH="$GITHOME/$RECEIVE_REPO"
     if [ ! -d $REPO_PATH ]; then
       mkdir -p $REPO_PATH
