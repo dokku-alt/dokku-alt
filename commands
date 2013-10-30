@@ -39,10 +39,10 @@ case "$1" in
         # Temporarily store it to a file
         if [[ ! -d $DOKKU_ROOT/.postgresql ]]; then
             mkdir -p $DOKKU_ROOT/.postgresql
-            chown -R git: $DOKKU_ROOT/.postgresql
+            chown -R dokku: $DOKKU_ROOT/.postgresql
         fi
         echo $DB_PASSWORD > "$DOKKU_ROOT/.postgresql/pwd_$APP"
-        chown git: "$DOKKU_ROOT/.postgresql/pwd_$APP"
+        chown dokku: "$DOKKU_ROOT/.postgresql/pwd_$APP"
     fi
     # Fork DB image
     ID=$(docker run -d kloadut/postgresql exit 0)
