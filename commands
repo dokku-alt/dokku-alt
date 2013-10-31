@@ -7,7 +7,7 @@ OLDHOME=$HOME
 HOME="$DOKKU_ROOT/.mongodb"
 
 check_exists() {
-  if [[ $app_exists == false ]]; then
+  if [[ ! -d "$DOKKU_ROOT/$APP" ]]; then
     echo "App must exist before creating mongodb storage for it"
     exit 1
   fi
