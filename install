@@ -1,25 +1,31 @@
 #!/bin/bash
 
 # Build MongoDB image
-docker build -q=true -t jeffutter/mongodb github.com/jeffutter/mongodb-docker
+db_image="jeffutter/mongodb"
+docker build -q=true -t "$db_image" github.com/jeffutter/mongodb-docker
 
-if [[ ! -d /home/git/.mongodb ]]; then
-  mkdir -p /home/git/.mongodb
-  mkdir -p /home/git/.mongodb/data
+if [[ ! -d "$DOKKU_ROOT/.mongodb" ]]; then
+  mkdir -p "$DOKKU_ROOT/.mongodb"
+  mkdir -p "$DOKKU_ROOT/.mongodb/data"
 fi
 
 admin_pass=$(openssl rand -base64 32|base64)
-echo $admin_pass > /home/git/.mongodb/admin_pw
+echo $admin_pass > "$DOKKU_ROOT/.mongodb/admin_pw"
 
-chown -R git: /home/git/.mongodb
+chown -R dokku: "$DOKKU_ROOT/.mongodb"
 
-docker run -d -v /home/git/.mongodb/data:/tmp/mongo jeffutter/mongodb /usr/bin/mongod --dbpath=/tmp/mongo
-id=$(docker ps|grep "jeffutter/mongodb:latest"| cut -f 1 -d ' ')
-mongo_port=$(docker port ${id} 27017)
+docker run -p 27017:27017 -d -v "$DOKKU_ROOT/.mongodb/data":/tmp/mongo "$db_image" /usr/bin/mongod --dbpath=/tmp/mongo
+id=$(docker ps | grep "$db_image":latest |  awk '{print $1}')
+mongodb_ip=$(docker port ${id} 27017 | awk '{split($0,a,":"); print a[1]}')
+mongodb_port=$(docker port ${id} 27017 | awk '{split($0,a,":"); print a[2]}')
+if [[ $mongodb_ip = "0.0.0.0" ]]; then
+  mongodb_ip=localhost
+fi
+
 
 apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
 echo deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen > /etc/apt/sources.list.d/10gen.list
 apt-get update
 apt-get -y install mongodb-10gen
-mongo localhost:$mongo_port/admin --eval "db.addUser(\"admin\", \"${admin_pass}\")"
+mongo $mongodb_ip:$mongodb_port/admin --eval "db.addUser(\"admin\", \"${admin_pass}\")"
 docker stop "$id"
