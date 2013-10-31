@@ -113,7 +113,7 @@ case "$1" in
         # Check temporarily file
     	if [[ ! -f "$DOKKU_ROOT/.postgresql/pwd_$APP" ]]; then
             echo "Database is already linked"
-            exit 1
+            exit 0
         fi
         DB_PASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
         ID=$(docker ps -a | grep "$DB_IMAGE":latest |  awk '{print $1}')
