@@ -28,6 +28,8 @@ func main() {
 	}
 	done := make(chan bool, len(cmds))
 	for i := len(cmds)-1; i >= 0; i-- {
+		cmds[i].Stderr = os.Stderr
+
 		if i == len(cmds)-1 {
 			cmds[i].Stdout = os.Stdout
 		} 
