@@ -5,8 +5,8 @@ Creates a system user made for running a single command via SSH and manages an A
 ## Commands
 
     $ sshcommand create <user> <command>        # creates a user forced to run command when SSH connects
-    $ sshcommand acl-add <user> <name>          # adds named SSH key to user from STDIN
-    $ sshcommand acl-remove <user> <name>       # removes SSH key by name
+    $ sshcommand acl-add <user> <identifier>    # adds named SSH key to user from STDIN
+    $ sshcommand acl-remove <user> <identifier> # removes SSH key by name
     $ sshcommand help                           # displays the usage help message
 
 

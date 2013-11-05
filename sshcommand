@@ -9,7 +9,7 @@ HOME_DIR=${HOME_DIR:-"/home"}
 case "$1" in
   create) # sshcommand create <user> <command>
     if [[ $# -ne 3 ]]; then
-      echo "Usage : sshcommand create username command"
+      echo "Usage : sshcommand create user command"
       exit -1
     fi
     USER="$2"; COMMAND="$3"
@@ -21,9 +21,9 @@ case "$1" in
     chown -R $USER $USERHOME
     ;;
 
-  acl-add) # sshcommand acl-add <user> <name>
+  acl-add) # sshcommand acl-add <user> <identifier>
     if [[ $# -ne 3 ]]; then
-      echo "Usage : sshcommand acl-add username command"
+      echo "Usage : sshcommand acl-add user identifier"
       exit -1
     fi
     USER="$2"; NAME="$3"
@@ -34,9 +34,9 @@ case "$1" in
     echo $FINGERPRINT
     ;;
 
-  acl-remove) # sshcommand acl-remove <user> <name>
+  acl-remove) # sshcommand acl-remove <user> <identifier>
     if [[ $# -ne 3 ]]; then
-      echo "Usage : sshcommand acl-remove username command"
+      echo "Usage : sshcommand acl-remove user identifier"
       exit -1
     fi
     USER="$2"; NAME="$3"
@@ -44,10 +44,11 @@ case "$1" in
     ;;
 
   help|*) # sshcommand help
-    echo "Usage : sshcommand create username command"
-    echo "        sshcommand acl-add username command"
-    echo "        sshcommand acl-remove username command"
+    echo "Usage : sshcommand create user command"
+    echo "        sshcommand acl-add user identifier"
+    echo "        sshcommand acl-remove user identifier"
     echo "        sshcommand help # shows this usage message"
     ;;
 
 esac
+
