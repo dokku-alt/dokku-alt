@@ -98,6 +98,8 @@ case "$1" in
         # Write REDIS_IP to app's ENV file
         URL="REDIS_IP=$IP"
         cat "$DOKKU_ROOT/$APP/ENV" | grep "$URL" || echo "export $URL" >> "$DOKKU_ROOT/$APP/ENV"
+        REDIS_URL="REDIS_URL=redis://$IP:6379"
+        cat "$DOKKU_ROOT/$APP/ENV" | grep "$REDIS_URL" || echo "export $REDIS_URL" >> "$DOKKU_ROOT/$APP/ENV"
         echo
         echo "-----> $APP linked to $REDIS_IMAGE container"
     fi
