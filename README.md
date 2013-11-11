@@ -98,6 +98,9 @@ advantage! You can even use chunked-transfer encoding to stream back
 progress in realtime if you wanted to keep using HTTP. Alternatively, you can have the
 receiver script run any other script on the server.
 
+#### Handling submodules
+Submodules are not included when you do a `git push`, if you want them to be part of your workflow, have a look at [Handling Submodules](https://github.com/progrium/gitreceive/wiki/TipsAndTricks#handling-submodules).
+
 ## So what?
 
 You can use `gitreceive` not only to trigger code on `git push`, but to provide
