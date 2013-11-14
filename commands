@@ -54,6 +54,7 @@ case "$1" in
     mongodb_port=27017
 
     dokku config:set "$APP" MONGODB_DATABASE="$mongodb_database" \
+      MONGODB_HOST="$mongodb_private_ip" \
       MONGODB_PORT="$mongodb_port" \
       MONGODB_USERNAME="$mongodb_username" \
       MONGODB_PASSWORD="$mongodb_password" \
@@ -67,6 +68,7 @@ case "$1" in
     mongo $mongodb_public_ip:$mongodb_port/$mongodb_database --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "printjson(db.dropDatabase())"
 
     dokku config:unset "$APP" MONGODB_DATABASE \
+      MONGODB_HOST \
       MONGODB_USERNAME \
       MONGODB_PASSWORD \
       MONGODB_PORT \
