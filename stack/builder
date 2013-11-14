@@ -43,7 +43,8 @@ export REQUEST_ID=$(openssl rand -base64 32)
 $selected_buildpack/bin/compile "$build_root" "$cache_root"
 
 echo "-----> Discovering process types"
-$selected_buildpack/bin/release "$build_root" "$cache_root" > /build/app/.release
+
+$selected_buildpack/bin/release "$build_root" > /build/app/.release
 
 if [[ -f "$build_root/Procfile" ]]; then
   types=$(ruby -e "require 'yaml';puts YAML.load_file('$build_root/Procfile').keys().join(', ')")
