@@ -46,7 +46,7 @@ case "$1" in
     IMAGE=$(docker commit $ID)
     docker tag $IMAGE $REDIS_IMAGE
     # Launch container
-    ID=$(docker run -p 6379 -d $REDIS_IMAGE -v $VOLUME /bin/start_redis.sh)
+    ID=$(docker run -v $VOLUME -p 6379 -d $REDIS_IMAGE /bin/start_redis.sh)
     sleep 4
     # Rename persistent volume
     if [[ ! -d "/var/lib/docker/volumes/redis-$APP" ]]; then
