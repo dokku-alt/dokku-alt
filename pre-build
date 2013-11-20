@@ -1,8 +1,6 @@
-#!/bin/bash
-set -e
-
-APP="$1"
-IMAGE="$2"
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+APP="$1"; IMAGE="$2"
 SOURCE_ENV_PATH="$HOME/$APP/ENV"
 
 if [[ -f "$SOURCE_ENV_PATH" ]]; then
