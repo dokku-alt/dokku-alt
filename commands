@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e;
+export DOKKU_ROOT=${DOKKU_ROOT:="/home/dokku"}
 
 # Check if name is specified
 if [[ $1 == mariadb:* ]]; then
@@ -9,7 +10,7 @@ if [[ $1 == mariadb:* ]]; then
     else
         APP="$2"
         # Check if app exists with the same name
-        if [[ -d "/home/git/$APP" ]]; then
+        if [[ -d "$DOKKU_ROOT/$APP" ]]; then
             APP_EXISTS=true
         else
             APP_EXISTS=false
@@ -37,12 +38,12 @@ case "$1" in
         # Generate a random password for DB user
         DB_PASSWORD=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 16)
         # Temporarily store it to a file
-        if [[ ! -d /home/git/.mariadb ]]; then
-            mkdir -p /home/git/.mariadb
-            chown -R git: /home/git/.mariadb
+        if [[ ! -d $DOKKU_ROOT/.mariadb ]]; then
+            mkdir -p $DOKKU_ROOT/.mariadb
+            chown -R dokku: $DOKKU_ROOT/.mariadb
         fi
-        echo $DB_PASSWORD > "/home/git/.mariadb/pwd_$APP"
-        chown git: "/home/git/.mariadb/pwd_$APP"
+        echo $DB_PASSWORD > "$DOKKU_ROOT/.mariadb/pwd_$APP"
+        chown dokku: "$DOKKU_ROOT/.mariadb/pwd_$APP"
     fi
     # Stop existing container with the same persistent DB
     ID=$(docker ps | grep "$DB_IMAGE":latest |  awk '{print $1}')
@@ -99,8 +100,8 @@ case "$1" in
     echo
     echo "       Host: $IP"
     echo "       User: 'root'"
-    if [[ -f "/home/git/.mariadb/pwd_$APP" ]]; then
-        echo "       Password: '$(cat "/home/git/.mariadb/pwd_$APP")'"
+    if [[ -f "$DOKKU_ROOT/.mariadb/pwd_$APP" ]]; then
+        echo "       Password: '$(cat "$DOKKU_ROOT/.mariadb/pwd_$APP")'"
     fi
     echo "       Database: 'db'"
     echo "       Public port: $PORT"
@@ -116,19 +117,19 @@ case "$1" in
         fi
         DB_IMAGE="mariadb/$3"
         # Check temporarily file
-        if [[ ! -f "/home/git/.mariadb/pwd_$APP" ]]; then
+        if [[ ! -f "$DOKKU_ROOT/.mariadb/pwd_$APP" ]]; then
             echo "Database is already linked"
             exit 1
         fi
-        DB_PASSWORD=$(cat "/home/git/.mariadb/pwd_$APP")
+        DB_PASSWORD=$(cat "$DOKKU_ROOT/.mariadb/pwd_$APP")
         ID=$(docker ps -a | grep "$DB_IMAGE":latest |  awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
         # Write DATABASE_URL to app's ENV file
         URL="DATABASE_URL=mysql://root:$DB_PASSWORD@$IP/db"
-        cat "/home/git/$APP/ENV" | grep "$URL" || echo "export $URL" >> "/home/git/$APP/ENV"
+        cat "$DOKKU_ROOT/$APP/ENV" | grep "$URL" || echo "export $URL" >> "$DOKKU_ROOT/$APP/ENV"
         echo
         echo "-----> $APP linked to $DB_IMAGE database"
-        rm "/home/git/.mariadb/pwd_$APP"
+        rm "$DOKKU_ROOT/.mariadb/pwd_$APP"
     fi
     ;;
 
