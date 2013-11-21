@@ -1,5 +1,4 @@
 #!/bin/bash
-export DOKKU_ROOT=${DOKKU_ROOT:="/home/dokku"}
 
 APP="$1"; IMAGE="$2";
 if [[ -f "$DOKKU_ROOT/.mariadb/pwd_$APP" ]]; then

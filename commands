@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e;
-export DOKKU_ROOT=${DOKKU_ROOT:="/home/dokku"}
 
 # Check if name is specified
 if [[ $1 == mariadb:* ]]; then
