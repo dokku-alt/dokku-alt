@@ -32,11 +32,13 @@ mongodb_database="${APP/./_}-production"
 
 db_image="jeffutter/mongodb"
 id=$(docker ps | grep "$db_image":latest |  awk '{print $1}')
-mongodb_public_ip=$(docker port ${id} 27017 | awk '{split($0,a,":"); print a[1]}')
-mongodb_private_ip=$(docker inspect ${id} | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
-mongodb_port=$(docker port ${id} 27017 | awk '{split($0,a,":"); print a[2]}')
-if [[ $mongodb_public_ip = "0.0.0.0" ]]; then
-  mongodb_public_ip=localhost
+if [[ -n "$id" ]]; then
+  mongodb_public_ip=$(docker port ${id} 27017 | awk '{split($0,a,":"); print a[1]}')
+  mongodb_private_ip=$(docker inspect ${id} | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+  mongodb_port=$(docker port ${id} 27017 | awk '{split($0,a,":"); print a[2]}')
+  if [[ $mongodb_public_ip = "0.0.0.0" ]]; then
+    mongodb_public_ip=localhost
+  fi
 fi
 
 case "$1" in
