@@ -27,6 +27,14 @@ case "$1" in
         echo "Redis image not found... Did you run 'dokku plugins-install' ?"
         exit 1
     fi
+    # Check if an existing DB volume exists
+    if [[ -d "/var/lib/docker/volumes/redis-$APP" ]]; then
+        VOLUME="/var/lib/docker/volumes/redis-$APP/layer:/opt/redis"
+        echo
+        echo "-----> Reusing redis/$APP database"
+    else
+        VOLUME="/opt/redis"
+    fi
     # Stop existing container with the same persistent Redis
     ID=$(docker ps | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
     if [[ ! -z "$ID" ]]; then
@@ -38,7 +46,7 @@ case "$1" in
     IMAGE=$(docker commit $ID)
     docker tag $IMAGE $REDIS_IMAGE
     # Launch container
-    ID=$(docker run -p 6379 -d $REDIS_IMAGE /bin/start_redis.sh)
+    ID=$(docker run -v $VOLUME -p 6379 -d $REDIS_IMAGE /bin/start_redis.sh)
     sleep 4
     # Rename persistent volume
     if [[ ! -d "/var/lib/docker/volumes/redis-$APP" ]]; then
