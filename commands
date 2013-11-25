@@ -1,0 +1,21 @@
+#!/bin/bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+case "$1" in
+  rebuild)
+    if [[ -z $2 ]]; then
+      echo "Please specify an app to rebuild"
+      exit 1
+    fi
+    APP="$2"
+    REPO="$DOKKU_ROOT/$APP"
+    REF=$(cat $REPO/refs/heads/master)
+    cd $REPO && git archive $REF | dokku receive $APP | sed -u "s/^/"$'\e[1G'"/"
+    ;;
+  help)
+    cat && cat<<EOF
+    rebuild <app>                                   Rebuild an app
+EOF
+  ;;
+    
+esac
