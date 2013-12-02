@@ -18,6 +18,7 @@ libpng12-0
 libpng12-dev
 libmagickcore-dev
 libmagickwand-dev
+libmcrypt-dev
 libmysqlclient-dev
 libpq-dev
 libsqlite3-dev
