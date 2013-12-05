@@ -3,7 +3,7 @@ set -e
 
 app_root=/app
 build_root=/build/app
-cache_root=/cache
+cache_root=/cache/app
 buildpack_root=/build/buildpacks
 
 cp -r /app /build
