@@ -28,13 +28,14 @@ case "$1" in
         exit 1
     fi
     # Check if an existing DB volume exists
-    if [[ -d "/var/lib/docker/volumes/redis-$APP" ]]; then
-        VOLUME="/var/lib/docker/volumes/redis-$APP/layer:/opt/redis"
+    HOST_DIR="$DOKKU_ROOT/.redis/volume-$APP"
+    if [[ -d $HOST_DIR ]]; then
         echo
         echo "-----> Reusing redis/$APP database"
     else
-        VOLUME="/opt/redis"
+        mkdir -p $HOST_DIR
     fi
+    VOLUME="$HOST_DIR:/opt/redis"
     # Stop existing container with the same persistent Redis
     ID=$(docker ps | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
     if [[ ! -z "$ID" ]]; then
@@ -48,12 +49,6 @@ case "$1" in
     # Launch container
     ID=$(docker run -v $VOLUME -p 6379 -d $REDIS_IMAGE /bin/start_redis.sh)
     sleep 4
-    # Rename persistent volume
-    if [[ ! -d "/var/lib/docker/volumes/redis-$APP" ]]; then
-        VOLUME_PATH=$(docker inspect $ID | grep "/var/lib/docker/volumes/" | awk '{print $2}' | sed -e"s/\/layer//" | sed -e's/"//g')
-        mv $VOLUME_PATH "/var/lib/docker/volumes/redis-$APP"
-        sleep 1
-    fi
     # Link to a potential existing app
     dokku redis:link $APP $APP
     echo
@@ -75,8 +70,8 @@ case "$1" in
         docker rmi $IMAGE
     fi
     # Remove persistent volume
-    if [[ -d "/var/lib/docker/volumes/redis-$APP" ]]; then
-        rm -rf "/var/lib/docker/volumes/redis-$APP"
+    if [[ -d $HOST_DIR ]]; then
+        rm -rf $HOST_DIR
     fi
     echo
     echo "-----> Redis container deleted: $REDIS_IMAGE"
