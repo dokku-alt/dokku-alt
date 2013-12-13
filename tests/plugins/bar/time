@@ -1,0 +1,4 @@
+#!/bin/bash
+date +%s
+sleep 2
+

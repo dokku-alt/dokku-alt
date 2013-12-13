@@ -7,51 +7,75 @@ import (
 	"syscall"
 	"path/filepath"
 	"log"
+	"flag"
+	"bytes"
 	"code.google.com/p/go.crypto/ssh/terminal"
 )
 
 func main() {
-	pluginPath := os.Getenv("PLUGIN_PATH") 
+	var parallel = flag.Bool("p", false, "Run hooks in parallel")
+	flag.Parse()
+
+	pluginPath := os.Getenv("PLUGIN_PATH")
 	if pluginPath == "" {
 		log.Fatal("[ERROR] Unable to locate plugins: set $PLUGIN_PATH\n")
 		os.Exit(1)
 	}
-	if len(os.Args) < 2 {
+	if flag.NArg() < 1 {
 		log.Fatal("[ERROR] Hook name argument is required\n")
 		os.Exit(1)
 	}
 	cmds := make([]exec.Cmd, 0)
-	var matches, _ = filepath.Glob(fmt.Sprintf("%s/*/%s", pluginPath, os.Args[1]))
+	var matches, _ = filepath.Glob(fmt.Sprintf("%s/*/%s", pluginPath, flag.Arg(0)))
 	for _, hook := range matches {
-		cmd := exec.Command(hook, os.Args[2:]...)
+		cmd := exec.Command(hook, flag.Args()[1:]...)
 		cmds = append(cmds, *cmd)
 	}
-	done := make(chan bool, len(cmds))
 	for i := len(cmds)-1; i >= 0; i-- {
 		cmds[i].Stderr = os.Stderr
 
 		if i == len(cmds)-1 {
 			cmds[i].Stdout = os.Stdout
-		} 
+		}
 		if i > 0 {
-			stdout, err := cmds[i-1].StdoutPipe()
-			if err != nil {
-				log.Fatal(err)
+			if *parallel {
+				stdout, err := cmds[i-1].StdoutPipe()
+				if err != nil {
+					log.Fatal(err)
+				}
+				cmds[i].Stdin = stdout
+			} else {
+				var buf bytes.Buffer
+				cmds[i-1].Stdout = &buf
+				cmds[i].Stdin = &buf
 			}
-			cmds[i].Stdin = stdout
 		}
 		if i == 0 && !terminal.IsTerminal(syscall.Stdin) {
 			cmds[i].Stdin = os.Stdin
 		}
-		go func(cmd exec.Cmd) {
-			err := cmd.Run()
+	}
+
+	if *parallel {
+		done := make(chan bool, len(cmds))
+
+		for i := 0; i < len(cmds); i++ {
+			go func(cmd exec.Cmd) {
+				err := cmd.Run()
+				if msg, ok := err.(*exec.ExitError); ok { // there is error code 
+					os.Exit(msg.Sys().(syscall.WaitStatus).ExitStatus())
+				}
+				done <- true
+			}(cmds[i])
+		}
+		for i := 0; i < len(cmds); i++ {
+			<-done
+		}
+	} else {
+		for i := 0; i < len(cmds); i++ {
+			err := cmds[i].Run()
 			if msg, ok := err.(*exec.ExitError); ok { // there is error code 
 				os.Exit(msg.Sys().(syscall.WaitStatus).ExitStatus())
 			}
-			done <- true
-		}(cmds[i])
-	}
-	for i := 0; i < len(cmds); i++ {
-		<-done
+		}
 	}
 }
