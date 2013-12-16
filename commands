@@ -1,0 +1,114 @@
+#!/bin/bash
+set -e;
+
+# Check if name is specified
+if [[ $1 == memcached:* ]]; then
+    if [[ -z $2 ]]; then
+        echo "You must specify an app name"
+        exit 1
+    else
+        APP="$2"
+        # Check if app exists with the same name
+        if [[ -d "$DOKKU_ROOT/$APP" ]]; then
+            APP_EXISTS=true
+        else
+            APP_EXISTS=false
+        fi
+    fi
+fi
+
+MEMCACHED_IMAGE=memcached/$APP
+
+case "$1" in
+
+  memcached:create)
+    # Check if Memcached container is installed
+    IMAGE=$(docker images | grep "jezdez/memcached " |  awk '{print $3}')
+    if [[ -z $IMAGE ]]; then
+        echo "Memcached image not found... Did you run 'dokku plugins-install'?"
+        exit 1
+    fi
+    # Stop existing container with the same persistent Memcached
+    ID=$(docker ps | grep "$MEMCACHED_IMAGE":latest |  awk '{print $1}')
+    if [[ ! -z "$ID" ]]; then
+        docker stop $ID > /dev/null
+    fi
+    # Fork Memcache image
+    ID=$(docker run -d jezdez/memcached exit 0)
+    docker wait $ID > /dev/null
+    IMAGE=$(docker commit $ID)
+    docker tag $IMAGE $MEMCACHED_IMAGE
+    # Launch container
+    ID=$(docker run -p 11211 -d $MEMCACHED_IMAGE -d)
+    sleep 4
+    # Link to a potential existing app
+    dokku memcached:link $APP $APP
+    echo
+    echo "-----> Memcached container created: $MEMCACHED_IMAGE"
+    sleep 1
+    dokku memcached:info $APP
+    ;;
+
+  memcached:delete)
+    # Stop the container
+    ID=$(docker ps -a | grep "$MEMCACHED_IMAGE":latest |  awk '{print $1}')
+    if [[ ! -z $ID ]]; then
+        docker stop $ID
+    fi
+    # Remove image
+    IMAGE=$(docker images | grep "$MEMCACHED_IMAGE " |  awk '{print $1}')
+    if [[ ! -z $IMAGE ]]; then
+        docker rmi $IMAGE
+    fi
+    # Remove persistent volume
+    if [[ -d $HOST_DIR ]]; then
+        rm -rf $HOST_DIR
+    fi
+    echo
+    echo "-----> Memcached container deleted: $MEMCACHED_IMAGE"
+    ;;
+
+  memcached:info)
+    ID=$(docker ps -a | grep "$MEMCACHED_IMAGE":latest |  awk '{print $1}')
+    IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+    PORT=$(docker port $ID 11211)
+    echo
+    echo "       Host: $IP"
+    echo "       Public port: $PORT"
+    echo
+    ;;
+
+  memcached:link)
+    if $APP_EXISTS; then
+        # Check argument
+        if [[ -z $3 ]]; then
+            echo "You must specify a container name"
+            exit 1
+        fi
+        MEMCACHED_IMAGE="memcached/$3"
+        ID=$(docker ps -a | grep "$MEMCACHED_IMAGE":latest |  awk '{print $1}')
+        IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+        MEMCACHE_SERVERS="MEMCACHE_SERVERS=$IP:11211"
+        cat "$DOKKU_ROOT/$APP/ENV" | grep "$MEMCACHE_SERVERS" || echo "export $MEMCACHE_SERVERS" >> "$DOKKU_ROOT/$APP/ENV"
+        echo
+        echo "-----> $APP linked to $MEMCACHED_IMAGE container"
+    fi
+    ;;
+
+  memcached:logs)
+    ID=$(docker ps -a | grep "$MEMCACHED_IMAGE" |  awk '{print $1}')
+    docker logs $ID | tail -n 100
+    ;;
+
+  help)
+    cat && cat<<EOF
+    memcached:create <app>     Create a Memcached container
+    memcached:delete <app>     Delete specified Memcached container
+    memcached:info <app>       Display container informations
+    memcached:link <app> <rd>  Link an app to a Memcached container
+    memcached:logs <app>       Display last logs from Memcached container
+EOF
+    ;;
+
+esac
+cat
