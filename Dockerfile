@@ -9,4 +9,6 @@ RUN apt-get update
 RUN apt-get -y install memcached libmemcached-dev
 RUN service memcached stop
 
+EXPOSE 11211
+
 CMD memcached -u memcache -v -p 11211 -m 64 -l 0.0.0.0
