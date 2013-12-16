@@ -64,6 +64,8 @@ case "$1" in
     if [[ -d $HOST_DIR ]]; then
         rm -rf $HOST_DIR
     fi
+
+    dokku config:unset "$APP" MEMCACHE_SERVERS
     echo
     echo "-----> Memcached container deleted: $MEMCACHED_IMAGE"
     ;;
@@ -87,7 +89,7 @@ case "$1" in
         fi
         MEMCACHED_IMAGE="memcached/$3"
         ID=$(docker ps -a | grep "$MEMCACHED_IMAGE":latest |  awk '{print $1}')
-        IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+        IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
         dokku config:set "$APP" MEMCACHE_SERVERS="${IP}:11211"
         echo
         echo "-----> $APP linked to $MEMCACHED_IMAGE container"
