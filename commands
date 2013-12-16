@@ -88,8 +88,7 @@ case "$1" in
         MEMCACHED_IMAGE="memcached/$3"
         ID=$(docker ps -a | grep "$MEMCACHED_IMAGE":latest |  awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
-        MEMCACHE_SERVERS="MEMCACHE_SERVERS=$IP:11211"
-        cat "$DOKKU_ROOT/$APP/ENV" | grep "$MEMCACHE_SERVERS" || echo "export $MEMCACHE_SERVERS" >> "$DOKKU_ROOT/$APP/ENV"
+        dokku config:set "$APP" MEMCACHE_SERVERS="${IP}:11211"
         echo
         echo "-----> $APP linked to $MEMCACHED_IMAGE container"
     fi
