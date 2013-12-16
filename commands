@@ -39,7 +39,7 @@ case "$1" in
     IMAGE=$(docker commit $ID)
     docker tag $IMAGE $MEMCACHED_IMAGE
     # Launch container
-    ID=$(docker run -p 11211 -d $MEMCACHED_IMAGE -d)
+    ID=$(docker run -p 11211 -d $MEMCACHED_IMAGE)
     sleep 4
     # Link to a potential existing app
     dokku memcached:link $APP $APP
