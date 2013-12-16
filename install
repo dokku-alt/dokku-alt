@@ -1,4 +1,4 @@
 #!/bin/bash
 
 # Build docker image
-docker build -t jezdez/memcached .
+docker build -t jezdez/memcached - < Dockerfile
