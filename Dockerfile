@@ -10,7 +10,7 @@ RUN apt-get -y install memcached libmemcached-tools
 
 EXPOSE 11211
 
-ENTRYPOINT ["memcached"]
+ENTRYPOINT ["/usr/bin/memcached"]
 CMD ["-h"]
 
 # run memcached as the memcache user
