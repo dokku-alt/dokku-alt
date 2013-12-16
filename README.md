@@ -7,7 +7,7 @@ Installation
 ------------
 ```
 cd /var/lib/dokku/plugins
-git clone https://github.com/jezdez/dokku-memcached-plugin memcache
+git clone https://github.com/jezdez/dokku-memcached-plugin memcached
 dokku plugins-install
 ```
 

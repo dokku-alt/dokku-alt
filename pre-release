@@ -1,4 +1,4 @@
 #!/bin/bash
 
 APP="$1"; IMAGE="$2";
-dokku memcache:link $APP $APP
+dokku memcached:link $APP $APP
