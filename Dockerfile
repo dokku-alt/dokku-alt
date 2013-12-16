@@ -6,9 +6,12 @@ FROM ubuntu:quantal
 MAINTAINER Jannis Leidel "jannis@leidel.info"
 
 RUN apt-get update
-RUN apt-get -y install memcached libmemcached-dev libmemcached-tools
+RUN apt-get -y install memcached libmemcached-tools
 
 EXPOSE 11211
 
-ENTRYPOINT ["/usr/bin/memcached"]
+ENTRYPOINT ["memcached"]
 CMD ["-h"]
+
+# run memcached as the memcache user
+USER memcache
