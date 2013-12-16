@@ -1,6 +1,6 @@
-dokku-user-env-complie
+dokku-user-env-compile
 =====================
-user-env-complie is to dokku what [user-env-complie](https://devcenter.heroku.com/articles/labs-user-env-compile) is to heroku. It essentially makes a applications ENV file available to the build container. This allows the build process to to run in an environment that more closely resembles the runtime environment.
+dokku-user-env-compile is to dokku what [user-env-compile](https://devcenter.heroku.com/articles/labs-user-env-compile) is to heroku. It essentially makes a applications ENV file available to the build container. This allows the build process to to run in an environment that more closely resembles the runtime environment.
 
 ## Installation
 
