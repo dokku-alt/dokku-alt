@@ -38,7 +38,7 @@ case "$1" in
     docker wait $ID > /dev/null
     docker commit $ID $MEMCACHED_IMAGE
     # Launch container
-    ID=$(docker run -p 11211 -d -t $MEMCACHED_IMAGE)
+    ID=$(docker run -p 11211 -d -t $MEMCACHED_IMAGE -u memcache -v -p 11211 -m 64 -l 0.0.0.0)
     sleep 2
     # Link to a potential existing app
     dokku memcached:link $APP $APP

@@ -10,4 +10,5 @@ RUN apt-get -y install memcached libmemcached-dev libmemcached-tools
 
 EXPOSE 11211
 
-CMD service memcached start && tail -F /var/log/memcached.log
+ENTRYPOINT ["/usr/bin/memcached"]
+CMD ["-h"]
