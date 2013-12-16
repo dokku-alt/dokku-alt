@@ -33,7 +33,7 @@ case "$1" in
     if [[ ! -z "$ID" ]]; then
         docker stop $ID > /dev/null
     fi
-    # Fork Memcache image
+    # Fork Memcached image
     ID=$(docker run -d jezdez/memcached exit 0)
     docker wait $ID > /dev/null
     IMAGE=$(docker commit $ID)

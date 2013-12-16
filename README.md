@@ -1,5 +1,5 @@
-Memcache plugin for Dokku
--------------------------
+Memcached plugin for Dokku
+--------------------------
 
 Project: https://github.com/progrium/dokku
 
@@ -77,12 +77,12 @@ Linking an app to a specific container:
 dokku memcached:link foo bar
 ```
 
-Memcache logs (per container):
+Memcached logs (per container):
 ```
 dokku memcached:logs foo
 ```
 
-Memcache information:
+Memcached information:
 ```
 dokku memcached:info foo
 ```
