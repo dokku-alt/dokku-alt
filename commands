@@ -59,10 +59,6 @@ case "$1" in
     if [[ ! -z $IMAGE ]]; then
         docker rmi $IMAGE
     fi
-    # Remove persistent volume
-    if [[ -d $HOST_DIR ]]; then
-        rm -rf $HOST_DIR
-    fi
 
     dokku config:unset "$APP" MEMCACHE_SERVERS
     echo
@@ -88,7 +84,7 @@ case "$1" in
         fi
         MEMCACHED_IMAGE="memcached/$3"
         ID=$(docker ps -a | grep "$MEMCACHED_IMAGE":latest |  awk '{print $1}')
-        IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
+        IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
         dokku config:set "$APP" MEMCACHE_SERVERS="${IP}:11211"
         echo
         echo "-----> $APP linked to $MEMCACHED_IMAGE container"
@@ -105,7 +101,7 @@ case "$1" in
     memcached:create <app>                                 Create a Memcached container
     memcached:delete <app>                                 Delete specified Memcached container
     memcached:info <app>                                   Display container informations
-    memcached:link <app> <rd>                              Link an app to a Memcached container
+    memcached:link <app> <container>                       Link an app to a Memcached container
     memcached:logs <app>                                   Display last logs from Memcached container
 EOF
     ;;
