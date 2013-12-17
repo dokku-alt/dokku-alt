@@ -36,7 +36,9 @@ case "$1" in
     # Fork Memcached image
     ID=$(docker run -d jezdez/memcached exit 0)
     docker wait $ID > /dev/null
-    docker commit $ID $MEMCACHED_IMAGE
+    IMAGE=$(docker commit $ID)
+    docker tag $IMAGE $MEMCACHED_IMAGE
+
     # Launch container
     ID=$(docker run -p 11211 -d -t $MEMCACHED_IMAGE memcached -u memcache -p 11211 -m 64 -l 0.0.0.0)
     sleep 2
