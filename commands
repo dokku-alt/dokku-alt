@@ -1,0 +1,123 @@
+#!/bin/bash
+set -e;
+
+# Check if name is specified
+if [[ $1 == redis:* ]]; then
+    if [[ -z $2 ]]; then
+        echo "You must specify an app name"
+        exit 1
+    else
+        APP="$2"
+        # Check if app exists with the same name
+        if [[ -d "$DOKKU_ROOT/$APP" ]]; then
+            APP_EXISTS=true
+        else
+            APP_EXISTS=false
+        fi
+    fi
+fi
+
+REDIS_IMAGE=redis/$APP
+
+case "$1" in
+  redis:create)
+    # Check if Redis container is installed
+    IMAGE=$(docker images | grep "jezdez/redis " |  awk '{print $3}')
+    if [[ -z $IMAGE ]]; then
+        echo "Redis image not found... Did you run 'dokku plugins-install' ?"
+        exit 1
+    fi
+    # Check if an existing DB volume exists
+    HOST_DIR="$DOKKU_ROOT/.redis/$APP"
+    if [[ -d $HOST_DIR ]]; then
+        echo
+        echo "-----> Reusing redis/$APP database"
+    else
+        mkdir -p $HOST_DIR
+    fi
+    VOLUME="$HOST_DIR:/opt/redis"
+    # Stop existing container with the same persistent Redis
+    ID=$(docker ps | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
+    if [[ ! -z "$ID" ]]; then
+        docker stop $ID > /dev/null
+    fi
+    # Fork Redis image
+    ID=$(docker run -d jezdez/redis /bin/true)
+    docker wait $ID > /dev/null
+    IMAGE=$(docker commit $ID)
+    docker tag $IMAGE $REDIS_IMAGE
+    # Launch container
+    ID=$(docker run -v $VOLUME -p 6379 -d $REDIS_IMAGE)
+    sleep 4
+    # Link to a potential existing app
+    dokku redis:link $APP $APP
+    echo
+    echo "-----> Redis container created: $REDIS_IMAGE"
+    sleep 1
+    dokku redis:info $APP
+    ;;
+
+  redis:delete)
+    # Stop the container
+    ID=$(docker ps -a | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
+    if [[ ! -z $ID ]]; then
+        docker stop $ID
+        docker rm $ID
+    fi
+    # Remove image
+    IMAGE=$(docker images | grep "$REDIS_IMAGE " |  awk '{print $1}')
+    if [[ ! -z $IMAGE ]]; then
+        docker rmi $IMAGE
+    fi
+    # Remove persistent volume
+    if [[ -d $HOST_DIR ]]; then
+        rm -rf $HOST_DIR
+    fi
+
+    dokku config:unset "$APP" REDIS_URL
+    echo
+    echo "-----> Redis container deleted: $REDIS_IMAGE"
+    ;;
+
+  redis:info)
+    ID=$(docker ps -a | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
+    IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
+    PORT=$(docker port $ID 6379)
+    echo
+    echo "       Host: $IP"
+    echo "       Public port: $PORT"
+    echo
+    ;;
+
+  redis:link)
+    if $APP_EXISTS; then
+        # Check argument
+        if [[ -z $3 ]]; then
+            echo "You must specify a container name"
+            exit 1
+        fi
+        REDIS_IMAGE="redis/$3"
+        ID=$(docker ps -a | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
+        IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
+        dokku config:set "$APP" REDIS_URL="redis://${IP}:6379"
+        echo
+        echo "-----> $APP linked to $REDIS_IMAGE container"
+    fi
+    ;;
+
+  redis:logs)
+    ID=$(docker ps -a | grep "$REDIS_IMAGE" |  awk '{print $1}')
+    docker logs $ID | tail -n 100
+    ;;
+
+  help)
+    cat && cat<<EOF
+    redis:create <app>                                     Create a Redis container
+    redis:delete <app>                                     Delete specified Redis container
+    redis:info <app>                                       Display container informations
+    redis:link <app> <container>                           Link an app to a Redis container
+    redis:logs <app>                                       Display last logs from Redis container
+EOF
+    ;;
+
+esac
