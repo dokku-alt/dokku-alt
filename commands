@@ -39,11 +39,6 @@ case "$1" in
     if [[ ! -z "$ID" ]]; then
         docker stop $ID > /dev/null
     fi
-    # Fork Redis image
-    ID=$(docker run -d jezdez/redis /bin/true)
-    docker wait $ID > /dev/null
-    IMAGE=$(docker commit $ID)
-    docker tag $IMAGE $CONTAINER
     # Launch container
     docker run -v $VOLUME -name=$CONTAINER -p 6379 -d jezdez/redis /usr/bin/redis-server /etc/redis/redis.conf
     # Link to a potential existing app
