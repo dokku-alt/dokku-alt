@@ -22,7 +22,7 @@ CONTAINER=redis_$APP
 case "$1" in
   redis:create)
     # Check if Redis container is installed
-    IMAGE=$(docker images | grep "jezdez/redis " |  awk '{print $3}')
+    IMAGE=$(docker images | grep "jezdez/redis" | awk '{print $3}')
     if [[ -z $IMAGE ]]; then
         echo "Redis image not found... Did you run 'dokku plugins-install' ?"
         exit 1
@@ -81,7 +81,7 @@ case "$1" in
             echo "You must specify a container name"
             exit 1
         fi
-        CONTAINER="redis/$3"
+        CONTAINER="redis_$3"
         ID=$(docker ps -a | grep "$CONTAINER" | awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
         dokku config:set "$APP" REDIS_URL="redis://${IP}:6379"
