@@ -7,7 +7,7 @@ MAINTAINER Jannis Leidel "jannis@leidel.info"
 
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get -y install python-software-properties && \
+RUN apt-get -y install software-properties-common && \
     add-apt-repository ppa:chris-lea/redis-server && \
     apt-get update && \
     apt-get -y install redis-server
