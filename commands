@@ -55,6 +55,7 @@ case "$1" in
     ID=$(docker ps -a | grep "$MEMCACHED_IMAGE":latest |  awk '{print $1}')
     if [[ ! -z $ID ]]; then
         docker stop $ID
+        docker rm $ID
     fi
     # Remove image
     IMAGE=$(docker images | grep "$MEMCACHED_IMAGE " |  awk '{print $1}')
