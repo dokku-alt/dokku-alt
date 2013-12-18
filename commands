@@ -41,6 +41,11 @@ case "$1" in
     if [[ ! -z "$ID" ]]; then
         docker stop $ID > /dev/null
     fi
+    # Fork Redis image
+    ID=$(docker run -d jezdez/redis /bin/true)
+    docker wait $ID > /dev/null
+    IMAGE=$(docker commit $ID)
+    docker tag $IMAGE $REDIS_IMAGE
     # Launch container
     ID=$(docker run -v $VOLUME -p 6379 -d $REDIS_IMAGE)
     sleep 4
