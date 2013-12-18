@@ -17,7 +17,7 @@ if [[ $1 == redis:* ]]; then
     fi
 fi
 
-REDIS_IMAGE=redis/$APP
+CONTAINER=redis_$APP
 
 case "$1" in
   redis:create)
@@ -30,14 +30,12 @@ case "$1" in
     # Check if an existing DB volume exists
     HOST_DIR="$DOKKU_ROOT/.redis/$APP"
     if [[ -d $HOST_DIR ]]; then
-        echo
-        echo "-----> Reusing redis/$APP database"
-    else
-        mkdir -p $HOST_DIR
+        rm -rf $HOST_DIR
     fi
+    mkdir -p $HOST_DIR
     VOLUME="$HOST_DIR:/opt/redis"
     # Stop existing container with the same persistent Redis
-    ID=$(docker ps | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
+    ID=$(docker ps | grep "$CONTAINER" | awk '{print $1}')
     if [[ ! -z "$ID" ]]; then
         docker stop $ID > /dev/null
     fi
@@ -45,29 +43,22 @@ case "$1" in
     ID=$(docker run -d jezdez/redis /bin/true)
     docker wait $ID > /dev/null
     IMAGE=$(docker commit $ID)
-    docker tag $IMAGE $REDIS_IMAGE
+    docker tag $IMAGE $CONTAINER
     # Launch container
-    ID=$(docker run -v $VOLUME -p 6379 -d $REDIS_IMAGE /usr/bin/redis-server /etc/redis/redis.conf)
-    sleep 4
+    docker run -v $VOLUME -name=$CONTAINER -p 6379 -d jezdez/redis /usr/bin/redis-server /etc/redis/redis.conf
     # Link to a potential existing app
     dokku redis:link $APP $APP
-    echo
-    echo "-----> Redis container created: $REDIS_IMAGE"
+    echo "-----> Redis container created: $CONTAINER"
     sleep 1
     dokku redis:info $APP
     ;;
 
   redis:delete)
     # Stop the container
-    ID=$(docker ps -a | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
+    ID=$(docker ps -a | grep "$CONTAINER" |  awk '{print $1}')
     if [[ ! -z $ID ]]; then
-        docker stop $ID
-        docker rm $ID
-    fi
-    # Remove image
-    IMAGE=$(docker images | grep "$REDIS_IMAGE " |  awk '{print $1}')
-    if [[ ! -z $IMAGE ]]; then
-        docker rmi $IMAGE
+        docker stop $ID > /dev/null
+        docker rm $ID  > /dev/null
     fi
     # Remove persistent volume
     if [[ -d $HOST_DIR ]]; then
@@ -75,12 +66,11 @@ case "$1" in
     fi
 
     dokku config:unset "$APP" REDIS_URL
-    echo
-    echo "-----> Redis container deleted: $REDIS_IMAGE"
+    echo "-----> Redis container deleted: $CONTAINER"
     ;;
 
   redis:info)
-    ID=$(docker ps -a | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
+    ID=$(docker ps -a | grep "$CONTAINER" | awk '{print $1}')
     IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
     PORT=$(docker port $ID 6379)
     echo
@@ -96,17 +86,17 @@ case "$1" in
             echo "You must specify a container name"
             exit 1
         fi
-        REDIS_IMAGE="redis/$3"
-        ID=$(docker ps -a | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
+        CONTAINER="redis/$3"
+        ID=$(docker ps -a | grep "$CONTAINER" | awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
         dokku config:set "$APP" REDIS_URL="redis://${IP}:6379"
         echo
-        echo "-----> $APP linked to $REDIS_IMAGE container"
+        echo "-----> $APP linked to $CONTAINER container"
     fi
     ;;
 
   redis:logs)
-    ID=$(docker ps -a | grep "$REDIS_IMAGE" |  awk '{print $1}')
+    ID=$(docker ps -a | grep "$CONTAINER" |  awk '{print $1}')
     docker logs $ID | tail -n 100
     ;;
 
