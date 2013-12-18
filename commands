@@ -47,7 +47,7 @@ case "$1" in
     IMAGE=$(docker commit $ID)
     docker tag $IMAGE $REDIS_IMAGE
     # Launch container
-    ID=$(docker run -v $VOLUME -p 6379 -d $REDIS_IMAGE)
+    ID=$(docker run -v $VOLUME -p 6379 -d $REDIS_IMAGE /usr/bin/redis-server /etc/redis/redis.conf)
     sleep 4
     # Link to a potential existing app
     dokku redis:link $APP $APP

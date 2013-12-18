@@ -13,5 +13,3 @@ RUN sed -i 's@daemonize yes@daemonize no@' /etc/redis/redis.conf
 RUN sed -i 's@logfile /var/log/redis/redis-server.log@logfile stdout@' /etc/redis/redis.conf
 
 EXPOSE 6379
-ENTRYPOINT ['redis-server']
-CMD ['/etc/redis/redis.conf']
