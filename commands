@@ -15,9 +15,15 @@ if [[ $1 == redis:* ]]; then
             APP_EXISTS=false
         fi
     fi
+    if [[ ! -d "$PLUGIN_PATH/link" ]]; then
+        echo "Link plugin not found... Did you install it from https://github.com/rlaneve/dokku-link?"
+        exit 1
+    fi
 fi
 
-CONTAINER=redis_$APP
+CONTAINER="redis_$APP"
+LINK_FILE="$DOKKU_ROOT/$APP/LINK"
+LINK_NAME="redis"
 
 case "$1" in
   redis:create)
@@ -40,7 +46,8 @@ case "$1" in
         docker stop $ID > /dev/null
     fi
     # Launch container
-    docker run -v $VOLUME -name=$CONTAINER -p 6379 -d jezdez/redis /usr/bin/redis-server /etc/redis/redis.conf
+    docker run -v $VOLUME -name=$CONTAINER -d jezdez/redis \
+        /usr/bin/redis-server /etc/redis/redis.conf
     # Link to a potential existing app
     dokku redis:link $APP $APP
     echo "-----> Redis container created: $CONTAINER"
@@ -59,7 +66,8 @@ case "$1" in
     if [[ -d $HOST_DIR ]]; then
         rm -rf $HOST_DIR
     fi
-
+    LINK_TMP=`sed 's/$CONTAINER:$LINK_NAME//' $LINK_FILE`
+    echo -e "$LINK_TMP" | sed '/^$/d' | sort -u > $LINK_FILE
     dokku config:unset "$APP" REDIS_URL
     echo "-----> Redis container deleted: $CONTAINER"
     ;;
@@ -67,10 +75,8 @@ case "$1" in
   redis:info)
     ID=$(docker ps -a | grep "$CONTAINER" | awk '{print $1}')
     IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
-    PORT=$(docker port $ID 6379)
     echo
-    echo "       Host: $IP"
-    echo "       Public port: $PORT"
+    echo "       REDIS_URL=redis://${IP}:6379"
     echo
     ;;
 
@@ -82,10 +88,13 @@ case "$1" in
             exit 1
         fi
         CONTAINER="redis_$3"
+        echo "$CONTAINER:$LINK_NAME" >> LINK
+        LINK_TMP=`cat $LINK_FILE`
+        echo -e "$LINK_TMP" | sort -u > $LINK_FILE
+        cat $LINK_FILE
         ID=$(docker ps -a | grep "$CONTAINER" | awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
         dokku config:set "$APP" REDIS_URL="redis://${IP}:6379"
-        echo
         echo "-----> $APP linked to $CONTAINER container"
     fi
     ;;
@@ -97,11 +106,11 @@ case "$1" in
 
   help)
     cat && cat<<EOF
-    redis:create <app>                                     Create a Redis container
-    redis:delete <app>                                     Delete specified Redis container
-    redis:info <app>                                       Display container informations
-    redis:link <app> <container>                           Link an app to a Redis container
-    redis:logs <app>                                       Display last logs from Redis container
+    redis:create <app>                                 Create a Redis container
+    redis:delete <app>                                 Delete specified Redis container
+    redis:info <app>                                   Display container informations
+    redis:link <app> <container>                       Link an app to a Redis container
+    redis:logs <app>                                   Display last logs from Redis container
 EOF
     ;;
 
