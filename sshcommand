@@ -13,8 +13,16 @@ case "$1" in
       exit -1
     fi
     USER="$2"; COMMAND="$3"
-    USERHOME="$HOME_DIR/$USER"
-    useradd -d $USERHOME $USER || true
+
+    getent passwd $USER > /dev/null 2>&1
+
+    if [ $? -eq 0 ]; then
+        USERHOME=$(bash <<< "echo ~$USER")
+    else
+        USERHOME="$HOME_DIR/$USER"
+        useradd -d $USERHOME $USER || true
+    fi
+
     mkdir -p "$USERHOME/.ssh"
     touch $USERHOME/.ssh/authorized_keys
     echo "$COMMAND" > "$USERHOME/.sshcommand"
@@ -27,10 +35,19 @@ case "$1" in
       exit -1
     fi
     USER="$2"; NAME="$3"
+
+    getent passwd $USER > /dev/null 2>&1
+
+    if [ $? -eq 0 ]; then
+        USERHOME=$(bash <<< "echo ~$USER")
+    else
+        exit -1
+    fi
+
     KEY=$(cat)
     FINGERPRINT=$(ssh-keygen -lf /dev/stdin <<< $(echo $KEY) | awk '{print $2}')
-    KEY_PREFIX="command=\"FINGERPRINT=$FINGERPRINT NAME=$NAME \`cat $HOME_DIR/$USER/.sshcommand\` \$SSH_ORIGINAL_COMMAND\",no-agent-forwarding,no-user-rc,no-X11-forwarding,no-port-forwarding"
-    echo "$KEY_PREFIX $KEY" >> "$HOME_DIR/$USER/.ssh/authorized_keys"
+    KEY_PREFIX="command=\"FINGERPRINT=$FINGERPRINT NAME=$NAME \`cat $USERHOME/.sshcommand\` \$SSH_ORIGINAL_COMMAND\",no-agent-forwarding,no-user-rc,no-X11-forwarding,no-port-forwarding"
+    echo "$KEY_PREFIX $KEY" >> "$USERHOME/.ssh/authorized_keys"
     echo $FINGERPRINT
     ;;
 
@@ -40,7 +57,16 @@ case "$1" in
       exit -1
     fi
     USER="$2"; NAME="$3"
-    sed --in-place "/ NAME=$NAME /d" "$HOME_DIR/$USER/.ssh/authorized_keys"
+
+    getent passwd $USER > /dev/null 2>&1
+
+    if [ $? -eq 0]; then
+        USERHOME=$(bash <<< "echo ~$USER")
+    else
+        exit -1
+    fi
+
+    sed --in-place "/ NAME=$NAME /d" "$USERHOME/.ssh/authorized_keys"
     ;;
 
   help|*) # sshcommand help
