@@ -92,7 +92,7 @@ case "$1" in
             exit 1
         fi
         CONTAINER="redis_$3"
-        echo "$CONTAINER_NAME:$LINK_NAME" >> LINK
+        echo "$CONTAINER_NAME:$LINK_NAME" >> $LINK_FILE
         LINK_TMP=`cat $LINK_FILE`
         echo -e "$LINK_TMP" | sort -u > $LINK_FILE
         cat $LINK_FILE
