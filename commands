@@ -19,11 +19,15 @@ if [[ $1 == redis:* ]]; then
         echo "Link plugin not found... Did you install it from https://github.com/rlaneve/dokku-link?"
         exit 1
     fi
-fi
 
-CONTAINER="redis_$APP"
-LINK_FILE="$DOKKU_ROOT/$APP/LINK"
-LINK_NAME="redis"
+    CONTAINER_NAME="redis_$APP"
+    LINK_FILE="$DOKKU_ROOT/$APP/LINK"
+    LINK_NAME="redis"
+
+    if [[ ! -f "$LINK_FILE" ]]; then
+        touch $LINK_FILE
+    fi
+fi
 
 case "$1" in
   redis:create)
@@ -41,23 +45,23 @@ case "$1" in
     mkdir -p $HOST_DIR
     VOLUME="$HOST_DIR:/opt/redis"
     # Stop existing container with the same persistent Redis
-    ID=$(docker ps | grep "$CONTAINER" | awk '{print $1}')
+    ID=$(docker ps | grep "$CONTAINER_NAME" | awk '{print $1}')
     if [[ ! -z "$ID" ]]; then
         docker stop $ID > /dev/null
     fi
     # Launch container
-    docker run -v $VOLUME -name=$CONTAINER -d jezdez/redis \
+    docker run -v $VOLUME -name=$CONTAINER_NAME -d jezdez/redis \
         /usr/bin/redis-server /etc/redis/redis.conf
     # Link to a potential existing app
     dokku redis:link $APP $APP
-    echo "-----> Redis container created: $CONTAINER"
+    echo "-----> Redis container created: $CONTAINER_NAME"
     sleep 1
     dokku redis:info $APP
     ;;
 
   redis:delete)
     # Stop the container
-    ID=$(docker ps -a | grep "$CONTAINER" |  awk '{print $1}')
+    ID=$(docker ps -a | grep "$CONTAINER_NAME" |  awk '{print $1}')
     if [[ ! -z $ID ]]; then
         docker stop $ID > /dev/null
         docker rm $ID  > /dev/null
@@ -66,14 +70,14 @@ case "$1" in
     if [[ -d $HOST_DIR ]]; then
         rm -rf $HOST_DIR
     fi
-    LINK_TMP=`sed 's/$CONTAINER:$LINK_NAME//' $LINK_FILE`
+    LINK_TMP=`sed 's/$CONTAINER_NAME:$LINK_NAME//' $LINK_FILE`
     echo -e "$LINK_TMP" | sed '/^$/d' | sort -u > $LINK_FILE
     dokku config:unset "$APP" REDIS_URL
-    echo "-----> Redis container deleted: $CONTAINER"
+    echo "-----> Redis container deleted: $CONTAINER_NAME"
     ;;
 
   redis:info)
-    ID=$(docker ps -a | grep "$CONTAINER" | awk '{print $1}')
+    ID=$(docker ps -a | grep "$CONTAINER_NAME" | awk '{print $1}')
     IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
     echo
     echo "       REDIS_URL=redis://${IP}:6379"
@@ -88,19 +92,19 @@ case "$1" in
             exit 1
         fi
         CONTAINER="redis_$3"
-        echo "$CONTAINER:$LINK_NAME" >> LINK
+        echo "$CONTAINER_NAME:$LINK_NAME" >> LINK
         LINK_TMP=`cat $LINK_FILE`
         echo -e "$LINK_TMP" | sort -u > $LINK_FILE
         cat $LINK_FILE
-        ID=$(docker ps -a | grep "$CONTAINER" | awk '{print $1}')
+        ID=$(docker ps -a | grep "$CONTAINER_NAME" | awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
         dokku config:set "$APP" REDIS_URL="redis://${IP}:6379"
-        echo "-----> $APP linked to $CONTAINER container"
+        echo "-----> $APP linked to $CONTAINER_NAME container"
     fi
     ;;
 
   redis:logs)
-    ID=$(docker ps -a | grep "$CONTAINER" |  awk '{print $1}')
+    ID=$(docker ps -a | grep "$CONTAINER_NAME" |  awk '{print $1}')
     docker logs $ID | tail -n 100
     ;;
 
