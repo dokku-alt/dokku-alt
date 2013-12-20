@@ -80,7 +80,8 @@ case "$1" in
     ID=$(docker ps -a | grep "$CONTAINER_NAME" | awk '{print $1}')
     IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
     echo
-    echo "       REDIS_URL=redis://${IP}:6379"
+    echo "       Host: ${IP}"
+    echo "       Private port: 6379"
     echo
     ;;
 
