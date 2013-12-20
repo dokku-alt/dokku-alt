@@ -16,17 +16,12 @@ if [[ $1 == memcached:* ]]; then
         fi
     fi
     if [[ ! -d "$PLUGIN_PATH/link" ]]; then
-        echo "Link plugin not found... Did you install it from https://github.com/rlaneve/dokku-link?"
+        echo "Link plugin not found... Did you install it from https://github.com/jezdez/dokku-link?"
         exit 1
     fi
 
-    CONTAINER_NAME="memcached_$APP"
-    LINK_FILE="$DOKKU_ROOT/$APP/LINK"
     LINK_NAME="memcached"
-
-    if [[ ! -f "$LINK_FILE" ]]; then
-        touch $LINK_FILE
-    fi
+    CONTAINER_NAME="memcached_$APP"
 fi
 
 case "$1" in
@@ -61,9 +56,9 @@ case "$1" in
         docker stop $ID > /dev/null
         docker rm $ID  > /dev/null
     fi
-    LINK_TMP=`sed 's/$CONTAINER_NAME:$LINK_NAME//' $LINK_FILE`
-    echo -e "$LINK_TMP" | sed '/^$/d' | sort -u > $LINK_FILE
 
+    # unlink this container as "redis"
+    dokku link:delete "$APP" "$CONTAINER_NAME" "$LINK_NAME"
     dokku config:unset "$APP" MEMCACHE_SERVERS
     echo
     echo "-----> Memcached container deleted: $CONTAINER_NAME"
@@ -87,10 +82,10 @@ case "$1" in
         fi
         CONTAINER_NAME="memcached_$3"
 
-        echo "$CONTAINER_NAME:$LINK_NAME" >> $LINK_FILE
-        LINK_TMP=`cat $LINK_FILE`
-        echo -e "$LINK_TMP" | sort -u > $LINK_FILE
+        # link this container as "redis"
+        dokku link:create "$APP" "$CONTAINER_NAME" "$LINK_NAME"
 
+        # figure out IP to set env var
         ID=$(docker ps -a | grep "$CONTAINER_NAME" |  awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
         dokku config:set "$APP" MEMCACHE_SERVERS="${IP}:11211"
