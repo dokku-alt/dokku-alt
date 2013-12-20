@@ -105,11 +105,11 @@ case "$1" in
 
   help)
     cat && cat<<EOF
-    memcached:create <app>                   Create a Memcached container
-    memcached:delete <app>                   Delete specified Memcached container
-    memcached:info <app>                     Display container informations
-    memcached:link <app> <container>         Link an app to a Memcached container
-    memcached:logs <app>                     Display last logs from Memcached container
+    memcached:create <app>                          Create a Memcached container
+    memcached:delete <app>                          Delete specified Memcached container
+    memcached:info <app>                            Display container informations
+    memcached:link <app> <container>                Link an app to a Memcached container
+    memcached:logs <app>                            Display last logs from Memcached container
 EOF
     ;;
 
