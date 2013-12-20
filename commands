@@ -91,11 +91,14 @@ case "$1" in
             echo "You must specify a container name"
             exit 1
         fi
-        CONTAINER="redis_$3"
+        CONTAINER_NAME="redis_$3"
+
+        # add this container to the link file to open the ports
         echo "$CONTAINER_NAME:$LINK_NAME" >> $LINK_FILE
         LINK_TMP=`cat $LINK_FILE`
         echo -e "$LINK_TMP" | sort -u > $LINK_FILE
-        cat $LINK_FILE
+
+        # figure out IP to set env var
         ID=$(docker ps -a | grep "$CONTAINER_NAME" | awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
         dokku config:set "$APP" REDIS_URL="redis://${IP}:6379"
@@ -110,11 +113,11 @@ case "$1" in
 
   help)
     cat && cat<<EOF
-    redis:create <app>                                 Create a Redis container
-    redis:delete <app>                                 Delete specified Redis container
-    redis:info <app>                                   Display container informations
-    redis:link <app> <container>                       Link an app to a Redis container
-    redis:logs <app>                                   Display last logs from Redis container
+    redis:create <app>                              Create a Redis container
+    redis:delete <app>                              Delete specified Redis container
+    redis:info <app>                                Display container informations
+    redis:link <app> <container>                    Link an app to a Redis container
+    redis:logs <app>                                Display last logs from Redis container
 EOF
     ;;
 
