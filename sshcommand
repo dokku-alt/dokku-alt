@@ -14,12 +14,10 @@ case "$1" in
     fi
     USER="$2"; COMMAND="$3"
 
-    getent passwd $USER > /dev/null || false
-
-    if [ $? -eq 0 ]; then
+    getent passwd $USER > /dev/null || USERHOME="$HOME_DIR/$USER"
+    if [ -z $USERHOME ]; then
         USERHOME=$(bash <<< "echo ~$USER")
     else
-        USERHOME="$HOME_DIR/$USER"
         useradd -d $USERHOME $USER || true
     fi
 
@@ -37,12 +35,7 @@ case "$1" in
     USER="$2"; NAME="$3"
 
     getent passwd $USER > /dev/null || false
-
-    if [ $? -eq 0 ]; then
-        USERHOME=$(bash <<< "echo ~$USER")
-    else
-        exit -1
-    fi
+    USERHOME=$(bash <<< "echo ~$USER")
 
     KEY=$(cat)
     FINGERPRINT=$(ssh-keygen -lf /dev/stdin <<< $(echo $KEY) | awk '{print $2}')
@@ -59,12 +52,7 @@ case "$1" in
     USER="$2"; NAME="$3"
 
     getent passwd $USER > /dev/null || false
-
-    if [ $? -eq 0 ]; then
-        USERHOME=$(bash <<< "echo ~$USER")
-    else
-        exit -1
-    fi
+    USERHOME=$(bash <<< "echo ~$USER")
 
     sed --in-place "/ NAME=$NAME /d" "$USERHOME/.ssh/authorized_keys"
     ;;
