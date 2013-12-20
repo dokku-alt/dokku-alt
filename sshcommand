@@ -14,7 +14,7 @@ case "$1" in
     fi
     USER="$2"; COMMAND="$3"
 
-    getent passwd $USER > /dev/null 2>&1
+    getent passwd $USER > /dev/null || false
 
     if [ $? -eq 0 ]; then
         USERHOME=$(bash <<< "echo ~$USER")
@@ -36,7 +36,7 @@ case "$1" in
     fi
     USER="$2"; NAME="$3"
 
-    getent passwd $USER > /dev/null 2>&1
+    getent passwd $USER > /dev/null || false
 
     if [ $? -eq 0 ]; then
         USERHOME=$(bash <<< "echo ~$USER")
@@ -58,9 +58,9 @@ case "$1" in
     fi
     USER="$2"; NAME="$3"
 
-    getent passwd $USER > /dev/null 2>&1
+    getent passwd $USER > /dev/null || false
 
-    if [ $? -eq 0]; then
+    if [ $? -eq 0 ]; then
         USERHOME=$(bash <<< "echo ~$USER")
     else
         exit -1
