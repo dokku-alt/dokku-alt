@@ -124,7 +124,7 @@ case "$1" in
         ID=$(docker ps -a | grep "$DB_IMAGE":latest |  awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
         # Write DATABASE_URL to app's ENV file
-        URL="DATABASE_URL=mysql://root:$DB_PASSWORD@$IP/db"
+        URL="DATABASE_URL=mysql2://root:$DB_PASSWORD@$IP/db"
         cat "$DOKKU_ROOT/$APP/ENV" | grep "$URL" || echo "export $URL" >> "$DOKKU_ROOT/$APP/ENV"
         echo
         echo "-----> $APP linked to $DB_IMAGE database"
