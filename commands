@@ -16,34 +16,41 @@ if [[ $1 == redis:* ]]; then
         fi
     fi
     if [[ ! -d "$PLUGIN_PATH/link" ]]; then
-        echo "Link plugin not found... Did you install it from https://github.com/jezdez/dokku-link?"
+        echo "Link plugin not found... Did you install it from https://github.com/rlaneve/dokku-link?"
         exit 1
     fi
 
-    LINK_NAME="redis"
-    CONTAINER_NAME="redis_$APP"
+    PLUGIN_NAME="redis"
+    CONTAINER_NAME="$PLUGIN_NAME_$APP"
+    HOST_DIR="$DOKKU_ROOT/$APP/$PLUGIN_NAME"
+    ENVVAR_NAME="REDIS_URL"
 fi
 
 case "$1" in
   redis:create)
+
     # Check if Redis container is installed
     IMAGE=$(docker images | grep "jezdez/redis" | awk '{print $3}')
     if [[ -z $IMAGE ]]; then
         echo "Redis image not found... Did you run 'dokku plugins-install' ?"
         exit 1
     fi
-    # Check if an existing DB volume exists
-    HOST_DIR="$DOKKU_ROOT/.redis/$APP"
-    if [[ -d $HOST_DIR ]]; then
-        rm -rf $HOST_DIR
-    fi
-    mkdir -p $HOST_DIR
-    VOLUME="$HOST_DIR:/opt/redis"
+
     # Stop existing container with the same persistent Redis
     ID=$(docker ps | grep "$CONTAINER_NAME" | awk '{print $1}')
     if [[ ! -z "$ID" ]]; then
         docker stop $ID > /dev/null
     fi
+
+    # Check if an existing DB volume exists
+    if [[ -d $HOST_DIR ]]; then
+        echo "-----> Reusing $CONTAINER_NAME data"
+    else
+        mkdir -p $HOST_DIR
+        chown -R dokku:dokku $HOST_DIR
+    fi
+    VOLUME="$HOST_DIR:/opt/redis"
+
     # Launch container
     docker run -v $VOLUME -name=$CONTAINER_NAME -d jezdez/redis \
         /usr/bin/redis-server /etc/redis/redis.conf
@@ -67,8 +74,8 @@ case "$1" in
     fi
 
     # unlink this container as "redis"
-    dokku link:delete "$APP" "$CONTAINER_NAME" "$LINK_NAME"
-    dokku config:unset "$APP" REDIS_URL
+    dokku link:delete "$APP" "$CONTAINER_NAME" "$PLUGIN_NAME"
+    dokku config:unset "$APP" $ENVVAR_NAME
     echo "-----> Redis container deleted: $CONTAINER_NAME"
     ;;
 
@@ -88,15 +95,15 @@ case "$1" in
             echo "You must specify a container name"
             exit 1
         fi
-        CONTAINER_NAME="redis_$3"
+        CONTAINER_NAME="$PLUGIN_NAME_$3"
 
         # link this container as "redis"
-        dokku link:create "$APP" "$CONTAINER_NAME" "$LINK_NAME"
+        dokku link:create "$APP" "$CONTAINER_NAME" "$PLUGIN_NAME"
 
         # figure out IP to set env var
         ID=$(docker ps -a | grep "$CONTAINER_NAME" | awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
-        dokku config:set "$APP" REDIS_URL="redis://${IP}:6379"
+        dokku config:set "$APP" $ENVVAR_NAME="redis://${IP}:6379"
         echo "-----> $APP linked to $CONTAINER_NAME container"
     fi
     ;;
