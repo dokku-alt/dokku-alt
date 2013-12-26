@@ -16,7 +16,7 @@ if [[ $1 == memcached:* ]]; then
         fi
     fi
     if [[ ! -d "$PLUGIN_PATH/link" ]]; then
-        echo "Link plugin not found... Did you install it from https://github.com/jezdez/dokku-link?"
+        echo "Link plugin not found... Did you install it from https://github.com/rlaneve/dokku-link?"
         exit 1
     fi
 
@@ -33,14 +33,17 @@ case "$1" in
         echo "Memcached image not found... Did you run 'dokku plugins-install'?"
         exit 1
     fi
+
     # Stop existing container with the same persistent Memcached
     ID=$(docker ps | grep "$CONTAINER_NAME" |  awk '{print $1}')
     if [[ ! -z "$ID" ]]; then
         docker stop $ID > /dev/null
     fi
+
     # Launch container
     docker run -name=$CONTAINER_NAME -d jezdez/memcached \
         /usr/bin/memcached -u memcache -p 11211 -m 64 -l 0.0.0.0
+
     # Link to a potential existing app
     dokku memcached:link $APP $APP
     echo
