@@ -70,6 +70,7 @@ case "$1" in
         docker rmi $IMAGE
     fi
     # Remove persistent volume
+    HOST_DIR="$DOKKU_ROOT/.redis/volume-$APP"
     if [[ -d $HOST_DIR ]]; then
         rm -rf $HOST_DIR
     fi
@@ -99,8 +100,6 @@ case "$1" in
         ID=$(docker ps -a | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
         # Write REDIS_IP to app's ENV file
-        URL="REDIS_IP=$IP"
-        cat "$DOKKU_ROOT/$APP/ENV" | grep "$URL" || echo "export $URL" >> "$DOKKU_ROOT/$APP/ENV"
         REDIS_URL="REDIS_URL=redis://$IP:6379"
         cat "$DOKKU_ROOT/$APP/ENV" | grep "$REDIS_URL" || echo "export $REDIS_URL" >> "$DOKKU_ROOT/$APP/ENV"
         echo
