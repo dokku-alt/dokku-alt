@@ -28,8 +28,8 @@ case "$1" in
         exit 1
     fi
     # Check if an existing DB volume exists
-    if [[ -d "/var/lib/docker/volumes/mariadb-$APP" ]]; then
-        VOLUME="/var/lib/docker/volumes/mariadb-$APP/layer:/opt/mysql"
+    if [[ -d "/var/lib/docker/vfs/dir/mariadb-$APP" ]]; then
+        VOLUME="/var/lib/docker/vfs/dir/mariadb-$APP/layer:/opt/mysql"
         echo
         echo "-----> Reusing mariadb/$APP database"
     else
@@ -43,6 +43,7 @@ case "$1" in
         fi
         echo $DB_PASSWORD > "$DOKKU_ROOT/.mariadb/pwd_$APP"
         chown dokku: "$DOKKU_ROOT/.mariadb/pwd_$APP"
+        chmod 700 "$DOKKU_ROOT/.mariadb/pwd_$APP"
     fi
     # Stop existing container with the same persistent DB
     ID=$(docker ps | grep "$DB_IMAGE":latest |  awk '{print $1}')
@@ -58,9 +59,9 @@ case "$1" in
     ID=$(docker run -v $VOLUME -p 3306 -d $DB_IMAGE /usr/bin/start_mariadb.sh $DB_PASSWORD)
     sleep 4
     # Rename persistent volume
-    if [[ ! -d "/var/lib/docker/volumes/mariadb-$APP" ]]; then
-        VOLUME_PATH=$(docker inspect $ID | grep "/var/lib/docker/volumes/" | awk '{print $2}' | sed -e"s/\/layer//" | sed -e's/"//g')
-        mv $VOLUME_PATH "/var/lib/docker/volumes/mariadb-$APP"
+    if [[ ! -d "/var/lib/docker/vfs/dir/mariadb-$APP" ]]; then
+        VOLUME_PATH=$(docker inspect $ID | grep /var/lib/docker/vfs/dir/ | awk '{print $2}' | sed -e's/"//g')
+        mv $VOLUME_PATH "/var/lib/docker/vfs/dir/mariadb-$APP"
         sleep 1
     fi
     # Link to a potential existing app
@@ -84,8 +85,8 @@ case "$1" in
         docker rmi $IMAGE
     fi
     # Remove persistent volume
-    if [[ -d "/var/lib/docker/volumes/mariadb-$APP" ]]; then
-        rm -rf "/var/lib/docker/volumes/mariadb-$APP"
+    if [[ -d "/var/lib/docker/vfs/dir/mariadb-$APP" ]]; then
+        rm -rf "/var/lib/docker/vfs/dir/mariadb-$APP"
     fi
     echo
     echo "-----> MariaDB container deleted: $DB_IMAGE"
@@ -115,20 +116,17 @@ case "$1" in
             exit 1
         fi
         DB_IMAGE="mariadb/$3"
-        # Check temporarily file
         if [[ ! -f "$DOKKU_ROOT/.mariadb/pwd_$APP" ]]; then
-            echo "Database is already linked"
+            echo "Database is not initialized correctly"
             exit 1
         fi
         DB_PASSWORD=$(cat "$DOKKU_ROOT/.mariadb/pwd_$APP")
         ID=$(docker ps -a | grep "$DB_IMAGE":latest |  awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
-        # Write DATABASE_URL to app's ENV file
-        URL="DATABASE_URL=mysql2://root:$DB_PASSWORD@$IP/db"
-        cat "$DOKKU_ROOT/$APP/ENV" | grep "$URL" || echo "export $URL" >> "$DOKKU_ROOT/$APP/ENV"
+        # Link database using dokku command
+        dokku config:set $APP "DATABASE_URL=mysql2://root:$DB_PASSWORD@$IP/db"
         echo
         echo "-----> $APP linked to $DB_IMAGE database"
-        rm "$DOKKU_ROOT/.mariadb/pwd_$APP"
     fi
     ;;
 
@@ -149,4 +147,5 @@ EOF
     ;;
 
 esac
+exit 0 
 cat
