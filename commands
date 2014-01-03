@@ -62,6 +62,7 @@ case "$1" in
     if [[ ! -d "/var/lib/docker/vfs/dir/mariadb-$APP" ]]; then
         VOLUME_PATH=$(docker inspect $ID | grep /var/lib/docker/vfs/dir/ | awk '{print $2}' | sed -e's/"//g')
         mv $VOLUME_PATH "/var/lib/docker/vfs/dir/mariadb-$APP"
+        ln -s "/var/lib/docker/vfs/dir/mariadb-$APP" $VOLUME_PATH
         sleep 1
     fi
     # Link to a potential existing app
