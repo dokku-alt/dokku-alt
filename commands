@@ -29,7 +29,7 @@ case "$1" in
     fi
     # Check if an existing DB volume exists
     if [[ -d "/var/lib/docker/vfs/dir/mariadb-$APP" ]]; then
-        VOLUME="/var/lib/docker/vfs/dir/mariadb-$APP/layer:/opt/mysql"
+        VOLUME="/var/lib/docker/vfs/dir/mariadb-$APP:/opt/mysql"
         echo
         echo "-----> Reusing mariadb/$APP database"
     else
