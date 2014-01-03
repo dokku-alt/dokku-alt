@@ -57,8 +57,12 @@ case "$1" in
     if [[ ! -d "/var/lib/docker/vfs/dir/postgresql-$APP" ]]; then
         VOLUME_PATH=$(docker inspect $ID | grep /var/lib/docker/vfs/dir/ | awk '{print $2}' | sed -e's/"//g')
         mv $VOLUME_PATH "/var/lib/docker/vfs/dir/postgresql-$APP"
+        ln -s "/var/lib/docker/vfs/dir/postgresql-$APP" $VOLUME_PATH
         sleep 1
     fi
+    # Write port for further usage
+    PORT=$(docker port $ID 5432 | sed 's/0.0.0.0://')
+    echo $PORT > "$DOKKU_ROOT/.postgresql/port_$APP"
     # Link to a potential existing app
     dokku postgresql:link $APP $APP
     echo
@@ -69,10 +73,14 @@ case "$1" in
 
   postgresql:delete)
     DB_IMAGE=postgresql/$APP
-    # Stop the container
     ID=$(docker ps -a | grep "$DB_IMAGE":latest |  awk '{print $1}')
+    VOLUME_PATH=$(docker inspect $ID | grep /var/lib/docker/vfs/dir/ | awk '{print $2}' | sed -e's/"//g')
+    # Stop the container
     if [[ ! -z $ID ]]; then
-        docker stop $ID
+        docker kill $ID
+        sleep 1
+        docker rm $ID
+        sleep 1
     fi
     # Remove image
     IMAGE=$(docker images | grep "$DB_IMAGE " |  awk '{print $1}')
@@ -82,6 +90,15 @@ case "$1" in
     # Remove persistent volume
     if [[ -d "/var/lib/docker/vfs/dir/postgresql--$APP" ]]; then
         rm -rf "/var/lib/docker/vfs/dir/postgresql-$APP"
+        rm -f $VOLUME_PATH
+    fi
+    # Remove container port storage
+    if [[ -f "$DOKKU_ROOT/.postgresql/port_$APP" ]]; then
+        rm -f "$DOKKU_ROOT/.postgresql/port_$APP"
+    fi
+    # Remove container root password
+    if [[ -f "$DOKKU_ROOT/.postgresql/pwd_$APP" ]]; then
+        rm -f "$DOKKU_ROOT/.postgresql/pwd_$APP"
     fi
     echo
     echo "-----> PostgreSQL container deleted: $DB_IMAGE"
@@ -89,17 +106,16 @@ case "$1" in
 
   postgresql:info)
     DB_IMAGE=postgresql/$APP
-    ID=$(docker ps -a | grep "$DB_IMAGE":latest |  awk '{print $1}')
-    IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
-    PORT=$(docker port $ID 5432)
-    echo
-    echo "       Host: $IP"
-    echo "       User: 'root'"
-    if [[ -f "$DOKKU_ROOT/.postgresql/pwd_$APP" ]]; then
-        echo "       Password: '$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")'"
+    if [[ ! -f "$DOKKU_ROOT/.postgresql/pwd_$APP" ]]; then
+        echo "Unknown (or too old) PostgreSQL container"
+        exit 1
     fi
+    echo
+    echo "       Host: 127.0.0.1"
+    echo "       Port: $(cat "$DOKKU_ROOT/.postgresql/port_$APP")'"
+    echo "       User: 'root'"
+    echo "       Password: '$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")'"
     echo "       Database: 'db'"
-    echo "       Public port: $PORT"
     echo
     ;;
 
@@ -116,10 +132,9 @@ case "$1" in
             exit 0
         fi
         DB_PASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
-        ID=$(docker ps -a | grep "$DB_IMAGE":latest |  awk '{print $1}')
-        IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+        PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$APP")
         # Link database using dokku command
-        dokku config:set $APP "DATABASE_URL=postgres://root:$DB_PASSWORD@$IP/db"
+        dokku config:set $APP "DATABASE_URL=postgres://root:$DB_PASSWORD@127.0.0.1:$PORT/db"
         echo
         echo "-----> $APP linked to $DB_IMAGE database"
     fi
