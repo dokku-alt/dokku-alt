@@ -6,6 +6,8 @@ if [[ ! -z "$1" ]]; then
     chown -R mysql:mysql /opt/mysql
     chmod -R 755 /opt/mysql
 fi
+sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
+sed -i -e"s/var\/lib/opt/g" /etc/mysql/my.cnf
 mysqld_safe & sleep 5
 if [[ ! -z "$1" ]]; then
     echo "CREATE DATABASE db;" | mysql -u root --password=a_stronk_password
