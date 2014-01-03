@@ -162,5 +162,3 @@ EOF
     ;;
 
 esac
-exit 0 
-cat
