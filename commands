@@ -112,7 +112,7 @@ case "$1" in
     fi
     echo
     echo "       Host: 127.0.0.1"
-    echo "       Port: $(cat "$DOKKU_ROOT/.postgresql/port_$APP")'"
+    echo "       Port: $(cat "$DOKKU_ROOT/.postgresql/port_$APP")"
     echo "       User: 'root'"
     echo "       Password: '$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")'"
     echo "       Database: 'db'"
