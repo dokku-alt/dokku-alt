@@ -92,7 +92,7 @@ case "$1" in
         docker rmi $IMAGE
     fi
     # Remove persistent volume
-    if [[ -d "/var/lib/docker/vfs/dir/postgresql--$APP" ]]; then
+    if [[ -d "/var/lib/docker/vfs/dir/postgresql-$APP" ]]; then
         rm -rf "/var/lib/docker/vfs/dir/postgresql-$APP"
         rm -f $VOLUME_PATH
     fi
