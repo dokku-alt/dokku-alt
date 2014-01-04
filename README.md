@@ -3,6 +3,10 @@ PostgreSQL plugin for Dokku
 
 Project: https://github.com/progrium/dokku
 
+Requirements
+------------
+* Docker version `0.7.2` or higher
+* Dokku version `0.2.1` or higher
 
 Installation
 ------------
@@ -66,6 +70,11 @@ remote: -----> Cleaning up ...
 remote: -----> Cleanup complete!
 remote: =====> Application deployed:
 remote:        http://foo.server
+```
+
+Link your app to the database
+```bash
+dokku postgresql:link app_name database_name
 ```
 
 
