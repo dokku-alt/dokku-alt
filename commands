@@ -115,7 +115,7 @@ case "$1" in
         exit 1
     fi
     echo
-    echo "       Host: 127.0.0.1"
+    echo "       Host: 172.17.42.1"
     echo "       Port: $(cat "$DOKKU_ROOT/.postgresql/port_$APP")"
     echo "       User: 'root'"
     echo "       Password: '$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")'"
@@ -138,7 +138,7 @@ case "$1" in
         DB_PASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
         PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$APP")
         # Link database using dokku command
-        dokku config:set $APP "DATABASE_URL=postgres://root:$DB_PASSWORD@127.0.0.1:$PORT/db"
+        dokku config:set $APP "DATABASE_URL=postgres://root:$DB_PASSWORD@172.17.42.1:$PORT/db"
         echo
         echo "-----> $APP linked to $DB_IMAGE database"
     fi
