@@ -1,6 +1,0 @@
-#!/bin/bash
-
-APP="$1"; IMAGE="app/$APP";
-if [[ -f "$DOKKU_ROOT/.mariadb/pwd_$APP" ]]; then
-    dokku mariadb:link $APP $APP
-fi
