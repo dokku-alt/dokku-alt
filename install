@@ -1,4 +1,6 @@
 #!/bin/bash
 
 # Build docker image
-docker build -q=true -t kloadut/mariadb github.com/Kloadut/dokku-md-dockerfiles
+git clone https://github.com/Kloadut/dokku-md-dockerfiles /tmp/dokku-md-dockerfiles
+docker build -q=true -t kloadut/mariadb /tmp/dokku-md-dockerfiles
+rm -rf /tmp/dokku-md-dockerfiles
