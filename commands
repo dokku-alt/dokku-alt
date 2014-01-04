@@ -56,6 +56,10 @@ case "$1" in
     # Rename persistent volume
     if [[ ! -d "/var/lib/docker/vfs/dir/postgresql-$APP" ]]; then
         VOLUME_PATH=$(docker inspect $ID | grep /var/lib/docker/vfs/dir/ | awk '{print $2}' | sed -e's/"//g')
+        if [[ -z $VOLUME_PATH ]]; then
+            echo "Your docker version is too old, please update it"
+            exit 1
+        fi
         mv $VOLUME_PATH "/var/lib/docker/vfs/dir/postgresql-$APP"
         ln -s "/var/lib/docker/vfs/dir/postgresql-$APP" $VOLUME_PATH
         sleep 1
