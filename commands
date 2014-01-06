@@ -82,7 +82,7 @@ case "$1" in
     REDIS_IMAGE=redis/$APP
     ID=$(docker ps -a | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
     IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
-    PORT=$(docker port $ID 6379)
+    PORT=$(docker port $ID 6379 | cut -d":" -f2)
     echo
     echo "       Host: $IP"
     echo "       Public port: $PORT"
