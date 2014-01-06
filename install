@@ -26,6 +26,7 @@ if [[ ! -d "$DOKKU_ROOT/.mongodb" ]]; then
     mongodb_ip=localhost
   fi
 
+  sleep 2 # give mongodb some time to start
   mongo $mongodb_ip:$mongodb_port/admin --eval "db.addUser(\"admin\", \"${admin_pass}\")"
   docker stop "$id"
 fi

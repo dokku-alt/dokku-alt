@@ -111,5 +111,3 @@ EOF
 esac
 
 HOME=$OLDHOME
-
-cat

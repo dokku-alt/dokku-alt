@@ -46,3 +46,10 @@ MONGODB_USERNAME
 MONGODB_PASSWORD
 MONGO_URL
 ```
+
+Persistence
+-----------
+
+The Mongo DB data is stored outside the container on the host at `$DOKKU_ROOT/.mongodb/data`. Inside the container, this location is bound to `/tmp/mongo` and will be there. 
+Since the data is stored outside the container, it will persistent through container restarts, and also be available to future revisions of your container. 
+
