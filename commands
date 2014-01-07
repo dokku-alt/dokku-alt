@@ -17,6 +17,12 @@ if [[ $1 == postgresql:* ]]; then
     fi
 fi
 
+# Create .postgresql diretory of not exists
+if [[ ! -d $DOKKU_ROOT/.postgresql ]]; then
+    mkdir -p $DOKKU_ROOT/.postgresql
+    chown -R dokku: $DOKKU_ROOT/.postgresql
+fi
+
 case "$1" in
 
   postgresql:create)
@@ -36,11 +42,6 @@ case "$1" in
         VOLUME="/opt/postgresql"
         # Generate a random password for DB user
         DB_PASSWORD=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 16)
-        # Temporarily store it to a file
-        if [[ ! -d $DOKKU_ROOT/.postgresql ]]; then
-            mkdir -p $DOKKU_ROOT/.postgresql
-            chown -R dokku: $DOKKU_ROOT/.postgresql
-        fi
         echo $DB_PASSWORD > "$DOKKU_ROOT/.postgresql/pwd_$APP"
         chown dokku: "$DOKKU_ROOT/.postgresql/pwd_$APP"
         chmod 700 "$DOKKU_ROOT/.postgresql/pwd_$APP"
@@ -78,20 +79,15 @@ case "$1" in
     ID=$(docker ps -a | grep "$DB_IMAGE":latest |  awk '{print $1}')
     # Stop the container
     if [[ ! -z $ID ]]; then
-        docker kill $ID
+        docker kill $ID > /dev/null
         sleep 1
-        docker rm $ID
+        docker rm $ID > /dev/null
         sleep 1
     fi
     # Remove image
     IMAGE=$(docker images | grep "$DB_IMAGE " |  awk '{print $1}')
     if [[ ! -z $IMAGE ]]; then
-        docker rmi $IMAGE
-    fi
-    # Remove persistent volume
-    if [[ -f "$DOKKU_ROOT/.postgresql/volume_$APP" ]]; then
-        rm -rf $(cat $DOKKU_ROOT/.postgresql/volume_$APP) || :
-        rm -f "$DOKKU_ROOT/.postgresql/volume_$APP"
+        docker rmi $IMAGE > /dev/null
     fi
     # Remove container port storage
     if [[ -f "$DOKKU_ROOT/.postgresql/port_$APP" ]]; then
@@ -100,6 +96,11 @@ case "$1" in
     # Remove container root password
     if [[ -f "$DOKKU_ROOT/.postgresql/pwd_$APP" ]]; then
         rm -f "$DOKKU_ROOT/.postgresql/pwd_$APP"
+    fi
+    # Remove persistent volume
+    if [[ -f "$DOKKU_ROOT/.postgresql/volume_$APP" ]]; then
+        rm -rf $(cat $DOKKU_ROOT/.postgresql/volume_$APP)
+        rm -f "$DOKKU_ROOT/.postgresql/volume_$APP"
     fi
     echo
     echo "-----> PostgreSQL container deleted: $DB_IMAGE"
