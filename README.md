@@ -3,6 +3,8 @@ PostgreSQL plugin for Dokku
 
 Project: https://github.com/progrium/dokku
 
+**Warning: This plugin is under development and still only tested with the below dependencies**
+
 Requirements
 ------------
 * Docker version `0.7.2` or higher
