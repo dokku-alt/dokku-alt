@@ -125,12 +125,13 @@ case "$1" in
             exit 1
         fi
         RABBITMQ_IMAGE="rabbitmq/$3"
-        if [[ ! -f "$DOKKU_ROOT/$RABBIT_HOME/pwd-$APP" ]]; then
+        if [[ ! -f "$DOKKU_ROOT/$RABBIT_HOME/pwd-$3" ]]; then
             echo "Rabbitmq is not correctly initialized"
             exit 0
         fi
         ID=$(docker ps -a | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+        RABBITMQ_PASSWORD=$(cat "$DOKKU_ROOT/$RABBIT_HOME/pwd-$3")
 
         # Write BROKER_URL to app's ENV file using dokku command
         BROKER_URL="BROKER_URL=amqp://admin:$RABBITMQ_PASSWORD@$IP:$RABBITMQ_PORT//"
