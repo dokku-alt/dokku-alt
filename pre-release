@@ -1,0 +1,4 @@
+#!/bin/bash
+
+APP="$1"; IMAGE="app/$APP";
+dokku rabbitmq:link $APP $APP

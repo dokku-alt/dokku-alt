@@ -25,5 +25,4 @@ $ dokku help
 
 Thanks
 ------
-This is a partially based on the dokku redis plugin: https://github.com/luxifer/dokku-redis-plugin
-
+This is based on the dokku redis plugin: https://github.com/luxifer/dokku-redis-plugin

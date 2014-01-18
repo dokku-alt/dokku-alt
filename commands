@@ -1,0 +1,129 @@
+#!/bin/bash
+set -e;
+
+# Check if name is specified
+if [[ $1 == redis:* ]]; then
+    if [[ -z $2 ]]; then
+        echo "You must specify an app name"
+        exit 1
+    else
+        APP="$2"
+        # Check if app exists with the same name
+        if [[ -d "$DOKKU_ROOT/$APP" ]]; then
+            APP_EXISTS=true
+        else
+            APP_EXISTS=false
+        fi
+    fi
+fi
+
+case "$1" in
+
+  rabbitmq:create)
+    RABBITMQ_IMAGE=rabbitmq/$APP
+    # Check if Rabbitmq container is installed
+    IMAGE=$(docker images | grep "jlachowski/rabbitmq " |  awk '{print $3}')
+    if [[ -z $IMAGE ]]; then
+        echo "Rabbitmq image not found... Did you run 'dokku plugins-install' ?"
+        exit 1
+    fi
+    # Check if an existing DB volume exists
+    #HOST_DIR="$DOKKU_ROOT/.rabbitmq/volume-$APP"
+    #if [[ -d $HOST_DIR ]]; then
+    #    echo
+    #    echo "-----> Reusing redis/$APP database"
+    #else
+    #    mkdir -p $HOST_DIR
+    #fi
+    #VOLUME="$HOST_DIR:/opt/redis"
+    # Stop existing container with the same persistent Redis
+    ID=$(docker ps | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
+    if [[ ! -z "$ID" ]]; then
+        docker stop $ID > /dev/null
+    fi
+    # Fork Rabbitmq image
+    ID=$(docker run -d jlachowski/rabbitmq exit 0)
+    docker wait $ID > /dev/null
+    IMAGE=$(docker commit $ID)
+    docker tag $IMAGE $RABBITMQ_IMAGE
+    # Launch container
+    ID=$(docker run -p 5672 -d $RABBITMQ_IMAGE)
+    sleep 4
+    # Link to a potential existing app
+    dokku rabbitmq:link $APP $APP
+    echo
+    echo "-----> Rabbitmq container created: $RABBITMQ_IMAGE"
+    sleep 1
+    dokku rabbitmq:info $APP
+    ;;
+
+  rabbitmq:delete)
+    RABBITMQ_IMAGE=rabbitmq/$APP
+    # Stop the container
+    ID=$(docker ps -a | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
+    if [[ ! -z $ID ]]; then
+        docker stop $ID
+    fi
+    # Remove image
+    IMAGE=$(docker images | grep "$RABBITMQ_IMAGE " |  awk '{print $1}')
+    if [[ ! -z $IMAGE ]]; then
+        docker rmi $IMAGE
+    fi
+    # Remove persistent volume
+    #HOST_DIR="$DOKKU_ROOT/.rabbitmq/volume-$APP"
+    #if [[ -d $HOST_DIR ]]; then
+    #    rm -rf $HOST_DIR
+    #fi
+    echo
+    echo "-----> Rabbitmq container deleted: $RABBITMQ_IMAGE"
+    ;;
+
+  rabbitmq:info)
+    RABBITMQ_IMAGE=rabbitmq/$APP
+    ID=$(docker ps -a | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
+    IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+    PORT=$(docker port $ID 5672 | cut -d":" -f2)
+    echo
+    echo "       Host: $IP"
+    echo "       Public port: $PORT"
+    echo
+    ;;
+
+  rabbitmq:link)
+    if $APP_EXISTS; then
+        # Check argument
+        if [[ -z $3 ]]; then
+            echo "You must specify a container name"
+            exit 1
+        fi
+        RABBITMQ_IMAGE="rabbitmq/$3"
+        ID=$(docker ps -a | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
+        IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+        # Write REDIS_IP to app's ENV file
+        RABBITMQ_BROKER_URL="RABBITMQ_BROKER_URL=amqp://$IP:5672//"
+        if [[ ! -f "$DOKKU_ROOT/$APP/ENV" ]]; then
+            touch "$DOKKU_ROOT/$APP/ENV"
+        fi
+        cat "$DOKKU_ROOT/$APP/ENV" | grep "$RABBITMQ_BROKER_URL" || echo "export $RABBITMQ_BROKER_URL" >> "$DOKKU_ROOT/$APP/ENV"
+        echo
+        echo "-----> $APP linked to $RABBITMQ_IMAGE container"
+    fi
+    ;;
+
+  rabbitmq:logs)
+    RABBITMQ_IMAGE=rabbitmq/$APP
+    ID=$(docker ps -a | grep "$RABBITMQ_IMAGE" |  awk '{print $1}')
+    docker logs $ID | tail -n 100
+    ;;
+
+  help)
+    cat && cat<<EOF
+    rabbitmq:create <app>           Create a Rabbitmq container
+    rabbitmq:delete <app>           Delete specified Rabbitmq container
+    rabbitmq:info <app>             Display container informations
+    rabbitmq:link <app> <rabbit>    Link an app to a Rabbitmq container
+    rabbitmq:logs <app>             Display last logs from Rabbitmq container
+EOF
+    ;;
+
+esac
