@@ -18,6 +18,5 @@ RUN /usr/sbin/rabbitmq-plugins enable rabbitmq_management
 
 EXPOSE 5672 15672
 
-CMD /usr/sbin/rabbitmq-server
-
-
+ADD . /usr/bin
+RUN chmod +x /usr/bin/start-rabbitmq.sh
