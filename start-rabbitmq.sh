@@ -13,7 +13,9 @@ if [[ ! -f /opt/rabbitmq/initialized ]]; then
     rabbitmqctl set_user_tags admin administrator
     # remove default user
     rabbitmqctl delete_user guest
+    rabbitmqctl stop
     touch /opt/rabbitmq/initialized
+    /usr/sbin/rabbitmq-server
 else
     export RABBITMQ_MNESIA_BASE=/opt/rabbitmq
     /usr/sbin/rabbitmq-server
