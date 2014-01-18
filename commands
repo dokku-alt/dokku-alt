@@ -19,6 +19,7 @@ fi
 
 RABBITMQ_PORT=5672
 RABBITMQ_ADMIN_PORT=15672
+RABBIT_HOME='.rabbitmq'
 
 case "$1" in
 
@@ -30,18 +31,21 @@ case "$1" in
         echo "Rabbitmq image not found... Did you run 'dokku plugins-install' ?"
         exit 1
     fi
+    if [[ ! -d "$DOKKU_ROOT/$RABBIT_HOME" ]]; then
+        mkdir -p "$DOKKU_ROOT/$RABBIT_HOME"
+    fi
     # Check if an existing storage volume exists
-    if [[ -f "$DOKKU_ROOT/.rabbitmq/volume-$APP" ]]; then
-        VOLUME="`cat $DOKKU_ROOT/.rabbitmq/volume-$APP`:/opt/rabbitmq"
+    if [[ -f "$DOKKU_ROOT/$RABBIT_HOME/volume-$APP" ]]; then
+        VOLUME="`cat $DOKKU_ROOT/$RABBIT_HOME/volume-$APP`:/opt/rabbitmq"
         echo
         echo "-----> Reusing rabbitmq/$APP storage"
     else
         VOLUME="/opt/rabbitmq"
         # Generate random password for users
         RABBITMQ_PASSWORD=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 16)
-        echo $RABBITMQ_PASSWORD > "$DOKKU_ROOT/.rabbitmq/pwd-$APP"
-        chown dokku: "$DOKKU_ROOT/.rabbitmq/pwd-$APP"
-        chmod 700 "$DOKKU_ROOT/.rabbitmq/pwd-$APP"
+        echo $RABBITMQ_PASSWORD > "$DOKKU_ROOT/$RABBIT_HOME/pwd-$APP"
+        chown dokku: "$DOKKU_ROOT/$RABBIT_HOME/pwd-$APP"
+        chmod 700 "$DOKKU_ROOT/$RABBIT_HOME/pwd-$APP"
     fi
     # Stop existing container with the same persistent Rabbitmq
     ID=$(docker ps | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
@@ -57,13 +61,13 @@ case "$1" in
     ID=$(docker run -v $VOLUME -p $RABBITMQ_PORT -p $RABBITMQ_ADMIN_PORT -d $RABBITMQ_IMAGE /usr/bin/start-rabbitmq.sh $RABBITMQ_PASSWORD)
     sleep 4
     # Rename persistent volume
-    if [[ ! -f "$DOKKU_ROOT/.rabbitmq/volume-$APP" ]]; then
+    if [[ ! -f "$DOKKU_ROOT/$RABBIT_HOME/volume-$APP" ]]; then
         VOLUME_PATH=$(docker inspect $ID | grep /var/lib/docker/vfs/dir/ | awk '{print $2}' | sed -e's/"//g')
         if [[ -z $VOLUME_PATH ]]; then
             echo "Your docker version is too old, please update it"
             exit 1
         fi
-        echo $VOLUME_PATH > "$DOKKU_ROOT/.rabbitmq/volume-$APP"
+        echo $VOLUME_PATH > "$DOKKU_ROOT/$RABBIT_HOME/volume-$APP"
     fi
     # Link to a potential existing app
     dokku rabbitmq:link $APP $APP
@@ -86,13 +90,13 @@ case "$1" in
         docker rmi $IMAGE
     fi
     # Remove container root password
-    if [[ -f "$DOKKU_ROOT/.rabbitmq/pwd-$APP" ]]; then
-        rm -f "$DOKKU_ROOT/.rabbitmq/pwd-$APP"
+    if [[ -f "$DOKKU_ROOT/$RABBIT_HOME/pwd-$APP" ]]; then
+        rm -f "$DOKKU_ROOT/$RABBIT_HOME/pwd-$APP"
     fi
     # Remove persistent volume
-    if [[ -f "$DOKKU_ROOT/.rabbitmq/volume-$APP" ]]; then
-        rm -rf $(cat $DOKKU_ROOT/.rabbitmq/volume-$APP)
-        rm -f "$DOKKU_ROOT/.rabbitmq/volume-$APP"
+    if [[ -f "$DOKKU_ROOT/$RABBIT_HOME/volume-$APP" ]]; then
+        rm -rf $(cat $DOKKU_ROOT/$RABBIT_HOME/volume-$APP)
+        rm -f "$DOKKU_ROOT/$RABBIT_HOME/volume-$APP"
     fi
     echo
     echo "-----> Rabbitmq container deleted: $RABBITMQ_IMAGE"
@@ -109,7 +113,7 @@ case "$1" in
     echo "       AMQP port: $PORT"
     echo "       ADMIN port: $PORT_ADMIN"
     echo "       User: 'admin'"
-    echo "       Password: '$(cat $DOKKU_ROOT/.rabbitmq/pwd-$APP)'"
+    echo "       Password: '$(cat $DOKKU_ROOT/$RABBIT_HOME/pwd-$APP)'"
     echo
     ;;
 
@@ -121,7 +125,7 @@ case "$1" in
             exit 1
         fi
         RABBITMQ_IMAGE="rabbitmq/$3"
-        if [[ ! -f "$DOKKU_ROOT/.rabbitmq/pwd-$APP" ]]; then
+        if [[ ! -f "$DOKKU_ROOT/$RABBIT_HOME/pwd-$APP" ]]; then
             echo "Rabbitmq is not correctly initialized"
             exit 0
         fi
