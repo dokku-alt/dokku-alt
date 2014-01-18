@@ -6,7 +6,7 @@ if [[ ! -f /opt/rabbitmq/initialized ]]; then
     chown -R rabbitmq:rabbitmq /opt/rabbitmq
 
     export RABBITMQ_MNESIA_BASE=/opt/rabbitmq
-    /usr/sbin/rabbitmq-server
+    /usr/sbin/rabbitmq-server &
     # add new user
     rabbitmqctl add_user admin $1
     rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
