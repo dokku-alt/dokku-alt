@@ -17,6 +17,9 @@ if [[ $1 == redis:* ]]; then
     fi
 fi
 
+RABBITMQ_PORT=5672
+RABBITMQ_ADMIN_PORT=15672
+
 case "$1" in
 
   rabbitmq:create)
@@ -27,16 +30,20 @@ case "$1" in
         echo "Rabbitmq image not found... Did you run 'dokku plugins-install' ?"
         exit 1
     fi
-    # Check if an existing DB volume exists
-    #HOST_DIR="$DOKKU_ROOT/.rabbitmq/volume-$APP"
-    #if [[ -d $HOST_DIR ]]; then
-    #    echo
-    #    echo "-----> Reusing redis/$APP database"
-    #else
-    #    mkdir -p $HOST_DIR
-    #fi
-    #VOLUME="$HOST_DIR:/opt/redis"
-    # Stop existing container with the same persistent Redis
+    # Check if an existing storage volume exists
+    if [[ -f "$DOKKU_ROOT/.rabbitmq/volume-$APP" ]]; then
+        VOLUME="`cat $DOKKU_ROOT/.rabbitmq/volume-$APP`:/opt/rabbitmq"
+        echo
+        echo "-----> Reusing rabbitmq/$APP storage"
+    else
+        VOLUME="/opt/rabbitmq"
+        # Generate random password for users
+        RABBITMQ_PASSWORD=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 16)
+        echo $RABBITMQ_PASSWORD > "$DOKKU_ROOT/.rabbitmq/pwd-$APP"
+        chown dokku: "$DOKKU_ROOT/.rabbitmq/pwd-$APP"
+        chmod 700 "$DOKKU_ROOT/.rabbitmq/pwd-$APP"
+    fi
+    # Stop existing container with the same persistent Rabbitmq
     ID=$(docker ps | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
     if [[ ! -z "$ID" ]]; then
         docker stop $ID > /dev/null
@@ -47,8 +54,17 @@ case "$1" in
     IMAGE=$(docker commit $ID)
     docker tag $IMAGE $RABBITMQ_IMAGE
     # Launch container
-    ID=$(docker run -p 5672 -d $RABBITMQ_IMAGE)
+    ID=$(docker run -v $VOLUME -p $RABBITMQ_PORT -p $RABBITMQ_ADMIN_PORT -d $RABBITMQ_IMAGE /usr/bin/start_rabbitmq.sh $RABBITMQ_PASSWORD)
     sleep 4
+    # Rename persistent volume
+    if [[ ! -f "$DOKKU_ROOT/.rabbitmq/volume-$APP" ]]; then
+        VOLUME_PATH=$(docker inspect $ID | grep /var/lib/docker/vfs/dir/ | awk '{print $2}' | sed -e's/"//g')
+        if [[ -z $VOLUME_PATH ]]; then
+            echo "Your docker version is too old, please update it"
+            exit 1
+        fi
+        echo $VOLUME_PATH > "$DOKKU_ROOT/.rabbitmq/volume-$APP"
+    fi
     # Link to a potential existing app
     dokku rabbitmq:link $APP $APP
     echo
@@ -69,11 +85,15 @@ case "$1" in
     if [[ ! -z $IMAGE ]]; then
         docker rmi $IMAGE
     fi
+    # Remove container root password
+    if [[ -f "$DOKKU_ROOT/.rabbitmq/pwd-$APP" ]]; then
+        rm -f "$DOKKU_ROOT/.rabbitmq/pwd-$APP"
+    fi
     # Remove persistent volume
-    #HOST_DIR="$DOKKU_ROOT/.rabbitmq/volume-$APP"
-    #if [[ -d $HOST_DIR ]]; then
-    #    rm -rf $HOST_DIR
-    #fi
+    if [[ -f "$DOKKU_ROOT/.rabbitmq/volume-$APP" ]]; then
+        rm -rf $(cat $DOKKU_ROOT/.rabbitmq/volume-$APP)
+        rm -f "$DOKKU_ROOT/.rabbitmq/volume-$APP"
+    fi
     echo
     echo "-----> Rabbitmq container deleted: $RABBITMQ_IMAGE"
     ;;
@@ -82,10 +102,14 @@ case "$1" in
     RABBITMQ_IMAGE=rabbitmq/$APP
     ID=$(docker ps -a | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
     IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
-    PORT=$(docker port $ID 5672 | cut -d":" -f2)
+    PORT=$(docker port $ID $RABBITMQ_PORT | cut -d":" -f2)
+    PORT_ADMIN=$(docker port $ID $RABBITMQ_ADMIN_PORT | cut -d":" -f2)
     echo
     echo "       Host: $IP"
-    echo "       Public port: $PORT"
+    echo "       AMQP port: $PORT"
+    echo "       ADMIN port: $PORT_ADMIN"
+    echo "       User: 'admin'"
+    echo "       Password: '$(cat $DOKKU_ROOT/.rabbitmq/pwd-$APP)'"
     echo
     ;;
 
@@ -97,14 +121,16 @@ case "$1" in
             exit 1
         fi
         RABBITMQ_IMAGE="rabbitmq/$3"
+        if [[ ! -f "$DOKKU_ROOT/.rabbitmq/pwd-$APP" ]]; then
+            echo "Rabbitmq is not correctly initialized"
+            exit 0
+        fi
         ID=$(docker ps -a | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
-        # Write REDIS_IP to app's ENV file
-        RABBITMQ_BROKER_URL="RABBITMQ_BROKER_URL=amqp://$IP:5672//"
-        if [[ ! -f "$DOKKU_ROOT/$APP/ENV" ]]; then
-            touch "$DOKKU_ROOT/$APP/ENV"
-        fi
-        cat "$DOKKU_ROOT/$APP/ENV" | grep "$RABBITMQ_BROKER_URL" || echo "export $RABBITMQ_BROKER_URL" >> "$DOKKU_ROOT/$APP/ENV"
+
+        # Write BROKER_URL to app's ENV file using dokku command
+        BROKER_URL="BROKER_URL=amqp://admin:$RABBITMQ_PASSWORD@$IP:$RABBITMQ_PORT//"
+        dokku config:set $APP $BROKER_URL
         echo
         echo "-----> $APP linked to $RABBITMQ_IMAGE container"
     fi
