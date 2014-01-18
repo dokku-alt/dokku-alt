@@ -17,4 +17,5 @@ rabbitmqctl add_user admin $1
 rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
 rabbitmqctl set_user_tags admin administrator
 rabbitmqctl stop
+sleep 2
 /usr/sbin/rabbitmq-server
