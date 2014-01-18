@@ -2,7 +2,7 @@
 set -e;
 
 # Check if name is specified
-if [[ $1 == redis:* ]]; then
+if [[ $1 == rabbitmq:* ]]; then
     if [[ -z $2 ]]; then
         echo "You must specify an app name"
         exit 1
