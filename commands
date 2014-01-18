@@ -82,12 +82,15 @@ case "$1" in
     # Stop the container
     ID=$(docker ps -a | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
     if [[ ! -z $ID ]]; then
-        docker stop $ID
+        docker kill $ID > /dev/null
+        sleep 1
+        docker rm $ID > /dev/null
+        sleep 1
     fi
     # Remove image
     IMAGE=$(docker images | grep "$RABBITMQ_IMAGE " |  awk '{print $1}')
     if [[ ! -z $IMAGE ]]; then
-        docker rmi $IMAGE
+        docker rmi $IMAGE > /dev/null
     fi
     # Remove container root password
     if [[ -f "$DOKKU_ROOT/$RABBIT_HOME/pwd-$APP" ]]; then
@@ -134,8 +137,7 @@ case "$1" in
         RABBITMQ_PASSWORD=$(cat "$DOKKU_ROOT/$RABBIT_HOME/pwd-$3")
 
         # Write BROKER_URL to app's ENV file using dokku command
-        BROKER_URL="BROKER_URL=amqp://admin:$RABBITMQ_PASSWORD@$IP:$RABBITMQ_PORT//"
-        dokku config:set $APP $BROKER_URL
+        dokku config:set $APP "BROKER_URL=amqp://admin:$RABBITMQ_PASSWORD@$IP:$RABBITMQ_PORT//"
         echo
         echo "-----> $APP linked to $RABBITMQ_IMAGE container"
     fi
