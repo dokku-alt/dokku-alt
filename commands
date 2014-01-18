@@ -54,7 +54,7 @@ case "$1" in
     IMAGE=$(docker commit $ID)
     docker tag $IMAGE $RABBITMQ_IMAGE
     # Launch container
-    ID=$(docker run -v $VOLUME -p $RABBITMQ_PORT -p $RABBITMQ_ADMIN_PORT -d $RABBITMQ_IMAGE /usr/bin/start_rabbitmq.sh $RABBITMQ_PASSWORD)
+    ID=$(docker run -v $VOLUME -p $RABBITMQ_PORT -p $RABBITMQ_ADMIN_PORT -d $RABBITMQ_IMAGE /usr/bin/start-rabbitmq.sh $RABBITMQ_PASSWORD)
     sleep 4
     # Rename persistent volume
     if [[ ! -f "$DOKKU_ROOT/.rabbitmq/volume-$APP" ]]; then
