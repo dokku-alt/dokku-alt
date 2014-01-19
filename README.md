@@ -27,6 +27,7 @@ $ dokku help
      postgresql:delete <app>     Delete specified PostgreSQL container
      postgresql:info <app>       Display database informations
      postgresql:link <app> <db>  Link an app to a PostgreSQL database
+     postgresql:list             Display list of PostgreSQL containers
      postgresql:logs <app>       Display last logs from PostgreSQL contain
 ```
 
@@ -86,4 +87,9 @@ dokku postgresql:logs foo
 Database informations:
 ```
 dokku postgresql:info foo
+```
+
+List of containers:
+```
+dokku postgresql:list
 ```

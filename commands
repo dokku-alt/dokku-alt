@@ -3,7 +3,7 @@ set -e;
 
 # Check if name is specified
 if [[ $1 == postgresql:* ]]; then
-    if [[ -z $2 ]]; then
+    if [ -z $2 ] && [ $1 != postgresql:list ]; then
         echo "You must specify an app name"
         exit 1
     else
@@ -147,6 +147,14 @@ case "$1" in
     ID=$(docker ps -a | grep "$DB_IMAGE" |  awk '{print $1}')
     docker logs $ID | tail -n 100
     ;;
+    
+  postgresql:list)
+    CONTAINERS=$(ls $DOKKU_ROOT/.postgresql/volume* | sed -e 's/_/ /' | awk '{print $2}')
+    echo "PostgreSQL containers:"
+    for CONTAINER in $CONTAINERS; do
+        echo "  - $CONTAINER"
+    done
+    ;;
 
   help)
     cat && cat<<EOF
@@ -154,6 +162,7 @@ case "$1" in
     postgresql:delete <app>     Delete specified PostgreSQL container
     postgresql:info <app>       Display database informations
     postgresql:link <app> <db>  Link an app to a PostgreSQL database
+    postgresql:list             Display list of PostgreSQL containers
     postgresql:logs <app>       Display last logs from PostgreSQL container
 EOF
     ;;
