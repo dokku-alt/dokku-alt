@@ -1,6 +1,5 @@
 Rabbitmq plugin for Dokku
 =========================
-(This is work in progress)
 
 Project: https://github.com/progrium/dokku
 
@@ -22,6 +21,11 @@ $ dokku help
     rabbitmq:link <app> <rabbit>    Link an app to a Rabbitmq container
     rabbitmq:logs <app>             Display last logs from Rabbitmq container
 ```
+
+TODO:
+-----
+- improve creation time
+- add peristent logs
 
 Thanks
 ------
