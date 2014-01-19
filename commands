@@ -15,11 +15,10 @@ if [[ $1 == rabbitmq:* ]]; then
             APP_EXISTS=false
         fi
     fi
+    RABBITMQ_PORT=5672
+    RABBITMQ_ADMIN_PORT=15672
+    RABBIT_HOME="$DOKKU_ROOT/.rabbitmq"
 fi
-
-RABBITMQ_PORT=5672
-RABBITMQ_ADMIN_PORT=15672
-RABBIT_HOME='.rabbitmq'
 
 case "$1" in
 
@@ -31,21 +30,21 @@ case "$1" in
         echo "Rabbitmq image not found... Did you run 'dokku plugins-install' ?"
         exit 1
     fi
-    if [[ ! -d "$DOKKU_ROOT/$RABBIT_HOME" ]]; then
-        mkdir -p "$DOKKU_ROOT/$RABBIT_HOME"
+    if [[ ! -d "$RABBIT_HOME" ]]; then
+        mkdir -p "$RABBIT_HOME"
     fi
     # Check if an existing storage volume exists
-    if [[ -f "$DOKKU_ROOT/$RABBIT_HOME/volume-$APP" ]]; then
-        VOLUME="`cat $DOKKU_ROOT/$RABBIT_HOME/volume-$APP`:/opt/rabbitmq"
+    if [[ -f "$RABBIT_HOME/volume-$APP" ]]; then
+        VOLUME="`cat $RABBIT_HOME/volume-$APP`:/opt/rabbitmq"
         echo
         echo "-----> Reusing rabbitmq/$APP storage"
     else
         VOLUME="/opt/rabbitmq"
         # Generate random password for users
         RABBITMQ_PASSWORD=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 16)
-        echo $RABBITMQ_PASSWORD > "$DOKKU_ROOT/$RABBIT_HOME/pwd-$APP"
-        chown dokku: "$DOKKU_ROOT/$RABBIT_HOME/pwd-$APP"
-        chmod 700 "$DOKKU_ROOT/$RABBIT_HOME/pwd-$APP"
+        echo $RABBITMQ_PASSWORD > "$RABBIT_HOME/pwd-$APP"
+        chown dokku: "$RABBIT_HOME/pwd-$APP"
+        chmod 700 "$RABBIT_HOME/pwd-$APP"
     fi
     # Stop existing container with the same persistent Rabbitmq
     ID=$(docker ps | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
@@ -61,13 +60,13 @@ case "$1" in
     ID=$(docker run -v $VOLUME -p $RABBITMQ_PORT -p $RABBITMQ_ADMIN_PORT -d $RABBITMQ_IMAGE /usr/bin/start-rabbitmq.sh $RABBITMQ_PASSWORD)
     sleep 4
     # Rename persistent volume
-    if [[ ! -f "$DOKKU_ROOT/$RABBIT_HOME/volume-$APP" ]]; then
+    if [[ ! -f "$RABBIT_HOME/volume-$APP" ]]; then
         VOLUME_PATH=$(docker inspect $ID | grep /var/lib/docker/vfs/dir/ | awk '{print $2}' | sed -e's/"//g')
         if [[ -z $VOLUME_PATH ]]; then
             echo "Your docker version is too old, please update it"
             exit 1
         fi
-        echo $VOLUME_PATH > "$DOKKU_ROOT/$RABBIT_HOME/volume-$APP"
+        echo $VOLUME_PATH > "$RABBIT_HOME/volume-$APP"
     fi
     # Link to a potential existing app
     dokku rabbitmq:link $APP $APP
@@ -93,14 +92,14 @@ case "$1" in
         docker rmi $IMAGE > /dev/null
     fi
     # Remove container root password
-    if [[ -f "$DOKKU_ROOT/$RABBIT_HOME/pwd-$APP" ]]; then
-        rm -f "$DOKKU_ROOT/$RABBIT_HOME/pwd-$APP"
+    if [[ -f "$RABBIT_HOME/pwd-$APP" ]]; then
+        rm -f "$RABBIT_HOME/pwd-$APP"
     fi
     # Remove persistent volume
-    if [[ -f "$DOKKU_ROOT/$RABBIT_HOME/volume-$APP" ]]; then
+    if [[ -f "$RABBIT_HOME/volume-$APP" ]]; then
         #TODO: fix access rights to be able to remove volume as dokku
-        rm -rf $(cat $DOKKU_ROOT/$RABBIT_HOME/volume-$APP)
-        rm -f "$DOKKU_ROOT/$RABBIT_HOME/volume-$APP"
+        rm -rf $(cat $RABBIT_HOME/volume-$APP)
+        rm -f "$RABBIT_HOME/volume-$APP"
     fi
     echo
     echo "-----> Rabbitmq container deleted: $RABBITMQ_IMAGE"
@@ -117,7 +116,7 @@ case "$1" in
     echo "       AMQP port: $RABBITMQ_PORT -> $PORT"
     echo "       ADMIN port: $RABBITMQ_ADMIN_PORT -> $PORT_ADMIN"
     echo "       User: 'admin'"
-    echo "       Password: '$(cat $DOKKU_ROOT/$RABBIT_HOME/pwd-$APP)'"
+    echo "       Password: '$(cat $RABBIT_HOME/pwd-$APP)'"
     echo
     ;;
 
@@ -129,13 +128,13 @@ case "$1" in
             exit 1
         fi
         RABBITMQ_IMAGE="rabbitmq/$3"
-        if [[ ! -f "$DOKKU_ROOT/$RABBIT_HOME/pwd-$3" ]]; then
+        if [[ ! -f "$RABBIT_HOME/pwd-$3" ]]; then
             echo "Rabbitmq is not correctly initialized"
             exit 0
         fi
         ID=$(docker ps -a | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
-        RABBITMQ_PASSWORD=$(cat "$DOKKU_ROOT/$RABBIT_HOME/pwd-$3")
+        RABBITMQ_PASSWORD=$(cat "$RABBIT_HOME/pwd-$3")
 
         # Write BROKER_URL to app's ENV file using dokku command
         dokku config:set $APP "BROKER_URL=amqp://admin:$RABBITMQ_PASSWORD@$IP:$RABBITMQ_PORT//"
