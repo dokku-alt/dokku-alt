@@ -9,7 +9,7 @@ fi
 
 export RABBITMQ_MNESIA_BASE=/opt/rabbitmq
 /usr/sbin/rabbitmq-server -detached
-sleep 4
+sleep 6
 # add new user
 rabbitmqctl add_user admin $1
 rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
@@ -17,5 +17,5 @@ rabbitmqctl set_user_tags admin administrator
 # remove default user
 rabbitmqctl delete_user guest
 rabbitmqctl stop
-sleep 2
+sleep 4
 /usr/sbin/rabbitmq-server
