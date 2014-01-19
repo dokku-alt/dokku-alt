@@ -24,6 +24,7 @@ $ dokku help
 
 TODO:
 -----
+- fix volumin delete (fix access rights)
 - improve creation time
 - add peristent logs
 

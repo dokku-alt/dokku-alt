@@ -98,6 +98,7 @@ case "$1" in
     fi
     # Remove persistent volume
     if [[ -f "$DOKKU_ROOT/$RABBIT_HOME/volume-$APP" ]]; then
+        #TODO: fix access rights to be able to remove volume as dokku
         rm -rf $(cat $DOKKU_ROOT/$RABBIT_HOME/volume-$APP)
         rm -f "$DOKKU_ROOT/$RABBIT_HOME/volume-$APP"
     fi
