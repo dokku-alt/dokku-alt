@@ -35,7 +35,7 @@ case "$1" in
     else
         mkdir -p $HOST_DIR
     fi
-    VOLUME="$HOST_DIR:/opt/redis"
+    VOLUME="$HOST_DIR:/var/lib/redis"
     # Stop existing container with the same persistent Redis
     ID=$(docker ps | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
     if [[ ! -z "$ID" ]]; then
