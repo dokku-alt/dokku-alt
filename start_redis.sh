@@ -1,3 +1,4 @@
 #!/bin/bash
 
-/usr/bin/redis-server
+# Start redis with our custom configuration
+/usr/bin/redis-server /etc/redis/redis.conf
