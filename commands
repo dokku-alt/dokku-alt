@@ -115,7 +115,7 @@ case "$1" in
     DOCKER_GATEWAY=$(docker inspect $ID | grep Gateway | awk '{ print $2 }' | tr -d ',"')
     echo
     echo "       Host: $IP"
-    echo "       Gateway (hardcoded): $DOCKER_GATEWAY"
+    echo "       Gateway: $DOCKER_GATEWAY"
     echo "       AMQP port: $RABBITMQ_PORT -> $PORT"
     echo "       ADMIN port: $RABBITMQ_ADMIN_PORT -> $PORT_ADMIN"
     echo "       User: 'admin'"
