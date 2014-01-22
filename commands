@@ -111,8 +111,11 @@ case "$1" in
     IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
     PORT=$(docker port $ID $RABBITMQ_PORT | cut -d":" -f2)
     PORT_ADMIN=$(docker port $ID $RABBITMQ_ADMIN_PORT | cut -d":" -f2)
+    #TODO: change it once solution for persistent links (urls) exist (dns?)
+    DOCKER_GATEWAY=$(docker inspect $ID | grep Gateway | awk '{ print $2 }' | tr -d ',"')
     echo
     echo "       Host: $IP"
+    echo "       Gateway (hardcoded): $DOCKER_GATEWAY"
     echo "       AMQP port: $RABBITMQ_PORT -> $PORT"
     echo "       ADMIN port: $RABBITMQ_ADMIN_PORT -> $PORT_ADMIN"
     echo "       User: 'admin'"
@@ -133,11 +136,14 @@ case "$1" in
             exit 0
         fi
         ID=$(docker ps -a | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
-        IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+        #IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+        PORT=$(docker port $ID $RABBITMQ_PORT | cut -d":" -f2)
+        #TODO: find solution for persistant links (dns?)
+        DOCKER_GATEWAY=$(docker inspect $ID | grep Gateway | awk '{ print $2 }' | tr -d ',"')
         RABBITMQ_PASSWORD=$(cat "$RABBIT_HOME/pwd-$3")
 
         # Write BROKER_URL to app's ENV file using dokku command
-        dokku config:set $APP "BROKER_URL=amqp://admin:$RABBITMQ_PASSWORD@$IP:$RABBITMQ_PORT//"
+        dokku config:set $APP "BROKER_URL=amqp://admin:$RABBITMQ_PASSWORD@$DOCKER_GATEWAY:$PORT//"
         echo
         echo "-----> $APP linked to $RABBITMQ_IMAGE container"
     fi
