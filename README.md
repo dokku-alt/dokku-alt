@@ -38,6 +38,10 @@ an argument. It will put the application in a new container based on `progrium/b
 Then it runs the builder script inside the container. 
 
     $ cat myapp.tar | ./buildstep myapp
+    
+If you didn't already have an application tar, you can create one on the fly.
+
+    $ tar cC /path/to/your/app . | ./buildstep myapp
 
 The resulting container has a built app ready to go. The builder script also parses the Procfile and produces
 a starter script that takes a process type. Run your app with:
