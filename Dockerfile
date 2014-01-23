@@ -1,4 +1,4 @@
-From ubuntu:precise
+From ubuntu:quantal
 MAINTAINER jlachowski "jalachowski@gmail.com"
 
 ENV DEBIAN_FRONTEND noninteractive
