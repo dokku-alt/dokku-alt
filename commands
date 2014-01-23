@@ -20,6 +20,7 @@ if [[ $1 == rabbitmq:* ]]; then
         exit 1
     fi
     PLUGIN_NAME="rabbitmq"
+    PLUGIN_ALIAS="broker"
     CONTAINER_NAME="${PLUGIN_NAME}_${APP}"
     HOST_DIR="$DOKKU_ROOT/.$PLUGIN_NAME/$APP"
     CONTAINER_IMAGE="jlachowski/rabbitmq"
@@ -84,6 +85,10 @@ case "$1" in
         docker stop $ID > /dev/null
         docker rm $ID > /dev/null
     fi
+
+    dokku link:delete "$APP" "$CONTAINER_NAME" "$PLUGIN_ALIAS"
+    dokku config:unset "$APP" "BROKER_PROTO" "BROKER_USER" "BROKER_PASSWORD"
+
     # Remove persistent volume
     if [[ -f "$HOST_DIR/volume-$APP" ]]; then
         #TODO: fix access rights to be able to remove volume as dokku
@@ -129,8 +134,9 @@ case "$1" in
         #IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
         RABBITMQ_PASSWORD=$(cat "$HOST_DIR/pwd-$3")
 
+        dokku link:create "$APP" "$CONTAINER_NAME" "$PLUGIN_ALIAS"
         # Write BROKER_URL to app's ENV file using dokku command
-        dokku config:set $APP "BROKER_PROTO=amqp"  "BROKER_USER=admin" "BROKER_PASSWORD=$RABBITMQ_PASSWORD"
+        dokku config:set $APP "BROKER_PROTO=amqp" "BROKER_USER=admin" "BROKER_PASSWORD=$RABBITMQ_PASSWORD"
         echo
         echo "-----> $APP linked to $CONTAINER_NAME container"
     fi
