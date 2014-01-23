@@ -49,7 +49,7 @@ case "$1" in
         # Generate random password for users
         RABBITMQ_PASSWORD=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 16)
         echo $RABBITMQ_PASSWORD > "$HOST_DIR/pwd-$APP"
-        chown dokku: "$HOST_DIR/pwd-$APP"
+        chown -R dokku:dokku "$HOST_DIR"
         chmod 700 "$HOST_DIR/pwd-$APP"
     fi
     VOLUME="$HOST_DIR/volume:/opt/rabbitmq"
@@ -67,6 +67,25 @@ case "$1" in
     echo "-----> Rabbitmq container created: $CONTAINER_NAME (using $CONTAINER_IMAGE)"
     sleep 1
     dokku rabbitmq:info $APP
+    ;;
+
+  rabbitmq:clone)
+    if $APP_EXISTS; then
+        # Check argument
+        if [[ -z $3 ]]; then
+            echo "You must specify a name for the clone"
+            exit 1
+        fi
+        TARGET_DIR="$DOKKU_ROOT/.$PLUGIN_NAME/$3"
+        if [[ -d "$TARGET_DIR" ]]; then
+            echo "Persistent storage for ${PLUGIN_NAME}_$3 already exists"
+            exit 1
+        fi
+        cp -r "$HOST_DIR/*" "$TARGET_DIR/"
+
+        # Create new container with copied storage
+        dokku rabbitmq:create $3
+    fi
     ;;
 
   rabbitmq:delete)
@@ -136,11 +155,12 @@ case "$1" in
 
   help)
     cat && cat<<EOF
-    rabbitmq:create <app>           Create a Rabbitmq container
-    rabbitmq:delete <app>           Delete specified Rabbitmq container
-    rabbitmq:info <app>             Display container informations
-    rabbitmq:link <app> <rabbit>    Link an app to a Rabbitmq container
-    rabbitmq:logs <app>             Display last logs from Rabbitmq container
+    rabbitmq:create <app>           Create a RabbitMQ container for <app>
+    rabbitmq:create <app> <trg>     Clone RabbitMQ container of <app> for <trg>
+    rabbitmq:delete <app>           Delete specified RabbitMQ container for <app>
+    rabbitmq:info <app>             Display <app> RabbitMQ container informations
+    rabbitmq:link <app> <rabbit>    Link an app to a RabbitMQ container
+    rabbitmq:logs <app>             Display last logs from <app> RabbitMQ container
 EOF
     ;;
 
