@@ -18,12 +18,12 @@ if [[ $1 == rabbitmq:* ]]; then
     RABBITMQ_PORT=5672
     RABBITMQ_ADMIN_PORT=15672
     RABBIT_HOME="$DOKKU_ROOT/.rabbitmq"
+    RABBITMQ_IMAGE=rabbitmq/$APP
 fi
 
 case "$1" in
 
   rabbitmq:create)
-    RABBITMQ_IMAGE=rabbitmq/$APP
     # Check if Rabbitmq container is installed
     IMAGE=$(docker images | grep "jlachowski/rabbitmq " |  awk '{print $3}')
     if [[ -z $IMAGE ]]; then
@@ -77,7 +77,6 @@ case "$1" in
     ;;
 
   rabbitmq:delete)
-    RABBITMQ_IMAGE=rabbitmq/$APP
     # Stop the container
     ID=$(docker ps -a | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
     if [[ ! -z $ID ]]; then
@@ -106,7 +105,6 @@ case "$1" in
     ;;
 
   rabbitmq:info)
-    RABBITMQ_IMAGE=rabbitmq/$APP
     ID=$(docker ps -a | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
     IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
     PORT=$(docker port $ID $RABBITMQ_PORT | cut -d":" -f2)
@@ -150,8 +148,7 @@ case "$1" in
     ;;
 
   rabbitmq:logs)
-    RABBITMQ_IMAGE=rabbitmq/$APP
-    ID=$(docker ps -a | grep "$RABBITMQ_IMAGE" |  awk '{print $1}')
+    ID=$(docker ps -a | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
     docker logs $ID | tail -n 100
     ;;
 
