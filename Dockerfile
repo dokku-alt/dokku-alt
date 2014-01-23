@@ -4,7 +4,7 @@ MAINTAINER jlachowski "jalachowski@gmail.com"
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN echo "deb http://www.rabbitmq.com/debian/ testing main" >> /etc/apt/sources.list
-RUN apt-key -y update
+RUN apt-key update
 RUN apt-get -y update
 RUN apt-get install -y wget
 RUN wget http://www.rabbitmq.com/rabbitmq-signing-key-public.asc -O /tmp/rabbitmq-signing-key-public.asc
