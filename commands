@@ -20,7 +20,7 @@ if [[ $1 == rabbitmq:* ]]; then
         exit 1
     fi
     PLUGIN_NAME="rabbitmq"
-    CONTAINER_NAME="$PLUGIN_NAME_$APP"
+    CONTAINER_NAME="${PLUGIN_NAME}_${APP}"
     HOST_DIR="$DOKKU_ROOT/.$PLUGIN_NAME/$APP"
     CONTAINER_IMAGE="jlachowski/rabbitmq"
     RABBITMQ_PORT=5672
@@ -31,7 +31,7 @@ case "$1" in
 
   rabbitmq:create)
     # Check if Rabbitmq container is installed
-    IMAGE=$(docker images | grep CONTAINER_IMAGE |  awk '{print $3}')
+    IMAGE=$(docker images | grep "$CONTAINER_IMAGE" |  awk '{print $3}')
     if [[ -z $IMAGE ]]; then
         echo "Rabbitmq image not found... Did you run 'dokku plugins-install' ?"
         exit 1
@@ -102,7 +102,7 @@ case "$1" in
     ;;
 
   rabbitmq:info)
-    ID=$(docker ps -a | grep "$RABBITMQ_IMAGE":latest |  awk '{print $1}')
+    ID=$(docker ps -a | grep "$CONTAINER_NAME" |  awk '{print $1}')
     IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
     DOCKER_GATEWAY=$(docker inspect $ID | grep Gateway | awk '{ print $2 }' | tr -d ',"')
     echo
@@ -120,7 +120,7 @@ case "$1" in
             echo "You must specify a container name"
             exit 1
         fi
-        CONTAINER_NAME="rabbitmq_$3"
+        CONTAINER_NAME="${PLUGIN_NAME}_$3"
         if [[ ! -f "$HOST_DIR/pwd-$3" ]]; then
             echo "Rabbitmq is not correctly initialized"
             exit 0
