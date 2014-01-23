@@ -41,18 +41,18 @@ case "$1" in
         mkdir -p "$HOST_DIR"
     fi
     # Check if an existing storage volume exists
-    if [[ -f "$HOST_DIR/volume-$APP" ]]; then
-        VOLUME="`cat $HOST_DIR/volume-$APP`:/opt/rabbitmq"
+    if [[ -d "$HOST_DIR/volume" ]]; then
         echo
         echo "-----> Reusing rabbitmq/$APP storage"
     else
-        VOLUME="/opt/rabbitmq"
+        mkdir -p "$HOST_DIR/volume"
         # Generate random password for users
         RABBITMQ_PASSWORD=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 16)
         echo $RABBITMQ_PASSWORD > "$HOST_DIR/pwd-$APP"
         chown dokku: "$HOST_DIR/pwd-$APP"
         chmod 700 "$HOST_DIR/pwd-$APP"
     fi
+    VOLUME="$HOST_DIR/volume:/opt/rabbitmq"
     # Stop existing container with the same persistent Rabbitmq
     ID=$(docker ps | grep "$CONTAINER_NAME" |  awk '{print $1}')
     if [[ ! -z "$ID" ]]; then
@@ -61,15 +61,6 @@ case "$1" in
     # Launch container
     ID=$(docker run -v $VOLUME -name=$CONTAINER_NAME -d $CONTAINER_IMAGE /usr/bin/start-rabbitmq.sh $RABBITMQ_PASSWORD)
     sleep 1
-    # Rename persistent volume
-    if [[ ! -f "$HOST_DIR/volume-$APP" ]]; then
-        VOLUME_PATH=$(docker inspect $ID | grep /var/lib/docker/vfs/dir/ | awk '{print $2}' | sed -e's/"//g')
-        if [[ -z $VOLUME_PATH ]]; then
-            echo "Your docker version is too old, please update it"
-            exit 1
-        fi
-        echo $VOLUME_PATH > "$HOST_DIR/volume-$APP"
-    fi
     # Link to a potential existing app
     dokku rabbitmq:link $APP $APP
     echo
@@ -79,31 +70,27 @@ case "$1" in
     ;;
 
   rabbitmq:delete)
-    # Stop the container
-    ID=$(docker ps -a | grep "$CONTAINER_NAME" |  awk '{print $1}')
-    if [[ ! -z $ID ]]; then
-        docker stop $ID > /dev/null
-        docker rm $ID > /dev/null
-    fi
-
-    dokku link:delete "$APP" "$CONTAINER_NAME" "$PLUGIN_ALIAS"
-    dokku config:unset "$APP" "BROKER_SCHEME" "BROKER_USERNAME" "BROKER_PASSWORD" "BROKER_PATH"
-
-    # Remove persistent volume
-    if [[ -f "$HOST_DIR/volume-$APP" ]]; then
-        #TODO: fix access rights to be able to remove volume as dokku
-        rm -rf $(cat $HOST_DIR/volume-$APP)
-        rm -f "$HOST_DIR/volume-$APP"
-    fi
-    # Remove container root password
-    if [[ -f "$HOST_DIR/pwd-$APP" ]]; then
-        rm -f "$HOST_DIR/pwd-$APP"
-    fi
-    if [[ -d "$HOST_DIR" ]]; then
-        rm -rf "$HOST_DIR"
-    fi
     echo
-    echo "-----> Rabbitmq container deleted: $RABBITMQ_IMAGE"
+    echo "-----> This will permanently remove all the stored data. Are you sure (yes/no)?"
+    read ANSWER
+    if [[ $ANSWER == "yes" ]]; then
+        # Stop the container
+        ID=$(docker ps -a | grep "$CONTAINER_NAME" |  awk '{print $1}')
+        if [[ ! -z $ID ]]; then
+            docker stop $ID > /dev/null
+            docker rm $ID > /dev/null
+        fi
+
+        dokku link:delete "$APP" "$CONTAINER_NAME" "$PLUGIN_ALIAS"
+        dokku config:unset "$APP" "BROKER_SCHEME" "BROKER_USERNAME" "BROKER_PASSWORD" "BROKER_PATH"
+
+        # Remove persistent volume
+        if [[ -d "$HOST_DIR" ]]; then
+            rm -rf "$HOST_DIR"
+        fi
+        echo
+        echo "-----> Rabbitmq container deleted: $RABBITMQ_IMAGE"
+    fi
     ;;
 
   rabbitmq:info)
