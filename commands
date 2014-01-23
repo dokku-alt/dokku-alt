@@ -87,7 +87,7 @@ case "$1" in
     fi
 
     dokku link:delete "$APP" "$CONTAINER_NAME" "$PLUGIN_ALIAS"
-    dokku config:unset "$APP" "BROKER_PROTO" "BROKER_USER" "BROKER_PASSWORD"
+    dokku config:unset "$APP" "BROKER_SCHEME" "BROKER_USERNAME" "BROKER_PASSWORD" "BROKER_PATH"
 
     # Remove persistent volume
     if [[ -f "$HOST_DIR/volume-$APP" ]]; then
@@ -136,7 +136,7 @@ case "$1" in
 
         dokku link:create "$APP" "$CONTAINER_NAME" "$PLUGIN_ALIAS"
         # Write BROKER_URL to app's ENV file using dokku command
-        dokku config:set $APP "BROKER_PROTO=amqp" "BROKER_USER=admin" "BROKER_PASSWORD=$RABBITMQ_PASSWORD"
+        dokku config:set $APP "BROKER_SCHEME=amqp" "BROKER_USERNAME=admin" "BROKER_PASSWORD=$RABBITMQ_PASSWORD" "BROKER_PATH=//"
         echo
         echo "-----> $APP linked to $CONTAINER_NAME container"
     fi
