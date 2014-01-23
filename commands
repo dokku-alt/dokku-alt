@@ -22,7 +22,7 @@ if [[ $1 == rabbitmq:* ]]; then
     PLUGIN_NAME="rabbitmq"
     CONTAINER_NAME="$PLUGIN_NAME_$APP"
     HOST_DIR="$DOKKU_ROOT/.$PLUGIN_NAME/$APP"
-    CONATINER_IMAGE="jlachowski/rabbitmq"
+    CONTAINER_IMAGE="jlachowski/rabbitmq"
     RABBITMQ_PORT=5672
     RABBITMQ_ADMIN_PORT=15672
 fi
