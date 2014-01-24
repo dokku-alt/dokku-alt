@@ -81,6 +81,8 @@ case "$1" in
             echo "Persistent storage for ${PLUGIN_NAME}_$3 already exists"
             exit 1
         fi
+        echo
+        echo "-----> Cloning rabbitmq/$APP storage"
         cp -r "$HOST_DIR" "$TARGET_DIR"
 
         # Create new container with copied storage
