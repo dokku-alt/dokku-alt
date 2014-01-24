@@ -51,6 +51,7 @@ case "$1" in
     if [[ -d "$HOST_DIR/volume" ]]; then
         echo
         echo "-----> Reusing rabbitmq/$APP storage"
+        RABBITMQ_PASSWORD=$(cat "$HOST_DIR/pwd")
     else
         mkdir -p "$HOST_DIR/volume"
         # Generate random password for users
