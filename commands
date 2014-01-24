@@ -76,7 +76,7 @@ case "$1" in
     dokku rabbitmq:info $APP
     ;;
 
-  postgresql:rebuild)
+  rabbitmq:rebuild)
     ID=$(docker ps -a | grep "$CONTAINER_NAME" |  awk '{print $1}')
     if [[ ! -z "$ID" ]]; then
         echo
@@ -87,7 +87,7 @@ case "$1" in
     dokku postgresql:create $APP
     ;;
 
-  postgresql:clone)
+  rabbitmq:clone)
     if $APP_EXISTS; then
         # Check argument
         if [[ -z $3 ]]; then
