@@ -81,7 +81,7 @@ case "$1" in
             echo "Persistent storage for ${PLUGIN_NAME}_$3 already exists"
             exit 1
         fi
-        cp -r "$HOST_DIR/*" "$TARGET_DIR/"
+        cp -r "$HOST_DIR" "$TARGET_DIR"
 
         # Create new container with copied storage
         dokku rabbitmq:create $3
