@@ -84,7 +84,7 @@ case "$1" in
         docker stop $ID > /dev/null
         docker rm $ID > /dev/null
     fi
-    dokku postgresql:create $APP
+    dokku rabbitmq:create $APP
     ;;
 
   rabbitmq:clone)
