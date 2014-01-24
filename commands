@@ -37,6 +37,13 @@ case "$1" in
         echo "Rabbitmq image not found... Did you run 'dokku plugins-install' ?"
         exit 1
     fi
+    # check for existing container with the same persistent rabbitmq
+    ID=$(docker ps -a | grep "$CONTAINER_NAME" |  awk '{print $1}')
+    if [[ ! -z "$ID" ]]; then
+        echo
+        echo "-----> Container $CONTAINER_NAME already exist. Please use rebuild or delete command"
+        exit 1
+    fi
     if [[ ! -d "$HOST_DIR" ]]; then
         mkdir -p "$HOST_DIR"
     fi
@@ -48,9 +55,9 @@ case "$1" in
         mkdir -p "$HOST_DIR/volume"
         # Generate random password for users
         RABBITMQ_PASSWORD=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 16)
-        echo $RABBITMQ_PASSWORD > "$HOST_DIR/pwd-$APP"
+        echo $RABBITMQ_PASSWORD > "$HOST_DIR/pwd"
         chown -R dokku:dokku "$HOST_DIR"
-        chmod 700 "$HOST_DIR/pwd-$APP"
+        chmod 600 "$HOST_DIR/pwd"
     fi
     VOLUME="$HOST_DIR/volume:/opt/rabbitmq"
     # Stop existing container with the same persistent Rabbitmq
@@ -69,7 +76,18 @@ case "$1" in
     dokku rabbitmq:info $APP
     ;;
 
-  rabbitmq:clone)
+  postgresql:rebuild)
+    ID=$(docker ps -a | grep "$CONTAINER_NAME" |  awk '{print $1}')
+    if [[ ! -z "$ID" ]]; then
+        echo
+        echo "-----> Stopping & removing $CONTAINER_NAME container"
+        docker stop $ID > /dev/null
+        docker rm $ID > /dev/null
+    fi
+    dokku postgresql:create $APP
+    ;;
+
+  postgresql:clone)
     if $APP_EXISTS; then
         # Check argument
         if [[ -z $3 ]]; then
@@ -82,11 +100,18 @@ case "$1" in
             exit 1
         fi
         echo
-        echo "-----> Cloning rabbitmq/$APP storage"
-        cp -r "$HOST_DIR" "$TARGET_DIR"
-
-        # Create new container with copied storage
-        dokku rabbitmq:create $3
+        echo "-----> Cloning $PLUGIN_NAME/$APP storage"
+        #FIXME: fix the access rights issue
+        #cp -rf "$HOST_DIR" "$TARGET_DIR"
+        #dokku postgresql:rebuild $3 > /dev/null
+        #echo
+        #echo "-----> $PLUGIN_NAME/$APP storage cloned to $PLUGIN_NAME/$3"
+        echo
+        echo "-----> [Attention]: This command needs access right fix, for now issue following command as root"
+        echo "cp -rf ${HOST_DIR} ${TARGET_DIR}"
+        echo
+        echo "-----> and manualy rebuild ${PLUGIN_NAME}_${3} container"
+        echo "dokku rabbitmq:rebuild $3"
     fi
     ;;
 
@@ -108,9 +133,11 @@ case "$1" in
         # Remove persistent volume
         if [[ -d "$HOST_DIR" ]]; then
             rm -rf "$HOST_DIR"
+            echo
+            echo "-----> Deleted persistent storage for $CONTAINER_NAME"
         fi
         echo
-        echo "-----> Rabbitmq container deleted: $RABBITMQ_IMAGE"
+        echo "-----> Deleted RabbitMQ container $CONTAINER_NAME"
     fi
     ;;
 
@@ -155,14 +182,24 @@ case "$1" in
     docker logs $ID | tail -n 100
     ;;
 
+  rabbitmq:list)
+    CONTAINERS=$(ls -1 "$DOKKU_ROOT/.$PLUGIN_NAME/" | awk '{print $1}')
+    echo "RabbitMQ containers:"
+    for CONTAINER in $CONTAINERS; do
+        echo "  - $CONTAINER"
+    done
+    ;;
+
   help)
     cat && cat<<EOF
-    rabbitmq:create <app>           Create a RabbitMQ container for <app>
-    rabbitmq:create <app> <trg>     Clone RabbitMQ container of <app> for <trg>
-    rabbitmq:delete <app>           Delete specified RabbitMQ container for <app>
-    rabbitmq:info <app>             Display <app> RabbitMQ container informations
-    rabbitmq:link <app> <rabbit>    Link an app to a RabbitMQ container
-    rabbitmq:logs <app>             Display last logs from <app> RabbitMQ container
+    rabbitmq:create <app>                         Create a RabbitMQ container for <app>
+    rabbitmq:clone <app> <trg>                    Clone RabbitMQ container of <app> for <trg>
+    rabbitmq:rebuild <app>                        Rebuild RabbitMQ container of <app> (keep persistend data)
+    rabbitmq:delete <app>                         Delete specified RabbitMQ container for <app>
+    rabbitmq:info <app>                           Display <app> RabbitMQ container informations
+    rabbitmq:link <app> <rabbit>                  Link an app to a RabbitMQ container
+    rabbitmq:list                                 Display list of RabbitMQ containers
+    rabbitmq:logs <app>                           Display last logs from <app> RabbitMQ container
 EOF
     ;;
 
