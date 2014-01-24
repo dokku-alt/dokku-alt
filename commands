@@ -103,7 +103,7 @@ case "$1" in
         echo "-----> Cloning $PLUGIN_NAME/$APP storage"
         #FIXME: fix the access rights issue
         #cp -rf "$HOST_DIR" "$TARGET_DIR"
-        #dokku postgresql:rebuild $3 > /dev/null
+        #dokku rabbitmq:rebuild $3 > /dev/null
         #echo
         #echo "-----> $PLUGIN_NAME/$APP storage cloned to $PLUGIN_NAME/$3"
         echo
