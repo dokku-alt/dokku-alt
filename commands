@@ -51,15 +51,14 @@ case "$1" in
     if [[ -d "$HOST_DIR/volume" ]]; then
         echo
         echo "-----> Reusing rabbitmq/$APP storage"
-        RABBITMQ_PASSWORD=$(cat "$HOST_DIR/pwd")
     else
         mkdir -p "$HOST_DIR/volume"
-        # Generate random password for users
-        RABBITMQ_PASSWORD=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 16)
-        echo $RABBITMQ_PASSWORD > "$HOST_DIR/pwd"
-        chown -R dokku:dokku "$HOST_DIR"
-        chmod 600 "$HOST_DIR/pwd"
     fi
+    # Generate random password for users
+    RABBITMQ_PASSWORD=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 16)
+    echo $RABBITMQ_PASSWORD > "$HOST_DIR/pwd"
+    chown -R dokku:dokku "$HOST_DIR"
+    chmod 600 "$HOST_DIR/pwd"
     VOLUME="$HOST_DIR/volume:/opt/rabbitmq"
     # Stop existing container with the same persistent Rabbitmq
     ID=$(docker ps | grep "$CONTAINER_NAME" |  awk '{print $1}')
