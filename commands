@@ -77,11 +77,11 @@ case "$1" in
   postgresql:delete)
     DB_IMAGE=postgresql/$APP
     ID=$(docker ps -a | grep "$DB_IMAGE":latest |  awk '{print $1}')
-    # Stop the container
+    # Stop and remove the container
     if [[ ! -z $ID ]]; then
         docker kill $ID > /dev/null
         sleep 1
-        docker rm $ID > /dev/null
+        docker rm -v $ID > /dev/null
         sleep 1
     fi
     # Remove image
@@ -99,7 +99,6 @@ case "$1" in
     fi
     # Remove persistent volume
     if [[ -f "$DOKKU_ROOT/.postgresql/volume_$APP" ]]; then
-        rm -rf $(cat $DOKKU_ROOT/.postgresql/volume_$APP)
         rm -f "$DOKKU_ROOT/.postgresql/volume_$APP"
     fi
     echo
