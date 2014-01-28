@@ -18,6 +18,7 @@ $ dokku help
      mongodb:create <app>   Create a Mongo database
      mongodb:delete <app>   Delete specified Mongo database
      mongodb:list           List all databases
+     mongodb:console        Launch a mongodb console as admin
 ```
 
 Simple usage
