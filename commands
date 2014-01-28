@@ -53,14 +53,14 @@ case "$1" in
     mongodb_username=$APP
     mongo $mongodb_public_ip:$mongodb_port/$mongodb_database --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "db.addUser(\"${mongodb_username}\", \"${mongodb_password}\")"
 
-    mongodb_port=27017
+    mongodb_internal_port=27017
 
     dokku config:set "$APP" MONGODB_DATABASE="$mongodb_database" \
       MONGODB_HOST="$mongodb_private_ip" \
       MONGODB_PORT="$mongodb_port" \
       MONGODB_USERNAME="$mongodb_username" \
       MONGODB_PASSWORD="$mongodb_password" \
-      MONGO_URL="mongodb://${mongodb_username}:${mongodb_password}@${mongodb_private_ip}:${mongodb_port}/${mongodb_database}"
+      MONGO_URL="mongodb://${mongodb_username}:${mongodb_password}@${mongodb_private_ip}:${mongodb_internal_port}/${mongodb_database}"
     ;;
   mongodb:delete)
     check_container
@@ -80,11 +80,15 @@ case "$1" in
     check_container
     mongo $mongodb_public_ip:$mongodb_port --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "printjson(db.adminCommand('listDatabases'));" | grep name | cut -d \" -f 4 |grep -v admin | grep -v test
     ;;
+  mongodb:console)
+    check_container
+    mongo $mongodb_public_ip:$mongodb_port -u admin -p"$admin_pass" --authenticationDatabase="admin"
+    ;;
   mongodb:start)
     if [[ "$id" != "" ]]; then
       echo "MongoDB container already running with ID: ${id}"
     else
-      docker run -p 27017:27017 -d -v "$DOKKU_ROOT/.mongodb/data":/tmp/mongo jeffutter/mongodb /usr/bin/mongod --dbpath=/tmp/mongo --auth
+      docker run -p 27017 -d -v "$DOKKU_ROOT/.mongodb/data":/tmp/mongo jeffutter/mongodb /usr/bin/mongod --dbpath=/tmp/mongo --auth
     fi
     ;;
   mongodb:stop)
