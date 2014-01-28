@@ -77,12 +77,27 @@ case "$1" in
       mongodb_password=$(cat "$DOKKU_ROOT/.mongodb/pass_${APP}")
       mongodb_username=$APP
 
-      dokku config:set "$APP" MONGODB_DATABASE="$mongodb_database" \
-        MONGODB_HOST="$mongodb_private_ip" \
-        MONGODB_PORT="$mongodb_port" \
-        MONGODB_USERNAME="$mongodb_username" \
-        MONGODB_PASSWORD="$mongodb_password" \
-        MONGO_URL="mongodb://${mongodb_username}:${mongodb_password}@${mongodb_private_ip}:${mongodb_internal_port}/${mongodb_database}"
+      # Have to set ENV vars this way. Using dokku config:set causes a loop where it tries to redeploy itself and calls this again
+
+      MONGODB_DATABASE="MONGODB_DATABASE=\"$mongodb_database\""
+      cat "$DOKKU_ROOT/$APP/ENV" | grep "$MONGODB_DATABASE" || echo "export $MONGODB_DATABASE" >> "$DOKKU_ROOT/$APP/ENV"
+
+      MONGODB_HOST="MONGODB_HOST=\"$mongodb_private_ip\""
+      cat "$DOKKU_ROOT/$APP/ENV" | grep "$MONGODB_HOST" || echo "export $MONGODB_HOST" >> "$DOKKU_ROOT/$APP/ENV"
+
+      MONGODB_PORT="MONGODB_PORT=\"$mongodb_port\""
+      cat "$DOKKU_ROOT/$APP/ENV" | grep "$MONGODB_PORT" || echo "export $MONGODB_PORT" >> "$DOKKU_ROOT/$APP/ENV"
+
+      MONGODB_USERNAME="MONGODB_USERNAME=\"$mongodb_username\""
+      cat "$DOKKU_ROOT/$APP/ENV" | grep "$MONGODB_USERNAME" || echo "export $MONGODB_USERNAME" >> "$DOKKU_ROOT/$APP/ENV"
+
+      MONGODB_PASSWORD="MONGODB_PASSWORD=\"$mongodb_password\""
+      cat "$DOKKU_ROOT/$APP/ENV" | grep "$MONGODB_PASSWORD" || echo "export $MONGODB_PASSWORD" >> "$DOKKU_ROOT/$APP/ENV"
+
+      MONGO_URL="MONGO_URL=\"mongodb://${mongodb_username}:${mongodb_password}@${mongodb_private_ip}:${mongodb_internal_port}/${mongodb_database}\""
+      cat "$DOKKU_ROOT/$APP/ENV" | grep "$MONGO_URL" || echo "export $MONGO_URL" >> "$DOKKU_ROOT/$APP/ENV"
+
+      echo
       echo "-----> $APP linked to $IMAGE container"
     fi
     ;;
