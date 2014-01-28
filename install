@@ -2,12 +2,23 @@
 
 # Build MongoDB image
 db_image="jeffutter/mongodb"
-docker pull -t "$db_image" jeffutter/mongodb-docker
+docker pull "$db_image"
 
+if [[ -f /etc/init/mongodb.conf ]]
+then
+  previous_mongo_install=true
+else
+  previous_mongo_install=false
+fi
+  
 apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
 echo deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen > /etc/apt/sources.list.d/10gen.list
 apt-get update
 apt-get -y install mongodb-10gen
+
+if [ $previous_mongo_install = false ]; then
+  echo 'ENABLE_MONGODB="no"' > /etc/default/mongodb
+fi
 
 if [[ ! -d "$DOKKU_ROOT/.mongodb" ]]; then
   mkdir -p "$DOKKU_ROOT/.mongodb"
