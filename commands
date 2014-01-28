@@ -29,8 +29,8 @@ check_container() {
 }
 
 set_dokku_env() {
-  env_var=$2
-  env_val=$3
+  env_var=$1
+  env_val=$2
   ex -s -c "g/export ${env_var}=/d" -c "x" "$DOKKU_ROOT/$APP/ENV"
   echo "export ${env_var}=\"${env_val}\"" >> "$DOKKU_ROOT/$APP/ENV"
 }
