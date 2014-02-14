@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+APP="$1"; IMAGE="app/$APP"
+
+GIT_REV=$(GIT_DIR=$DOKKU_ROOT/$APP git rev-parse HEAD)
+
+id=$(echo "export GIT_REV=$GIT_REV" | docker run -i -a stdin $IMAGE /bin/bash -c "cat > /app/.profile.d/git_rev.sh")
+test $(docker wait $id) -eq 0
+docker commit $id $IMAGE > /dev/null
