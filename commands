@@ -105,6 +105,22 @@ case "$1" in
     echo "-----> PostgreSQL container deleted: $DB_IMAGE"
     ;;
 
+  postgresql:dump)
+    DB_IMAGE=postgresql/$APP
+    if [[ ! -f "$DOKKU_ROOT/.postgresql/pwd_$APP" ]]; then
+        echo "Unknown (or too old) PostgreSQL container"
+        exit 1
+    fi
+    export PGPASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
+    PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$APP")
+
+    pg_dump -h 172.17.42.1 -p $PORT -U root -c -O db
+
+    # echo to stderr, as stdout will probably be redirected to a file
+    echo 1>&2
+    echo "-----> $APP database dumped" 1>&2
+    ;;
+
   postgresql:info)
     DB_IMAGE=postgresql/$APP
     if [[ ! -f "$DOKKU_ROOT/.postgresql/pwd_$APP" ]]; then
@@ -162,12 +178,13 @@ case "$1" in
 
   help)
     cat && cat<<EOF
-    postgresql:create <app>     Create a PostgreSQL container
-    postgresql:delete <app>     Delete specified PostgreSQL container
-    postgresql:info <app>       Display database informations
-    postgresql:link <app> <db>  Link an app to a PostgreSQL database
-    postgresql:list             Display list of PostgreSQL containers
-    postgresql:logs <app>       Display last logs from PostgreSQL container
+    postgresql:create <app>                     Create a PostgreSQL container
+    postgresql:delete <app>                     Delete specified PostgreSQL container
+    postgresql:dump <app> > dump_file.sql       Dump database data
+    postgresql:info <app>                       Display database informations
+    postgresql:link <app> <db>                  Link an app to a PostgreSQL database
+    postgresql:list                             Display list of PostgreSQL containers
+    postgresql:logs <app>                       Display last logs from PostgreSQL container
 EOF
     ;;
 
