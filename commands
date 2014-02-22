@@ -111,12 +111,17 @@ case "$1" in
         echo "Unknown (or too old) PostgreSQL container"
         exit 1
     fi
+    DB_PASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
+    PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$APP")
+
     echo
     echo "       Host: 172.17.42.1"
-    echo "       Port: $(cat "$DOKKU_ROOT/.postgresql/port_$APP")"
+    echo "       Port: $PORT"
     echo "       User: 'root'"
-    echo "       Password: '$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")'"
+    echo "       Password: '$DB_PASSWORD'"
     echo "       Database: 'db'"
+    echo
+    echo "       Url: 'postgres://root:$DB_PASSWORD@172.17.42.1:$PORT/db'"
     echo
     ;;
 
