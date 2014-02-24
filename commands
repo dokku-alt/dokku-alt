@@ -111,6 +111,10 @@ case "$1" in
         echo "Unknown (or too old) PostgreSQL container"
         exit 1
     fi
+    if [[ $(whereis pg_dump | awk '{ print NF }') -eq 1 ]]; then
+        echo "'pg_dump' not found. Is the package 'postgresql-client' installed?"
+        exit 1
+    fi
     export PGPASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
     PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$APP")
 
@@ -180,6 +184,10 @@ case "$1" in
     DB_IMAGE=postgresql/$APP
     if [[ ! -f "$DOKKU_ROOT/.postgresql/pwd_$APP" ]]; then
         echo "Unknown (or too old) PostgreSQL container"
+        exit 1
+    fi
+    if [[ $(whereis psql | awk '{ print NF }') -eq 1 ]]; then
+        echo "'psql' not found. Is the package 'postgresql-client' installed?"
         exit 1
     fi
     export PGPASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
