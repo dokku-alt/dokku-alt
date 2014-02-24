@@ -133,12 +133,12 @@ case "$1" in
             exit 1
         fi
         DB_IMAGE="postgresql/$3"
-    	if [[ ! -f "$DOKKU_ROOT/.postgresql/pwd_$APP" ]]; then
+    	if [[ ! -f "$DOKKU_ROOT/.postgresql/pwd_$3" ]]; then
             echo "Database is not initialized correctly"
             exit 0
         fi
-        DB_PASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
-        PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$APP")
+        DB_PASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$3")
+        PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$3")
         # Link database using dokku command
         dokku config:set $APP "DATABASE_URL=postgres://root:$DB_PASSWORD@172.17.42.1:$PORT/db"
         echo
