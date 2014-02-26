@@ -98,15 +98,17 @@ case "$1" in
         fi
         REDIS_IMAGE="redis/$3"
         ID=$(docker ps -a | grep "$REDIS_IMAGE":latest |  awk '{print $1}')
-        IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
-        # Write REDIS_IP to app's ENV file
-        REDIS_URL="REDIS_URL=redis://$IP:6379"
-        if [[ ! -f "$DOKKU_ROOT/$APP/ENV" ]]; then
-            touch "$DOKKU_ROOT/$APP/ENV"
+        if [[ -n "$ID" ]]; then
+            IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+            # Write REDIS_IP to app's ENV file
+            REDIS_URL="REDIS_URL=redis://$IP:6379"
+            if [[ ! -f "$DOKKU_ROOT/$APP/ENV" ]]; then
+                touch "$DOKKU_ROOT/$APP/ENV"
+            fi
+            cat "$DOKKU_ROOT/$APP/ENV" | grep "$REDIS_URL" || echo "export $REDIS_URL" >> "$DOKKU_ROOT/$APP/ENV"
+            echo
+            echo "-----> $APP linked to $REDIS_IMAGE container"
         fi
-        cat "$DOKKU_ROOT/$APP/ENV" | grep "$REDIS_URL" || echo "export $REDIS_URL" >> "$DOKKU_ROOT/$APP/ENV"
-        echo
-        echo "-----> $APP linked to $REDIS_IMAGE container"
     fi
     ;;
 
