@@ -9,6 +9,7 @@ import (
 	"log"
 	"flag"
 	"bytes"
+	"strings"
 	"code.google.com/p/go.crypto/ssh/terminal"
 )
 
@@ -66,7 +67,7 @@ func main() {
 		for i := 0; i < len(cmds); i++ {
 			go func(cmd exec.Cmd) {
 				if *trace {
-					fmt.Fprintln(os.Stderr, "Executing : ", cmd.Args)
+					fmt.Fprintln(os.Stderr, "+", strings.Join(cmds[i].Args, " "))
 				}
 				err := cmd.Run()
 				if msg, ok := err.(*exec.ExitError); ok { // there is error code 
@@ -81,7 +82,7 @@ func main() {
 	} else {
 		for i := 0; i < len(cmds); i++ {
 			if *trace {
-				fmt.Fprintln(os.Stderr, "Executing : ", cmds[i].Args)
+				fmt.Fprintln(os.Stderr, "+", strings.Join(cmds[i].Args, " "))
 			}
 			err := cmds[i].Run()
 			if msg, ok := err.(*exec.ExitError); ok { // there is error code 
