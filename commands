@@ -17,11 +17,26 @@ if [[ $1 == postgresql:* ]]; then
     fi
 fi
 
-# Create .postgresql diretory of not exists
+# Create .postgresql diretory if not exists
 if [[ ! -d $DOKKU_ROOT/.postgresql ]]; then
     mkdir -p $DOKKU_ROOT/.postgresql
     chown -R dokku: $DOKKU_ROOT/.postgresql
 fi
+
+function check_postgresql_container() {
+    if [[ ! -f "$DOKKU_ROOT/.postgresql/pwd_$APP" ]]; then
+        echo "Unknown (or too old) PostgreSQL container"
+        exit 1
+    fi
+}
+
+function check_postgresql_tool() {
+    local tool_name="$1"
+    if [[ $(whereis $tool_name | awk '{ print NF }') -eq 1 ]]; then
+        echo "'${tool_name}' not found. Is the package 'postgresql-client' installed?"
+        exit 1
+    fi
+}
 
 case "$1" in
 
@@ -105,12 +120,21 @@ case "$1" in
     echo "-----> PostgreSQL container deleted: $DB_IMAGE"
     ;;
 
+  postgresql:dump)
+    check_postgresql_container
+    check_installed_tool pg_dump
+    export PGPASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
+    PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$APP")
+
+    pg_dump -h 172.17.42.1 -p $PORT -U root -c -O db
+
+    # echo to stderr, as stdout will probably be redirected to a file
+    echo 1>&2
+    echo "-----> $APP database dumped" 1>&2
+    ;;
+
   postgresql:info)
-    DB_IMAGE=postgresql/$APP
-    if [[ ! -f "$DOKKU_ROOT/.postgresql/pwd_$APP" ]]; then
-        echo "Unknown (or too old) PostgreSQL container"
-        exit 1
-    fi
+    check_postgresql_container
     DB_PASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
     PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$APP")
 
@@ -135,7 +159,7 @@ case "$1" in
         DB_IMAGE="postgresql/$3"
     	if [[ ! -f "$DOKKU_ROOT/.postgresql/pwd_$3" ]]; then
             echo "Database is not initialized correctly"
-            exit 0
+            exit 1
         fi
         DB_PASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$3")
         PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$3")
@@ -160,14 +184,28 @@ case "$1" in
     done
     ;;
 
+  postgresql:restore)
+    check_postgresql_container
+    check_postgresql_tool psql
+    export PGPASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
+    PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$APP")
+
+    psql -h 172.17.42.1 -p $PORT -U root db
+
+    echo
+    echo "-----> $APP database restored"
+    ;;
+
   help)
     cat && cat<<EOF
-    postgresql:create <app>     Create a PostgreSQL container
-    postgresql:delete <app>     Delete specified PostgreSQL container
-    postgresql:info <app>       Display database informations
-    postgresql:link <app> <db>  Link an app to a PostgreSQL database
-    postgresql:list             Display list of PostgreSQL containers
-    postgresql:logs <app>       Display last logs from PostgreSQL container
+    postgresql:create <app>                         Create a PostgreSQL container
+    postgresql:delete <app>                         Delete specified PostgreSQL container
+    postgresql:dump <app> > dump_file.sql           Dump database data
+    postgresql:info <app>                           Display database informations
+    postgresql:link <app> <db>                      Link an app to a PostgreSQL database
+    postgresql:list                                 Display list of PostgreSQL containers
+    postgresql:logs <app>                           Display last logs from PostgreSQL container
+    postgresql:restore <app> < dump_file.sql        Restore database data from a previous dump
 EOF
     ;;
 
