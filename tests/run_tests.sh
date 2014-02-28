@@ -20,3 +20,14 @@
   [[ $(( ${times[0]} - ${times[1]} )) -le 1 ]]
 }
 
+@test "print trace of hook calls" {
+  stderr=$(echo Hello | $BIN -x cat 2>&1 >/dev/null)
+  [[ $stderr == Executing* ]]
+  stderr=$(echo Hello | $BIN -x -p cat 2>&1 >/dev/null)
+  [[ $stderr == Executing* ]]
+  stderr=$(echo Hello | PLUGINHOOK_TRACE=1 $BIN cat 2>&1 >/dev/null)
+  [[ $stderr == Executing* ]]
+  stderr=$(echo Hello | PLUGINHOOK_TRACE=1 $BIN -p cat 2>&1 >/dev/null)
+  [[ $stderr == Executing* ]]
+}
+

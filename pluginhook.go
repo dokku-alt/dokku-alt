@@ -9,12 +9,18 @@ import (
 	"log"
 	"flag"
 	"bytes"
+	"strings"
 	"code.google.com/p/go.crypto/ssh/terminal"
 )
 
 func main() {
 	var parallel = flag.Bool("p", false, "Run hooks in parallel")
+	var trace = flag.Bool("x", false, "Trace mode")
 	flag.Parse()
+
+	if len(os.Getenv("PLUGINHOOK_TRACE")) > 0 {
+		*trace = true
+	}
 
 	pluginPath := os.Getenv("PLUGIN_PATH")
 	if pluginPath == "" {
@@ -60,6 +66,9 @@ func main() {
 
 		for i := 0; i < len(cmds); i++ {
 			go func(cmd exec.Cmd) {
+				if *trace {
+					fmt.Fprintln(os.Stderr, "+", strings.Join(cmds[i].Args, " "))
+				}
 				err := cmd.Run()
 				if msg, ok := err.(*exec.ExitError); ok { // there is error code 
 					os.Exit(msg.Sys().(syscall.WaitStatus).ExitStatus())
@@ -72,6 +81,9 @@ func main() {
 		}
 	} else {
 		for i := 0; i < len(cmds); i++ {
+			if *trace {
+				fmt.Fprintln(os.Stderr, "+", strings.Join(cmds[i].Args, " "))
+			}
 			err := cmds[i].Run()
 			if msg, ok := err.(*exec.ExitError); ok { // there is error code 
 				os.Exit(msg.Sys().(syscall.WaitStatus).ExitStatus())
