@@ -65,7 +65,7 @@ func main() {
 		done := make(chan bool, len(cmds))
 
 		for i := 0; i < len(cmds); i++ {
-			go func(cmd exec.Cmd) {
+			go func(cmd exec.Cmd, i int) {
 				if *trace {
 					fmt.Fprintln(os.Stderr, "+", strings.Join(cmds[i].Args, " "))
 				}
@@ -74,7 +74,7 @@ func main() {
 					os.Exit(msg.Sys().(syscall.WaitStatus).ExitStatus())
 				}
 				done <- true
-			}(cmds[i])
+			}(cmds[i], i)
 		}
 		for i := 0; i < len(cmds); i++ {
 			<-done

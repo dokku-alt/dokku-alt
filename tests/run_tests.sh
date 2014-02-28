@@ -22,12 +22,12 @@
 
 @test "print trace of hook calls" {
   stderr=$(echo Hello | $BIN -x cat 2>&1 >/dev/null)
-  [[ $stderr == Executing* ]]
+  [[ $stderr == +* ]]
   stderr=$(echo Hello | $BIN -x -p cat 2>&1 >/dev/null)
-  [[ $stderr == Executing* ]]
+  [[ $stderr == +* ]]
   stderr=$(echo Hello | PLUGINHOOK_TRACE=1 $BIN cat 2>&1 >/dev/null)
-  [[ $stderr == Executing* ]]
+  [[ $stderr == +* ]]
   stderr=$(echo Hello | PLUGINHOOK_TRACE=1 $BIN -p cat 2>&1 >/dev/null)
-  [[ $stderr == Executing* ]]
+  [[ $stderr == +* ]]
 }
 
