@@ -23,6 +23,13 @@ if [[ ! -d $DOKKU_ROOT/.postgresql ]]; then
     chown -R dokku: $DOKKU_ROOT/.postgresql
 fi
 
+function check_postgresql_container() {
+    if [[ ! -f "$DOKKU_ROOT/.postgresql/pwd_$APP" ]]; then
+        echo "Unknown (or too old) PostgreSQL container"
+        exit 1
+    fi
+}
+
 function check_postgresql_tool() {
     local tool_name="$1"
     if [[ $(whereis $tool_name | awk '{ print NF }') -eq 1 ]]; then
@@ -114,10 +121,7 @@ case "$1" in
     ;;
 
   postgresql:dump)
-    if [[ ! -f "$DOKKU_ROOT/.postgresql/pwd_$APP" ]]; then
-        echo "Unknown (or too old) PostgreSQL container"
-        exit 1
-    fi
+    check_postgresql_container
     check_installed_tool pg_dump
     export PGPASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
     PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$APP")
@@ -130,10 +134,7 @@ case "$1" in
     ;;
 
   postgresql:info)
-    if [[ ! -f "$DOKKU_ROOT/.postgresql/pwd_$APP" ]]; then
-        echo "Unknown (or too old) PostgreSQL container"
-        exit 1
-    fi
+    check_postgresql_container
     DB_PASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
     PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$APP")
 
@@ -184,10 +185,7 @@ case "$1" in
     ;;
 
   postgresql:restore)
-    if [[ ! -f "$DOKKU_ROOT/.postgresql/pwd_$APP" ]]; then
-        echo "Unknown (or too old) PostgreSQL container"
-        exit 1
-    fi
+    check_postgresql_container
     check_postgresql_tool psql
     export PGPASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
     PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$APP")
