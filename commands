@@ -23,6 +23,14 @@ if [[ ! -d $DOKKU_ROOT/.postgresql ]]; then
     chown -R dokku: $DOKKU_ROOT/.postgresql
 fi
 
+function check_postgresql_tool() {
+    local tool_name="$1"
+    if [[ $(whereis $tool_name | awk '{ print NF }') -eq 1 ]]; then
+        echo "'${tool_name}' not found. Is the package 'postgresql-client' installed?"
+        exit 1
+    fi
+}
+
 case "$1" in
 
   postgresql:create)
@@ -110,10 +118,7 @@ case "$1" in
         echo "Unknown (or too old) PostgreSQL container"
         exit 1
     fi
-    if [[ $(whereis pg_dump | awk '{ print NF }') -eq 1 ]]; then
-        echo "'pg_dump' not found. Is the package 'postgresql-client' installed?"
-        exit 1
-    fi
+    check_installed_tool pg_dump
     export PGPASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
     PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$APP")
 
@@ -183,10 +188,7 @@ case "$1" in
         echo "Unknown (or too old) PostgreSQL container"
         exit 1
     fi
-    if [[ $(whereis psql | awk '{ print NF }') -eq 1 ]]; then
-        echo "'psql' not found. Is the package 'postgresql-client' installed?"
-        exit 1
-    fi
+    check_postgresql_tool psql
     export PGPASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$APP")
     PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$APP")
 
