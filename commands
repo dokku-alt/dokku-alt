@@ -17,7 +17,7 @@ if [[ $1 == postgresql:* ]]; then
     fi
 fi
 
-# Create .postgresql diretory of not exists
+# Create .postgresql diretory if not exists
 if [[ ! -d $DOKKU_ROOT/.postgresql ]]; then
     mkdir -p $DOKKU_ROOT/.postgresql
     chown -R dokku: $DOKKU_ROOT/.postgresql
@@ -155,7 +155,7 @@ case "$1" in
         DB_IMAGE="postgresql/$3"
     	if [[ ! -f "$DOKKU_ROOT/.postgresql/pwd_$3" ]]; then
             echo "Database is not initialized correctly"
-            exit 0
+            exit 1
         fi
         DB_PASSWORD=$(cat "$DOKKU_ROOT/.postgresql/pwd_$3")
         PORT=$(cat "$DOKKU_ROOT/.postgresql/port_$3")
