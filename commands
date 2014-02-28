@@ -177,11 +177,15 @@ case "$1" in
     ;;
     
   postgresql:list)
-    CONTAINERS=$(ls $DOKKU_ROOT/.postgresql/volume* | sed -e 's/_/ /' | awk '{print $2}')
-    echo "PostgreSQL containers:"
-    for CONTAINER in $CONTAINERS; do
-        echo "  - $CONTAINER"
-    done
+    CONTAINERS=$(ls $DOKKU_ROOT/.postgresql/volume* 2> /dev/null | sed -e 's/_/ /' | awk '{print $2}')
+    if [[ -z $CONTAINERS ]]; then
+        echo "There are no PostgreSQL containers created."
+    else
+        echo "PostgreSQL containers:"
+        for CONTAINER in $CONTAINERS; do
+            echo "  - $CONTAINER"
+        done
+    fi
     ;;
 
   postgresql:restore)
