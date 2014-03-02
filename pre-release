@@ -10,6 +10,6 @@ fi
 
 #new way supports multi db per db
 for f in `ls $DOKKU_ROOT/.mongodb/pass_${APP}_*`; do
-  DATABASE = $( echo "$f" | cut -d'_' -f3 )
+  DATABASE=$( echo "$f" | cut -d'_' -f3 )
   dokku mongodb:link $APP $DATABASE
 done
