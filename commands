@@ -6,8 +6,8 @@ then
   APP=$2
   DATABASE=$2
 else
-  APP=$3
-  DATABASE=$2
+  APP=$2
+  DATABASE=$3
 fi
 
 IMAGE="jeffutter/mongodb"
@@ -67,7 +67,14 @@ case "$1" in
     check_app
 
     mongodb_password=$(openssl rand -base64 32|base64)
-    echo $mongodb_password > "$DOKKU_ROOT/.mongodb/pass_${APP}"
+
+    if [[ -z "$3"  ]]
+      then
+        echo $mongodb_password > "$DOKKU_ROOT/.mongodb/pass_${APP}"
+      else
+        echo $mongodb_password > "$DOKKU_ROOT/.mongodb/pass_${APP}_${DATABASE}"
+    fi
+    
 
     mongodb_username=$APP
     mongo $mongodb_public_ip:$mongodb_port/$mongodb_database --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "db.addUser(\"${mongodb_username}\", \"${mongodb_password}\")"
@@ -89,7 +96,13 @@ case "$1" in
   mongodb:link)
     if [[ -d "$DOKKU_ROOT/$APP" ]]; then
       mongodb_internal_port=27017
-      mongodb_password=$(cat "$DOKKU_ROOT/.mongodb/pass_${APP}")
+      if [[ -z "$3"  ]]
+        then
+          mongodb_password=$(cat "$DOKKU_ROOT/.mongodb/pass_${APP}")
+        else
+          mongodb_password=$(cat "$DOKKU_ROOT/.mongodb/pass_${APP}_${DATABASE}")
+      fi
+
       mongodb_username=$APP
 
       # Have to set ENV vars this way. Using dokku config:set causes a loop where it tries to redeploy itself and calls this again
@@ -135,9 +148,9 @@ case "$1" in
   help)
     cat && cat<<EOF
     mongodb:console      Launch an admin mongodb console
-    mongodb:create <database> <app> Create a Mongo database and optionall params for app
-    mongodb:delete <database> Delete specified Mongo database
-    mongodb:link <database>  <app> Set ENV variables for app if database exists
+    mongodb:create <app> <database> Create a Mongo database and optionall params for app
+    mongodb:delete <app> Delete specified Mongo database
+    mongodb:link <app>  <database> Set ENV variables for app if database exists
     mongodb:list         List all databases
     mongodb:logs         Show logs from MongoDB program
     mongodb:start        Start the MongoDB docker container if it isn't running
