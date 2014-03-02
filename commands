@@ -1,7 +1,15 @@
 #!/bin/bash
 #set -e;
 
-APP=$2
+if [[ -z "$3"  ]]
+then
+  APP=$2
+  DATABASE=$2
+else
+  APP=$3
+  DATABASE=$2
+fi
+
 IMAGE="jeffutter/mongodb"
 
 OLDHOME=$HOME
@@ -36,7 +44,7 @@ set_dokku_env() {
 }
 
 admin_pass=$(cat "$DOKKU_ROOT/.mongodb/admin_pw")
-mongodb_database="${APP/./_}-production"
+mongodb_database="${DATABASE/./_}-production"
 
 db_image="jeffutter/mongodb"
 id=$(docker ps | grep "$db_image":latest |  awk '{print $1}')
