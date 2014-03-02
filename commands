@@ -135,9 +135,9 @@ case "$1" in
   help)
     cat && cat<<EOF
     mongodb:console      Launch an admin mongodb console
-    mongodb:create <app> Create a Mongo database
-    mongodb:delete <app> Delete specified Mongo database
-    mongodb:link <app>   Set ENV variables for app if database exists
+    mongodb:create <database> <app> Create a Mongo database and optionall params for app
+    mongodb:delete <database> Delete specified Mongo database
+    mongodb:link <database>  <app> Set ENV variables for app if database exists
     mongodb:list         List all databases
     mongodb:logs         Show logs from MongoDB program
     mongodb:start        Start the MongoDB docker container if it isn't running
