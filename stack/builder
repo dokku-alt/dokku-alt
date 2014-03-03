@@ -21,7 +21,18 @@ if [ -n "$BUILDPACK_URL" ]; then
   echo "       Fetching custom buildpack"
   buildpack="$buildpack_root/custom"
   rm -rf "$buildpack"
-  git clone --depth=1 "$BUILDPACK_URL" "$buildpack"
+
+  IFS='#' read url treeish <<< "$BUILDPACK_URL"
+
+  if [ "$treeish" == "" ]; then
+    git clone --depth=1 "$url" "$buildpack" > /dev/null 2>&1
+  else
+    git clone "$url" "$buildpack" > /dev/null 2>&1
+    cd $buildpack
+    git checkout $treeish > /dev/null 2>&1
+    cd $build_root
+  fi
+
   selected_buildpack="$buildpack"
   buildpack_name=$($buildpack/bin/detect "$build_root") && selected_buildpack=$buildpack
 else
