@@ -15,3 +15,4 @@ https://github.com/igrigorik/heroku-buildpack-dart.git
 https://github.com/rhy-jot/buildpack-nginx.git
 https://github.com/Kloadut/heroku-buildpack-static-apache.git
 https://github.com/bacongobbler/heroku-buildpack-jekyll.git
+https://github.com/ddollar/heroku-buildpack-multi.git
