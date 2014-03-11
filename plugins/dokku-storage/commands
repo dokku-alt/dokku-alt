@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+# Check if name is specified
+if [[ $1 == storage:* ]]; then
+    if [[ -z $2 ]]; then
+        echo "You must specify an app name"
+        exit 1
+    fi
+
+    APP="$2"
+    # Check if app exists with the same name
+    if [[ ! -d "$DOKKU_ROOT/$APP" ]]; then
+      echo "App $APP does not exist"
+      exit 1
+    fi
+
+    STORAGE_FILE="$DOKKU_ROOT/$APP/STORAGE"
+    [ ! -f $STORAGE_FILE ] && touch $STORAGE_FILE
+fi
+
+storage_restart_app() {
+  APP="$1";
+
+  echo "-----> Deploying $APP ..."
+  dokku deploy $APP
+  echo "-----> Deploy complete!"
+}
+
+case "$1" in
+  storage:list)
+    cat $STORAGE_FILE
+	;;
+
+  storage:add)
+    while read STORAGE_LINE
+    do
+        if [[ "$STORAGE_LINE" == "$3" ]]; then
+            exit 0
+        fi
+    done < $STORAGE_FILE
+    echo $3 >> $STORAGE_FILE
+    storage_restart_app $APP
+	;;
+
+  storage:remove)
+    FOUND=0
+    while read STORAGE_LINE
+    do
+        if [[ "$STORAGE_LINE" == "$3" ]]; then
+            FOUND=1
+            continue
+        fi
+        echo $STORAGE_LINE
+    done < $STORAGE_FILE > $STORAGE_FILE.tmp
+    [ "$FOUND" == "0" ] && exit 0
+    mv $STORAGE_FILE.tmp $STORAGE_FILE
+    storage_restart_app $APP
+	;;
+
+  help)
+    cat && cat<<EOF
+    storage:list <app>           List persistent paths
+    storage:add <app> <path>     Add persistent path
+    storage:remove <app> <path>  Remove persistent path
+EOF
+    ;;
+esac

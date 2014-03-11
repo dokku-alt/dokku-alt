@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+cat
+
+APP="$1"
+STORAGE_FILE="$DOKKU_ROOT/$APP/STORAGE"
+STORAGE_DATA="$DOKKU_ROOT/$APP/STORAGE_DATA"
+
+[ ! -f $STORAGE_FILE ] && exit 0
+
+while read STORAGE_LINE
+do
+    LOCAL_STORAGE_DATA="$STORAGE_DATA/$STORAGE_LINE"
+    mkdir -p $LOCAL_STORAGE_DATA
+    echo -n "-v" "$LOCAL_STORAGE_DATA":"$STORAGE_LINE" " "
+done < $STORAGE_FILE
