@@ -110,7 +110,12 @@ case "$1" in
     if [[ "$id" != "" ]]; then
       echo "MongoDB container already running with ID: ${id}"
     else
-      docker run -p 27017 -v "$DOKKU_ROOT/.mongodb/data":/tmp/mongo --name="dokku-mongodb" -d "$IMAGE" /usr/bin/mongod --dbpath=/tmp/mongo --auth
+      id=$(docker ps -a | grep "$db_image:latest[[:space:]].\+[[:space:]]dokku-mongodb[[:space:]]*$" |  awk '{print $1}')
+      if [[ "$id" != "" ]]; then
+        docker start $id
+      else
+        docker run -p 27017 -v "$DOKKU_ROOT/.mongodb/data":/tmp/mongo --name="dokku-mongodb" -d "$IMAGE" /usr/bin/mongod --dbpath=/tmp/mongo --auth
+      fi
     fi
     ;;
   mongodb:stop)
