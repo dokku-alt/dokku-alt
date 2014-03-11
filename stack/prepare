@@ -25,4 +25,3 @@ xargs -L 1 git clone --depth=1 < /build/buildpacks.txt
 update-alternatives --set ruby /usr/bin/ruby1.9.1
 update-alternatives --set gem /usr/bin/gem1.9.1
 gem install bundler
-cd /build/buildpacks/heroku-buildpack-ruby && bundle install
