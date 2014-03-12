@@ -44,7 +44,7 @@ case "$1" in
 
   help)
     cat && cat<<EOF
-    apps	List apps
+    apps                  List apps
     apps:status <app>     Status of specific apps
     apps:start <app>	  Stop specific apps
     apps:stop <app>		  Stop specific apps
