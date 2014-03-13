@@ -28,13 +28,6 @@ check_container() {
   fi
 }
 
-set_dokku_env() {
-  env_var=$1
-  env_val=$2
-  ex -s -c "g/export ${env_var}=/d" -c "x" "$DOKKU_ROOT/$APP/ENV"
-  echo "export ${env_var}=\"${env_val}\"" >> "$DOKKU_ROOT/$APP/ENV"
-}
-
 admin_pass=$(cat "$DOKKU_ROOT/.mongodb/admin_pw")
 mongodb_database="${APP//./_}-production"
 
@@ -42,7 +35,6 @@ db_image="jeffutter/mongodb"
 id=$(docker ps | grep "$db_image":latest |  awk '{print $1}')
 if [[ -n "$id" ]]; then
   mongodb_public_ip=$(docker port ${id} 27017 | awk '{split($0,a,":"); print a[1]}')
-  mongodb_private_ip=$(docker inspect ${id} | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
   mongodb_port=$(docker port ${id} 27017 | awk '{split($0,a,":"); print a[2]}')
   if [[ $mongodb_public_ip = "0.0.0.0" ]]; then
     mongodb_public_ip=localhost
@@ -70,33 +62,7 @@ case "$1" in
     check_exists
 
     mongo $mongodb_public_ip:$mongodb_port/$mongodb_database --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "printjson(db.dropDatabase())"
-
-    dokku config:unset "$APP" MONGODB_DATABASE \
-      MONGODB_HOST \
-      MONGODB_USERNAME \
-      MONGODB_PASSWORD \
-      MONGODB_PORT \
-      MONGO_URL
-    ;;
-  mongodb:link)
-    if [[ -d "$DOKKU_ROOT/$APP" ]]; then
-      mongodb_internal_port=27017
-      mongodb_password=$(cat "$DOKKU_ROOT/.mongodb/pass_${APP}")
-      mongodb_username=$APP
-
-      # Have to set ENV vars this way. Using dokku config:set causes a loop where it tries to redeploy itself and calls this again
-
-
-      set_dokku_env MONGODB_DATABASE "$mongodb_database"
-      set_dokku_env MONGODB_HOST "$mongodb_private_ip"
-      set_dokku_env MONGODB_PORT "$mongodb_port"
-      set_dokku_env MONGODB_USERNAME "$mongodb_username"
-      set_dokku_env MONGODB_PASSWORD "$mongodb_password"
-      set_dokku_env MONGO_URL "mongodb://${mongodb_username}:${mongodb_password}@${mongodb_private_ip}:${mongodb_internal_port}/${mongodb_database}"
-
-      echo
-      echo "-----> $APP linked to $IMAGE container"
-    fi
+    rm -f "$DOKKU_ROOT/.mongodb/pass_${APP}"
     ;;
   mongodb:list)
     check_container
@@ -126,15 +92,14 @@ case "$1" in
     ;;
   help)
     cat && cat<<EOF
-    mongodb:console      Launch an admin mongodb console
-    mongodb:create <app> Create a Mongo database
-    mongodb:delete <app> Delete specified Mongo database
-    mongodb:link <app>   Set ENV variables for app if database exists
-    mongodb:list         List all databases
-    mongodb:logs         Show logs from MongoDB program
-    mongodb:start        Start the MongoDB docker container if it isn't running
-    mongodb:stop         Stop the MongoDB docker container
-    mongodb:status       Shows status of MongoDB
+    mongodb:console       Launch an admin mongodb console
+    mongodb:create <app>  Create a Mongo database
+    mongodb:delete <app>  Delete specified Mongo database
+    mongodb:list          List all databases
+    mongodb:logs          Show logs from MongoDB program
+    mongodb:start         Start the MongoDB docker container if it isn't running
+    mongodb:stop          Stop the MongoDB docker container
+    mongodb:status        Shows status of MongoDB
 EOF
     ;;
 esac

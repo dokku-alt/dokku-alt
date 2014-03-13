@@ -1,6 +1,0 @@
-#!/bin/bash
-
-APP="$1"
-if [[ -f "$DOKKU_ROOT/.mongodb/pass_${APP}" ]]; then
-  dokku mongodb:link $APP
-fi
