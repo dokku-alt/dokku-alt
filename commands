@@ -36,7 +36,7 @@ set_dokku_env() {
 }
 
 admin_pass=$(cat "$DOKKU_ROOT/.mongodb/admin_pw")
-mongodb_database="${APP/./_}-production"
+mongodb_database="${APP//./_}-production"
 
 db_image="jeffutter/mongodb"
 id=$(docker ps | grep "$db_image":latest |  awk '{print $1}')
