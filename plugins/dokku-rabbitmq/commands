@@ -1,0 +1,205 @@
+#!/bin/bash
+set -e;
+
+# Check if name is specified
+if [[ $1 == rabbitmq:* ]]; then
+    if [[ -z $2 ]]; then
+        echo "You must specify an app name"
+        exit 1
+    else
+        APP="$2"
+        # Check if app exists with the same name
+        if [[ -d "$DOKKU_ROOT/$APP" ]]; then
+            APP_EXISTS=true
+        else
+            APP_EXISTS=false
+        fi
+    fi
+    if [[ ! -d "$PLUGIN_PATH/link" ]]; then
+        echo "Link plugin not found... Did you install it from https://github.com/rlaneve/dokku-link?"
+        exit 1
+    fi
+    PLUGIN_NAME="rabbitmq"
+    PLUGIN_ALIAS="broker"
+    CONTAINER_NAME="${PLUGIN_NAME}_${APP}"
+    HOST_DIR="$DOKKU_ROOT/.$PLUGIN_NAME/$APP"
+    CONTAINER_IMAGE="jlachowski/rabbitmq"
+    RABBITMQ_PORT=5672
+    RABBITMQ_ADMIN_PORT=15672
+fi
+
+case "$1" in
+
+  rabbitmq:create)
+    # Check if Rabbitmq container is installed
+    IMAGE=$(docker images | grep "$CONTAINER_IMAGE" |  awk '{print $3}')
+    if [[ -z $IMAGE ]]; then
+        echo "Rabbitmq image not found... Did you run 'dokku plugins-install' ?"
+        exit 1
+    fi
+    # check for existing container with the same persistent rabbitmq
+    ID=$(docker ps -a | grep "$CONTAINER_NAME" |  awk '{print $1}')
+    if [[ ! -z "$ID" ]]; then
+        echo
+        echo "-----> Container $CONTAINER_NAME already exist. Please use rebuild or delete command"
+        exit 1
+    fi
+    if [[ ! -d "$HOST_DIR" ]]; then
+        mkdir -p "$HOST_DIR"
+    fi
+    # Check if an existing storage volume exists
+    if [[ -d "$HOST_DIR/volume" ]]; then
+        echo
+        echo "-----> Reusing rabbitmq/$APP storage"
+    else
+        mkdir -p "$HOST_DIR/volume"
+    fi
+    # Generate random password for users
+    RABBITMQ_PASSWORD=$(< /dev/urandom tr -dc A-Za-z0-9 | head -c 16)
+    echo $RABBITMQ_PASSWORD > "$HOST_DIR/pwd"
+    chmod 600 "$HOST_DIR/pwd"
+    VOLUME="$HOST_DIR/volume:/opt/rabbitmq"
+    # Stop existing container with the same persistent Rabbitmq
+    ID=$(docker ps | grep "$CONTAINER_NAME" |  awk '{print $1}')
+    if [[ ! -z "$ID" ]]; then
+        docker stop $ID > /dev/null
+    fi
+    # Launch container
+    ID=$(docker run -v $VOLUME -name=$CONTAINER_NAME -d $CONTAINER_IMAGE /usr/bin/start-rabbitmq.sh $RABBITMQ_PASSWORD)
+    sleep 1
+    # Link to a potential existing app
+    dokku rabbitmq:link $APP $APP
+    echo
+    echo "-----> Rabbitmq container created: $CONTAINER_NAME (using $CONTAINER_IMAGE)"
+    sleep 1
+    dokku rabbitmq:info $APP
+    ;;
+
+  rabbitmq:rebuild)
+    ID=$(docker ps -a | grep "$CONTAINER_NAME" |  awk '{print $1}')
+    if [[ ! -z "$ID" ]]; then
+        echo
+        echo "-----> Stopping & removing $CONTAINER_NAME container"
+        docker stop $ID > /dev/null
+        docker rm $ID > /dev/null
+    fi
+    dokku rabbitmq:create $APP
+    ;;
+
+  rabbitmq:clone)
+    if $APP_EXISTS; then
+        # Check argument
+        if [[ -z $3 ]]; then
+            echo "You must specify a name for the clone"
+            exit 1
+        fi
+        TARGET_DIR="$DOKKU_ROOT/.$PLUGIN_NAME/$3"
+        if [[ -d "$TARGET_DIR" ]]; then
+            echo "Persistent storage for ${PLUGIN_NAME}_$3 already exists"
+            exit 1
+        fi
+        echo
+        echo "-----> Cloning $PLUGIN_NAME/$APP storage"
+        #FIXME: fix the access rights issue
+        #cp -rf "$HOST_DIR" "$TARGET_DIR"
+        #dokku rabbitmq:rebuild $3 > /dev/null
+        #echo
+        #echo "-----> $PLUGIN_NAME/$APP storage cloned to $PLUGIN_NAME/$3"
+        echo
+        echo "-----> [Attention]: This command needs access right fix, for now issue following command as root"
+        echo "cp -rf ${HOST_DIR} ${TARGET_DIR}"
+        echo
+        echo "-----> and manualy rebuild ${PLUGIN_NAME}_${3} container"
+        echo "dokku rabbitmq:rebuild $3"
+    fi
+    ;;
+
+  rabbitmq:delete)
+    echo
+    echo "-----> This will permanently remove all the stored data. Are you sure (yes/no)?"
+    read ANSWER
+    if [[ $ANSWER == "yes" ]]; then
+        # Stop the container
+        ID=$(docker ps -a | grep "$CONTAINER_NAME" |  awk '{print $1}')
+        if [[ ! -z $ID ]]; then
+            docker stop $ID > /dev/null
+            docker rm $ID > /dev/null
+        fi
+
+        dokku link:delete "$APP" "$CONTAINER_NAME" "$PLUGIN_ALIAS"
+        dokku config:unset "$APP" "BROKER_SCHEME" "BROKER_USERNAME" "BROKER_PASSWORD" "BROKER_PATH"
+
+        # Remove persistent volume
+        if [[ -d "$HOST_DIR" ]]; then
+            rm -rf "$HOST_DIR"
+            echo
+            echo "-----> Deleted persistent storage for $CONTAINER_NAME"
+        fi
+        echo
+        echo "-----> Deleted RabbitMQ container $CONTAINER_NAME"
+    fi
+    ;;
+
+  rabbitmq:info)
+    ID=$(docker ps -a | grep "$CONTAINER_NAME" |  awk '{print $1}')
+    IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+    DOCKER_GATEWAY=$(docker inspect $ID | grep Gateway | awk '{ print $2 }' | tr -d ',"')
+    echo
+    echo "       Host: $IP"
+    echo "       Gateway: $DOCKER_GATEWAY"
+    echo "       Secret AMQP port: $RABBITMQ_PORT"
+    echo "       Secret ADMIN port: $RABBITMQ_ADMIN_PORT"
+    echo
+    ;;
+
+  rabbitmq:link)
+    if $APP_EXISTS; then
+        # Check argument
+        if [[ -z $3 ]]; then
+            echo "You must specify a container name"
+            exit 1
+        fi
+        CONTAINER_NAME="${PLUGIN_NAME}_$3"
+        if [[ ! -f "$HOST_DIR/pwd" ]]; then
+            echo "Rabbitmq is not correctly initialized"
+            exit 0
+        fi
+        ID=$(docker ps -a | grep "$CONTAINER_NAME" |  awk '{print $1}')
+        #IP=$(docker inspect $ID | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+        RABBITMQ_PASSWORD=$(cat "$HOST_DIR/pwd")
+
+        dokku link:create "$APP" "$CONTAINER_NAME" "$PLUGIN_ALIAS"
+        # Write BROKER_URL to app's ENV file using dokku command
+        dokku config:set $APP "BROKER_SCHEME=amqp" "BROKER_USERNAME=admin" "BROKER_PASSWORD=$RABBITMQ_PASSWORD" "BROKER_PATH=//"
+        echo
+        echo "-----> $APP linked to $CONTAINER_NAME container"
+    fi
+    ;;
+
+  rabbitmq:logs)
+    ID=$(docker ps -a | grep "$CONTAINER_NAME" |  awk '{print $1}')
+    docker logs $ID | tail -n 100
+    ;;
+
+  rabbitmq:list)
+    CONTAINERS=$(ls -1 "$DOKKU_ROOT/.$PLUGIN_NAME/" | awk '{print $1}')
+    echo "RabbitMQ containers:"
+    for CONTAINER in $CONTAINERS; do
+        echo "  - $CONTAINER"
+    done
+    ;;
+
+  help)
+    cat && cat<<EOF
+    rabbitmq:create <app>                         Create a RabbitMQ container for <app>
+    rabbitmq:clone <app> <trg>                    Clone RabbitMQ container of <app> for <trg>
+    rabbitmq:rebuild <app>                        Rebuild RabbitMQ container of <app> (keep persistend data)
+    rabbitmq:delete <app>                         Delete specified RabbitMQ container for <app>
+    rabbitmq:info <app>                           Display <app> RabbitMQ container informations
+    rabbitmq:link <app> <rabbit>                  Link an app to a RabbitMQ container
+    rabbitmq:list                                 Display list of RabbitMQ containers
+    rabbitmq:logs <app>                           Display last logs from <app> RabbitMQ container
+EOF
+    ;;
+
+esac
