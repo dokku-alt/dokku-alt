@@ -1,0 +1,53 @@
+[subtree "plugins/dokku-mongodb"]
+	url = https://github.com/jeffutter/dokku-mongodb-plugin.git
+	path = plugins/dokku-mongodb
+	branch = master
+[subtree "plugins/dokku-git-rev"]
+	url = https://github.com/nornagon/dokku-git-rev.git
+	path = plugins/dokku-git-rev
+	branch = master
+[subtree "plugins/dokku-rebuild"]
+	url = https://github.com/scottatron/dokku-rebuild.git
+	path = plugins/dokku-rebuild
+	branch = master
+[subtree "plugins/dokku-mariadb"]
+	url = https://github.com/Kloadut/dokku-md-plugin.git
+	path = plugins/dokku-mariadb
+	branch = master
+[subtree "plugins/dokku-memcached"]
+	url = https://github.com/jezdez/dokku-memcached-plugin.git
+	path = plugins/dokku-memcached
+	branch = master
+[subtree "plugins/dokku-postgresql"]
+	url = https://github.com/Kloadut/dokku-pg-plugin.git
+	path = plugins/dokku-postgresql
+	branch = master
+[subtree "plugins/dokku-rabbitmq"]
+	url = https://github.com/jlachowski/dokku-rabbitmq-plugin.git
+	path = plugins/dokku-rabbitmq
+	branch = master
+[subtree "plugins/dokku-redis"]
+	url = https://github.com/jezdez/dokku-redis-plugin.git
+	path = plugins/dokku-redis
+	branch = master
+[subtree "plugins/dokku-user-env-compile"]
+	url = https://github.com/musicglue/dokku-user-env-compile.git
+	path = plugins/dokku-user-env-compile
+	branch = master
+[subtree "buildstep"]
+	url = https://github.com/progrium/buildstep.git
+	path = buildstep
+	branch = master
+[subtree "pluginhook"]
+	url = https://github.com/progrium/pluginhook.git
+	path = pluginhook
+	branch = master
+[subtree "gitreceive"]
+	url = https://github.com/progrium/gitreceive.git
+	path = gitreceive
+	branch = master
+[subtree "sshcommand"]
+	url = https://github.com/progrium/sshcommand.git
+	path = sshcommand
+	branch = master
+
