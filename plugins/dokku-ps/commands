@@ -42,12 +42,25 @@ case "$1" in
     docker stop $ID
 	;;
 
+  apps:restart)
+    ID=$(< "$DOKKU_ROOT/$APP/CONTAINER")
+    docker restart $ID
+    ;;
+
+  apps:top)
+    ID=$(< "$DOKKU_ROOT/$APP/CONTAINER")
+    shift 2
+    docker ps $ID "$@"
+    ;;
+
   help)
     cat && cat<<EOF
-    apps                  List apps
-    apps:status <app>     Status of specific apps
-    apps:start <app>	  Stop specific apps
-    apps:stop <app>		  Stop specific apps
+    apps                      List apps
+    apps:status <app>         Status of specific apps
+    apps:start <app>	      Stop specific apps
+    apps:stop <app>		      Stop specific apps
+    apps:restart <app>        Restart specific apps
+    apps:top <app> [args...]  Show running processes
 EOF
     ;;
 esac

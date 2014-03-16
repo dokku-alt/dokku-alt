@@ -12,6 +12,11 @@ if [[ $(id -un) != "dokku" && $1 != "plugins-install" ]]; then
   exit
 fi
 
+if [[ "$1" == "" ]]; then
+  dokku help
+  exit
+fi
+
 case "$1" in
   receive)
     APP="$2"; IMAGE="app/$APP"
