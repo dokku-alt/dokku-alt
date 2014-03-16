@@ -2,9 +2,17 @@ VERSION = 0.1.1
 
 build: pluginhook
 
-pluginhook:
-	go build -o pluginhook
-	GOOS=linux go build -o pluginhook.linux
+install: pluginhook
+	cp pluginhook /usr/local/bin/
+
+pluginhook pluginhook.linux: pluginhook.go
+	docker build -t progrium/pluginhook .
+	docker run -t -rm progrium/pluginhook cat pluginhook > pluginhook.tmp
+	docker run -t -rm progrium/pluginhook cat pluginhook.linux > pluginhook.linux.tmp
+	mv pluginhook.tmp pluginhook
+	mv pluginhook.linux.tmp pluginhook.linux
+	docker rmi progrium/pluginhook
+	chmod +x pluginhook pluginhook.linux
 
 test: build
 	PLUGIN_PATH=./tests/plugins BIN=./pluginhook tests/run_tests.sh
