@@ -34,9 +34,9 @@
 	url = https://github.com/musicglue/dokku-user-env-compile.git
 	path = plugins/dokku-user-env-compile
 	branch = master
-[subtree "buildstep"]
+[subtree "plugins/00_dokku-standard/buildstep"]
 	url = https://github.com/progrium/buildstep.git
-	path = buildstep
+	path = plugins/00_dokku-standard/buildstep
 	branch = master
 [subtree "pluginhook"]
 	url = https://github.com/progrium/pluginhook.git
