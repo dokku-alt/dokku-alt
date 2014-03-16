@@ -1,0 +1,68 @@
+#!/bin/bash
+set -e
+
+shopt -s nocasematch #For case insensitive string matching, for the first parameter
+
+SELF=`which $0`
+HOME_DIR=${HOME_DIR:-"/home"}
+
+case "$1" in
+  create) # sshcommand create <user> <command>
+    if [[ $# -ne 3 ]]; then
+      echo "Usage : sshcommand create user command"
+      exit -1
+    fi
+    USER="$2"; COMMAND="$3"
+
+    getent passwd $USER > /dev/null || USERHOME="$HOME_DIR/$USER"
+    if [ -z $USERHOME ]; then
+        USERHOME=$(bash <<< "echo ~$USER")
+    else
+        useradd -d $USERHOME $USER || true
+    fi
+
+    mkdir -p "$USERHOME/.ssh"
+    touch $USERHOME/.ssh/authorized_keys
+    echo "$COMMAND" > "$USERHOME/.sshcommand"
+    chown -R $USER $USERHOME
+    ;;
+
+  acl-add) # sshcommand acl-add <user> <identifier>
+    if [[ $# -ne 3 ]]; then
+      echo "Usage : sshcommand acl-add user identifier"
+      exit -1
+    fi
+    USER="$2"; NAME="$3"
+
+    getent passwd $USER > /dev/null || false
+    USERHOME=$(bash <<< "echo ~$USER")
+
+    KEY=$(cat)
+    FINGERPRINT=$(ssh-keygen -lf /dev/stdin <<< $(echo $KEY) | awk '{print $2}')
+    KEY_PREFIX="command=\"FINGERPRINT=$FINGERPRINT NAME=$NAME \`cat $USERHOME/.sshcommand\` \$SSH_ORIGINAL_COMMAND\",no-agent-forwarding,no-user-rc,no-X11-forwarding,no-port-forwarding"
+    echo "$KEY_PREFIX $KEY" >> "$USERHOME/.ssh/authorized_keys"
+    echo $FINGERPRINT
+    ;;
+
+  acl-remove) # sshcommand acl-remove <user> <identifier>
+    if [[ $# -ne 3 ]]; then
+      echo "Usage : sshcommand acl-remove user identifier"
+      exit -1
+    fi
+    USER="$2"; NAME="$3"
+
+    getent passwd $USER > /dev/null || false
+    USERHOME=$(bash <<< "echo ~$USER")
+
+    sed --in-place "/ NAME=$NAME /d" "$USERHOME/.ssh/authorized_keys"
+    ;;
+
+  help|*) # sshcommand help
+    echo "Usage : sshcommand create user command"
+    echo "        sshcommand acl-add user identifier"
+    echo "        sshcommand acl-remove user identifier"
+    echo "        sshcommand help # shows this usage message"
+    ;;
+
+esac
+
