@@ -1,43 +1,27 @@
 [submodule "dokku-git-rev"]
 	path = plugins/dokku-git-rev
-	url = https://github.com/nornagon/dokku-git-rev
-[submodule "dokku-multi-buildpack"]
-	path = plugins/dokku-multi-buildpack
-	url = https://github.com/pauldub/dokku-multi-buildpack.git
+	url = ../dokku-git-rev.git
 [submodule "dokku-rebuild"]
 	path = plugins/dokku-rebuild
-	url = https://github.com/scottatron/dokku-rebuild
-[submodule "dokku-shoreman"]
-	path = plugins/dokku-shoreman
-	url = https://github.com/statianzo/dokku-shoreman.git
-[submodule "dokku-domains-plugin"]
-	path = plugins/domains-plugin
-	url = https://github.com/wmluke/dokku-domains-plugin.git
-[submodule "dokku-link"]
-	path = plugins/link
-	url = https://github.com/rlaneve/dokku-link.git
+	url = ../dokku-rebuild.git
 [submodule "dokku-md-plugin"]
-	path = plugins/mariadb
-	url = https://github.com/Kloadut/dokku-md-plugin
+	path = plugins/dokku-md
+	url = ../dokku-md-plugin.git
 [submodule "dokku-memcached-plugin"]
-	path = plugins/memcached
-	url = https://github.com/jezdez/dokku-memcached-plugin
+	path = plugins/dokku-memcached
+	url = ../dokku-memcached-plugin.git
 [submodule "dokku-mongodb-plugin"]
-	path = plugins/mongodb
-url=https://github.com/ayufan/dokku-mongodb-plugin
-[submodule "dokku-persistent-storage"]
-	path = plugins/persistent-storage
-	url = https://github.com/dyson/dokku-persistent-storage.git
+	path = plugins/dokku-mongodb
+	url = ../dokku-mongodb-plugin.git
 [submodule "dokku-pg-plugin"]
-	path = plugins/postgresql
-	url = https://github.com/Kloadut/dokku-pg-plugin
+	path = plugins/dokku-pg
+	url = ../dokku-pg-plugin.git
 [submodule "dokku-rabbitmq-plugin"]
-	path = plugins/rabbitmq
-	url = https://github.com/jlachowski/dokku-rabbitmq-plugin.git
+	path = plugins/dokku-rabbitmq
+	url = ../dokku-rabbitmq-plugin.git
 [submodule "dokku-redis-plugin"]
-	path = plugins/redis
-	url = https://github.com/jezdez/dokku-redis-plugin.git
+	path = plugins/dokku-redis
+	url = ../dokku-redis-plugin.git
 [submodule "dokku-user-env-compile"]
-	path = plugins/user-env-compile
-	url = https://github.com/musicglue/dokku-user-env-compile.git
-
+	path = plugins/dokku-user-env-compile
+	url = ../dokku-user-env-compile.git
