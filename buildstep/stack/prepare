@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# Prepares the "stack" to run apps and the environment to run buildpacks
+#
+
+#
+# SYSTEM PACKAGES
+#
+apt-get update
+xargs apt-get install -y --force-yes < /build/packages.txt
+apt-get clean
+
+#
+# SUPPORTED BUILDPACKS
+#
+mkdir -p /build/buildpacks
+cd /build/buildpacks
+xargs -L 1 git clone --depth=1 < /build/buildpacks.txt
+
+#
+# MISC
+#
+
+# Ruby buildpack system configuration
+update-alternatives --set ruby /usr/bin/ruby1.9.1
+update-alternatives --set gem /usr/bin/gem1.9.1
+gem install bundler

@@ -1,0 +1,95 @@
+#!/bin/bash
+set -e
+
+app_root=/app
+build_root=/build/app
+cache_root=/cache/app
+buildpack_root=/build/buildpacks
+
+cp -r /app /build
+
+buildpacks=($buildpack_root/*)
+selected_buildpack=
+
+mkdir -p $cache_root
+mkdir -p $build_root/.profile.d
+
+# This is to get a custom buildpack. Probably should use profile.d though
+[[ -f "$app_root/.env" ]] && . "$app_root/.env"
+
+if [ -n "$BUILDPACK_URL" ]; then
+  echo "       Fetching custom buildpack"
+  buildpack="$buildpack_root/custom"
+  rm -rf "$buildpack"
+
+  IFS='#' read url treeish <<< "$BUILDPACK_URL"
+
+  if [ "$treeish" == "" ]; then
+    git clone --depth=1 "$url" "$buildpack" > /dev/null 2>&1
+  else
+    git clone "$url" "$buildpack" > /dev/null 2>&1
+    cd $buildpack
+    git checkout $treeish > /dev/null 2>&1
+    cd $build_root
+  fi
+
+  selected_buildpack="$buildpack"
+  buildpack_name=$($buildpack/bin/detect "$build_root") && selected_buildpack=$buildpack
+else
+  for buildpack in "${buildpacks[@]}"; do
+    buildpack_name=$($buildpack/bin/detect "$build_root") && selected_buildpack=$buildpack && break
+  done
+fi
+
+if [ -n "$selected_buildpack" ]; then
+  echo "       $buildpack_name app detected"
+else
+  echo "       Unable to select a buildpack"
+  exit 1
+fi
+
+# generate a random request id used by buildpack instrumentation
+export REQUEST_ID=$(openssl rand -base64 32)
+
+$selected_buildpack/bin/compile "$build_root" "$cache_root"
+
+echo "-----> Discovering process types"
+
+$selected_buildpack/bin/release "$build_root" > /build/app/.release
+
+if [[ -f "$build_root/Procfile" ]]; then
+  types=$(ruby -e "require 'yaml';puts YAML.load_file('$build_root/Procfile').keys().join(', ')")
+  echo "       Procfile declares types -> $types"
+fi
+default_types=$(ruby -e "require 'yaml';puts (YAML.load_file('$build_root/.release')['default_process_types'] || {}).keys().join(', ')")
+[[ $default_types ]] && echo "       Default process types for $buildpack_name -> $default_types"
+
+mkdir -p $build_root/.profile.d
+ruby -e "require 'yaml';(YAML.load_file('$build_root/.release')['config_vars'] || {}).each{|k,v| puts \"#{k}=#{v}\"}" > $build_root/.profile.d/config_vars
+
+cat > /exec <<EOF
+#!/bin/bash
+export HOME=/app
+for file in $app_root/.profile.d/*; do source \$file; done
+hash -r
+cd $app_root
+"\$@"
+EOF
+chmod +x /exec
+
+cat > /start <<EOF
+#!/bin/bash
+export HOME=/app
+for file in $app_root/.profile.d/*; do source \$file; done
+hash -r
+cd $app_root
+if [[ -f Procfile ]]; then
+    ruby -e "require 'yaml';puts YAML.load_file('Procfile')['\$1']" | bash
+else
+    ruby -e "require 'yaml';puts (YAML.load_file('.release')['default_process_types'] || {})['\$1']" | bash
+fi
+EOF
+chmod +x /start
+
+rm -fR /app
+mv /build/app /
