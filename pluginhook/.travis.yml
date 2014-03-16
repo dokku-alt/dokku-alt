@@ -1,0 +1,13 @@
+---
+language: go
+go:
+  - 1.1
+script: go get "code.google.com/p/go.crypto/ssh/terminal" && make test
+before_install:
+  - git clone https://github.com/sstephenson/bats.git /tmp/bats && sudo /tmp/bats/install.sh /usr/local
+env:
+  global:
+  - ARTIFACTS_AWS_REGION=us-east-1
+  - ARTIFACTS_S3_BUCKET=progrium-pluginhook
+  - secure: "eGrQigTCcuV/UiiNtAWUyTxgSVinyu7GliN8zVzWBsT2Qcp+YWYIc3vbbMFV\ntBizU6MLUvhvdpbTV7hQN1X4kP7DIBnMuNpuF38vcolFHlDh57rFNj6A6HjA\nlOkpScF0APuaqd50bIxjDOs3cR9Ef2JqmBaFNVR+gJ8poG485Rw="
+  - secure: "OWHMXQRDXPBU6KUmTiCueteT2TJDlebzl3dU3WRjvYK/hzt6mstpjGyr+7lF\nb+GdKiik8xLf452uC/bhX1iLmeYw7kmHU6y9434EHvp6MjNIsN/Zkb9urwZp\nRIKO0dNeRvNUipPE9QhI+DfqgBoxbGQSWXcpGLpfNsQ7racCzTs="

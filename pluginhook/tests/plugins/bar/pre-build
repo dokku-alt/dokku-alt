@@ -1,0 +1,3 @@
+#!/bin/bash
+cat
+echo "bar pre-build $2 $3 $4 $5"
