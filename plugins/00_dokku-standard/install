@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
-docker build -t progrium/buildstep ../../buildstep
+# Build docker image
+CWD=$(cd $(dirname $0); pwd)
+docker build -t progrium/buildstep "$CWD/buildstep"
 
 if [[ ! -f  "$DOKKU_ROOT/HOSTNAME" ]]; then
     echo $(hostname -f) > $DOKKU_ROOT/HOSTNAME

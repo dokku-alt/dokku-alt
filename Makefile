@@ -2,12 +2,12 @@ DOKKU_VERSION = master
 
 DOKKU_ROOT ?= /home/dokku
 
-.PHONY: all install copyfiles version plugins dependencies sshcommand pluginhook docker aufs stack count
+.PHONY: all install copyfiles version plugins dependencies sshcommand pluginhook docker aufs count
 
 all:
 	# Type "make install" to install.
 
-install: dependencies stack copyfiles plugins version
+install: dependencies copyfiles plugins version
 
 copyfiles: addman
 	cp dokku /usr/local/bin/dokku
@@ -25,7 +25,7 @@ version:
 plugins: pluginhook docker
 	dokku plugins-install
 
-dependencies: sshcommand pluginhook docker stack
+dependencies: sshcommand pluginhook docker
 
 sshcommand:
 	make -C sshcommand install
@@ -49,9 +49,6 @@ endif
 
 aufs:
 	lsmod | grep aufs || modprobe aufs || apt-get install -y linux-image-extra-`uname -r`
-
-stack:
-	docker build -t progrium/buildstep buildstep
 
 count:
 	@echo "Core lines:"
