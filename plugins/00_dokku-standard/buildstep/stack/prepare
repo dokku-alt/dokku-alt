@@ -3,6 +3,11 @@
 # Prepares the "stack" to run apps and the environment to run buildpacks
 #
 
+set -e
+
+LC_ALL=C
+DEBIAN_FRONTEND=noninteractive
+
 #
 # SYSTEM PACKAGES
 #
@@ -10,18 +15,42 @@ apt-get update
 xargs apt-get install -y --force-yes < /build/packages.txt
 apt-get clean
 
-#
-# SUPPORTED BUILDPACKS
-#
-mkdir -p /build/buildpacks
-cd /build/buildpacks
-xargs -L 1 git clone --depth=1 < /build/buildpacks.txt
+# Ruby buildpack system configuration
+update-alternatives --set ruby /usr/bin/ruby1.9.1
+update-alternatives --set gem /usr/bin/gem1.9.1
+gem install bundler
 
 #
 # MISC
 #
 
-# Ruby buildpack system configuration
-update-alternatives --set ruby /usr/bin/ruby1.9.1
-update-alternatives --set gem /usr/bin/gem1.9.1
-gem install bundler
+# Configure locale
+cat <<EOF > /etc/environment
+export LANGUAGE=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+EOF
+
+locale-gen en_US.UTF-8
+
+#
+# SUPPORTED BUILDPACKS
+#
+
+mkdir -p /build/buildpacks
+cd /build/buildpacks
+cnt=0
+while read BUILDPACK
+do
+	[ "$BUILDPACK" == "" ] && continue
+	BUILDPACK_DIR="$(printf %02i $cnt)_$(basename $BUILDPACK)"
+	git clone --depth=1 $BUILDPACK $BUILDPACK_DIR
+    cnt=$((cnt+1))
+    if [ -e $BUILDPACK_DIR/Gemfile ]
+    then
+    	( cd $BUILDPACK_DIR && bundle install )
+	fi
+done < /build/buildpacks.txt
+
+rm -rf /var/lib/apt/lists/*
+apt-get clean
