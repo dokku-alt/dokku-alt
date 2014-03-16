@@ -21,7 +21,7 @@ if [[ $1 == redis:* ]]; then
     fi
 
     PLUGIN_NAME="redis"
-    CONTAINER_NAME="$PLUGIN_NAME_$APP"
+    CONTAINER_NAME="${PLUGIN_NAME}_$APP"
     HOST_DIR="$DOKKU_ROOT/$APP/$PLUGIN_NAME"
     ENVVAR_NAME="REDIS_URL"
 fi
@@ -95,7 +95,7 @@ case "$1" in
             echo "You must specify a container name"
             exit 1
         fi
-        CONTAINER_NAME="$PLUGIN_NAME_$3"
+        CONTAINER_NAME="${PLUGIN_NAME}_$3"
 
         # link this container as "redis"
         dokku link:create "$APP" "$CONTAINER_NAME" "$PLUGIN_NAME"
