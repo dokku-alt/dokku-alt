@@ -1,0 +1,15 @@
+---
+branches:
+  only:
+    - master
+script: make -e remote TARGET=test
+before_install:
+  - "sudo apt-get install -y s3cmd"
+  - "tests/setup_travis"
+#notifications:
+#  irc: "chat.freenode.net#dokku"
+env:
+  global:
+    - REMOTE=test@test.progrium.com
+    - secure: "Q+lKt2CG7/1nur1TkuXyd2LiNjctaCoMdyFnkrq4H3PnJROWL20Vc9qBbtVr\n5yM+kiXmRBaCbhqjNe3T7WdRReLihR1fNC5DFI8Upt3jE4+C4/IYc7lPQBcn\ntvFAklBnDFiE6LparlhNdJaEJfdocP8c1kILTwRIZjof0ozYYU0="
+    - secure: "XdtWn4kmlvOBWlkCAifuR8MIYK1i3GQhzba28lFIIdTPrcpeiD6G33h2bljI\nTP9p2h5Hcz/wN7Nf4vcr8gZ0ponTMjpp6bzCcNkPuhjAmjVP0BuwQdhNPoJI\ntvhVKG356wBYp6LvqDFwRm7vK1dDwz+c4n5+wPBP5L7FkI5ZK7E="
