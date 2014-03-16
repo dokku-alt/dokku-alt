@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Build MongoDB image
+db_image="jeffutter/mongodb"
+docker pull "$db_image"
+
+if [[ -f /etc/init/mongodb.conf ]]
+then
+  previous_mongo_install=true
+else
+  previous_mongo_install=false
+fi
+  
+apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
+echo deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen > /etc/apt/sources.list.d/10gen.list
+apt-get update
+apt-get -y install mongodb-10gen
+
+if [ $previous_mongo_install = false ]; then
+  echo 'ENABLE_MONGODB="no"' > /etc/default/mongodb
+fi
+
+if [[ ! -d "$DOKKU_ROOT/.mongodb" ]]; then
+  mkdir -p "$DOKKU_ROOT/.mongodb"
+  mkdir -p "$DOKKU_ROOT/.mongodb/data"
+
+  admin_pass=$(openssl rand -base64 32|base64)
+  echo $admin_pass > "$DOKKU_ROOT/.mongodb/admin_pw"
+
+  chown -R dokku: "$DOKKU_ROOT/.mongodb"
+
+  docker run -p 27017 -d -v "$DOKKU_ROOT/.mongodb/data":/tmp/mongo "$db_image" /usr/bin/mongod --dbpath=/tmp/mongo
+  id=$(docker ps | grep "$db_image":latest |  awk '{print $1}')
+  mongodb_ip=$(docker port ${id} 27017 | awk '{split($0,a,":"); print a[1]}')
+  mongodb_port=$(docker port ${id} 27017 | awk '{split($0,a,":"); print a[2]}')
+  if [[ $mongodb_ip = "0.0.0.0" ]]; then
+    mongodb_ip=localhost
+  fi
+
+  admin_id=""
+  loop_count=0
+  while [ -z "$admin_id" -a $loop_count -lt 100 ];
+  do
+    echo "Connecting to server and creating admin user"
+    sleep 2 # give mongodb some time to start
+    admin_id=$(mongo $mongodb_ip:$mongodb_port/admin --eval "db.addUser(\"admin\", \"${admin_pass}\")" | grep "_id" | awk '{split($0,a,":");split(a[2],b,"\""); print b[2]}')
+    loop_count=$((loop_count + 1))
+  done
+  docker stop "$id"
+
+  if [ -z $admin_id ]; then
+    echo "Unable to create the admin user!" 
+  fi
+fi
+

@@ -1,0 +1,164 @@
+#!/bin/bash
+#set -e;
+
+if [[ -z "$3"  ]]; then
+  APP=$2
+  DATABASE=$2
+else
+  APP=$2
+  DATABASE=$3
+fi
+
+IMAGE="jeffutter/mongodb"
+
+OLDHOME=$HOME
+HOME="$DOKKU_ROOT/.mongodb"
+
+check_exists() {
+  if [[ ! -d "$DOKKU_ROOT/$APP" ]]; then
+    echo "App must exist before creating mongodb storage for it"
+    exit 1
+  fi
+}
+
+check_app() {
+  if [[ -z "$APP" ]]; then
+    echo "You must specify an app name"
+    exit 1
+  fi
+}
+
+check_container() {
+  if [[ -z "$id" ]]; then
+    echo "MongoDB container not started cannot continue. Start with dokku mongodb:start"
+    exit 1
+  fi
+}
+
+set_dokku_env() {
+  env_var=$1
+  env_val=$2
+  ex -s -c "g/export ${env_var}=/d" -c "x" "$DOKKU_ROOT/$APP/ENV"
+  echo "export ${env_var}=\"${env_val}\"" >> "$DOKKU_ROOT/$APP/ENV"
+}
+
+admin_pass=$(cat "$DOKKU_ROOT/.mongodb/admin_pw")
+mongodb_database="${DATABASE/./_}-production"
+
+db_image="jeffutter/mongodb"
+id=$(docker ps | grep "$db_image":latest |  awk '{print $1}')
+if [[ -n "$id" ]]; then
+  mongodb_public_ip=$(docker port ${id} 27017 | awk '{split($0,a,":"); print a[1]}')
+  mongodb_private_ip=$(docker inspect ${id} | grep IPAddress | awk '{ print $2 }' | tr -d ',"')
+  mongodb_port=$(docker port ${id} 27017 | awk '{split($0,a,":"); print a[2]}')
+  if [[ $mongodb_public_ip = "0.0.0.0" ]]; then
+    mongodb_public_ip=localhost
+  fi
+fi
+
+case "$1" in
+  mongodb:console)
+    check_container
+    mongo $mongodb_public_ip:$mongodb_port -u admin -p"$admin_pass" --authenticationDatabase="admin"
+    ;;
+  mongodb:create)
+    check_container
+    check_app
+
+    mongodb_password=$(openssl rand -base64 32|base64)
+
+    if [[ -z "$3"  ]]; then
+      echo $mongodb_password > "$DOKKU_ROOT/.mongodb/pass_${APP}"
+    else
+      echo $mongodb_password > "$DOKKU_ROOT/.mongodb/pass_${APP}_${DATABASE}"
+    fi
+    
+
+    mongodb_username=$APP
+    mongo $mongodb_public_ip:$mongodb_port/$mongodb_database --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "db.addUser(\"${mongodb_username}\", \"${mongodb_password}\")"
+    ;;
+  mongodb:delete)
+    check_container
+    check_app
+    check_exists
+
+    mongo $mongodb_public_ip:$mongodb_port/$mongodb_database --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "printjson(db.dropDatabase())"
+
+    dokku config:unset "$APP" MONGODB_DATABASE \
+      MONGODB_HOST \
+      MONGODB_USERNAME \
+      MONGODB_PASSWORD \
+      MONGODB_PORT \
+      MONGO_URL
+    ;;
+  mongodb:link)
+    if [[ -d "$DOKKU_ROOT/$APP" ]]; then
+      mongodb_internal_port=27017
+      if [[ -z "$3"  ]]; then
+        mongodb_password=$(cat "$DOKKU_ROOT/.mongodb/pass_${APP}")
+      else
+        mongodb_password=$(cat "$DOKKU_ROOT/.mongodb/pass_${APP}_${DATABASE}")
+      fi
+
+      mongodb_username=$APP
+
+      # Have to set ENV vars this way. Using dokku config:set causes a loop where it tries to redeploy itself and calls this again
+
+      set_dokku_env MONGODB_DATABASE "$mongodb_database"
+      set_dokku_env MONGODB_HOST "$mongodb_private_ip"
+      set_dokku_env MONGODB_PORT "$mongodb_port"
+      set_dokku_env MONGODB_USERNAME "$mongodb_username"
+      set_dokku_env MONGODB_PASSWORD "$mongodb_password"
+      set_dokku_env MONGO_URL "mongodb://${mongodb_username}:${mongodb_password}@${mongodb_private_ip}:${mongodb_internal_port}/${mongodb_database}"
+
+      echo
+      echo "-----> $APP linked to $IMAGE container"
+    fi
+    ;;
+  mongodb:list)
+    check_container
+    mongo $mongodb_public_ip:$mongodb_port --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "printjson(db.adminCommand('listDatabases'));" | grep name | cut -d \" -f 4 |grep -v admin | grep -v test
+    ;;
+  mongodb:logs)
+    check_container
+    docker logs dokku-mongodb | tail -n 100
+    ;;
+  mongodb:start)
+    if [[ "$id" != "" ]]; then
+      echo "MongoDB container already running with ID: ${id}"
+    else
+      stopped_id=$(docker ps -a | grep "$db_image:latest[[:space:]].\+[[:space:]]dokku-mongodb[[:space:]]*$" |  awk '{print $1}')
+      if [[ "$stopped_id" != "" ]]; then
+        docker start $stopped_id
+      else
+        docker run -p 27017 -v "$DOKKU_ROOT/.mongodb/data":/tmp/mongo --name="dokku-mongodb" -d "$IMAGE" /usr/bin/mongod --dbpath=/tmp/mongo --auth
+      fi
+    fi
+    ;;
+  mongodb:stop)
+    check_container
+    mongo $mongodb_public_ip:$mongodb_port/admin --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "db.shutdownServer()"
+    ;;
+  mongodb:status)
+    if [[ "$id" != "" ]]; then
+      echo "MongoDB container running with ID: ${id}"
+    else
+      echo "MongoDB container not running"
+    fi
+    ;;
+  help)
+    cat && cat<<EOF
+    mongodb:console                 Launch an admin mongodb console
+    mongodb:create <app> <database> Create a Mongo database and optional params for app
+    mongodb:delete <app>            Delete specified Mongo database
+    mongodb:link <app> <database>   Set ENV variables for app if database exists
+    mongodb:list                    List all databases
+    mongodb:logs                    Show logs from MongoDB program
+    mongodb:start                   Start the MongoDB docker container if it isn't running
+    mongodb:stop                    Stop the MongoDB docker container
+    mongodb:status                  Shows status of MongoDB
+EOF
+    ;;
+esac
+
+HOME=$OLDHOME
