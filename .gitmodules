@@ -25,3 +25,6 @@
 [submodule "dokku-user-env-compile"]
 	path = plugins/dokku-user-env-compile
 	url = ../dokku-user-env-compile.git
+[submodule "plugins/dokku-supervisord"]
+	path = plugins/dokku-supervisord
+	url = https://github.com/dokku-alt/dokku-supervisord
