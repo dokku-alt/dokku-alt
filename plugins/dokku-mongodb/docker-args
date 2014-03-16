@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+STDIN=$(cat)
+APP="$1"
+db_image="jeffutter/mongodb"
+db_name="dokku-mongodb"
+echo -n $STDIN
+output=""
+if [[ -f "$DOKKU_ROOT/.mongodb/pass_${APP}" ]]; then
+  output=" --link $db_name:mongodb"
+fi
+echo "$STDIN$output"

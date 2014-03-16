@@ -1,0 +1,26 @@
+#!/bin/bash
+
+mongo_env() {
+	mongodb_database="${APP/./_}-production"
+	mongodb_password=$(cat "$DOKKU_ROOT/.mongodb/pass_${APP}")
+
+	cat <<EOF
+export MONGODB_DATABASE=$mongodb_database
+export MONGODB_HOST=\$MONGODB_PORT_27017_TCP_ADDR
+export MONGODB_PORT=\$MONGODB_PORT_27017_TCP_PORT
+export MONGODB_USERNAME=$APP
+export MONGODB_PASSWORD=$mongodb_password
+export MONGO_URL=mongodb://\$MONGODB_USERNAME:\$MONGODB_PASSWORD@\$MONGODB_HOST:\$MONGODB_PORT/\$MONGODB_DATABASE
+EOF
+}
+
+APP="$1"
+IMAGE="app/$APP"
+db_image="jeffutter/mongodb"
+if [[ -f "$DOKKU_ROOT/.mongodb/pass_${APP}" ]]; then
+  id=$(mongo_env | docker run -i -a stdin "$IMAGE" /bin/bash -c "cat >> /app/.profile.d/mongo_env")
+  test $(docker wait $id) -eq 0
+  docker commit $id "$IMAGE" > /dev/null
+
+  echo "-----> $APP linked to $db_image container"
+fi
