@@ -1,6 +1,5 @@
 #!/bin/bash
 
 # Build docker image
-git clone https://github.com/jlachowski/dokku-rabbitmq-dockerfiles.git /tmp/dokku-rabbitmq-dockerfiles
-docker build -t jlachowski/rabbitmq /tmp/dokku-rabbitmq-dockerfiles
-rm -rf /tmp/dokku-rabbitmq-dockerfiles
+CWD=$(cd $(dirname $0); pwd)
+docker build -q=true -t jlachowski/rabbitmq $(CWD)/dockerfiles

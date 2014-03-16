@@ -55,3 +55,7 @@
 	url = https://github.com/Kloadut/dokku-pg-dockerfiles.git
 	path = plugins/dokku-postgresql/dockerfiles
 	branch = master
+[subtree "plugins/dokku-rabbitmq/dockerfiles"]
+	url = https://github.com/jlachowski/dokku-rabbitmq-dockerfiles.git
+	path = plugins/dokku-rabbitmq/dockerfiles
+	branch = master
