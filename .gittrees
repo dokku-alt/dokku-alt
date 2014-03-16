@@ -51,3 +51,7 @@
 	path = sshcommand
 	branch = master
 
+[subtree "plugins/dokku-postgresql/dockerfiles"]
+	url = https://github.com/Kloadut/dokku-pg-dockerfiles.git
+	path = plugins/dokku-postgresql/dockerfiles
+	branch = master
