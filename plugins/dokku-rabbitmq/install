@@ -2,4 +2,4 @@
 
 # Build docker image
 CWD=$(cd $(dirname $0); pwd)
-docker build -q=true -t jlachowski/rabbitmq $(CWD)/dockerfiles
+docker build -q=true -t jlachowski/rabbitmq "$CWD/dockerfiles"
