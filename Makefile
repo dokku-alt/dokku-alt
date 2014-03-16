@@ -1,9 +1,5 @@
 DOKKU_VERSION = master
 
-SSHCOMMAND_URL ?= https://raw.github.com/progrium/sshcommand/master/sshcommand
-PLUGINHOOK_URL ?= https://s3.amazonaws.com/progrium-pluginhook/pluginhook_0.1.0_amd64.deb
-STACK_URL ?= https://github.com/progrium/buildstep.git
-PREBUILT_STACK_URL ?= https://github.com/progrium/buildstep/releases/download/2014-03-08/2014-03-08_429d4a9deb.tar.gz
 DOKKU_ROOT ?= /home/dokku
 
 .PHONY: all install copyfiles version plugins dependencies sshcommand pluginhook docker aufs stack count
@@ -32,13 +28,11 @@ plugins: pluginhook docker
 dependencies: sshcommand pluginhook docker stack
 
 sshcommand:
-	wget -qO /usr/local/bin/sshcommand ${SSHCOMMAND_URL}
-	chmod +x /usr/local/bin/sshcommand
+	make -C sshcommand install
 	sshcommand create dokku /usr/local/bin/dokku
 
 pluginhook:
-	wget -qO /tmp/pluginhook_0.1.0_amd64.deb ${PLUGINHOOK_URL}
-	dpkg -i /tmp/pluginhook_0.1.0_amd64.deb
+	make -C pluginhook install
 
 docker: aufs
 	egrep -i "^docker" /etc/group || groupadd docker
@@ -57,11 +51,7 @@ aufs:
 	lsmod | grep aufs || modprobe aufs || apt-get install -y linux-image-extra-`uname -r`
 
 stack:
-ifdef BUILD_STACK
-	@docker images | grep progrium/buildstep || (git clone ${STACK_URL} /tmp/buildstep && docker build -t progrium/buildstep /tmp/buildstep && rm -rf /tmp/buildstep)
-else
-	@docker images | grep progrium/buildstep || curl -L ${PREBUILT_STACK_URL} | gunzip -cd | docker import - progrium/buildstep
-endif
+	docker build -t progrium/buildstep buildstep
 
 count:
 	@echo "Core lines:"
