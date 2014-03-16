@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Build docker image
+CWD=$(cd $(dirname $0); pwd)
+docker build -t jezdez/memcached $CWD
