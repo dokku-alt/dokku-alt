@@ -24,7 +24,7 @@
 	url = https://github.com/jezdez/dokku-memcached-plugin
 [submodule "dokku-mongodb-plugin"]
 	path = plugins/mongodb
-	url = https://github.com/jeffutter/dokku-mongodb-plugin.git
+url=https://github.com/ayufan/dokku-mongodb-plugin
 [submodule "dokku-persistent-storage"]
 	path = plugins/persistent-storage
 	url = https://github.com/dyson/dokku-persistent-storage.git
