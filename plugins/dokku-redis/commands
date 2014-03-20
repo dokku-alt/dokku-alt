@@ -21,7 +21,7 @@ if [[ $1 == redis:* ]]; then
     fi
 
     PLUGIN_NAME="redis"
-    CONTAINER_NAME="$PLUGIN_NAME_$APP"
+    CONTAINER_NAME="${PLUGIN_NAME}_$APP"
     HOST_DIR="$DOKKU_ROOT/$APP/$PLUGIN_NAME"
     ENVVAR_NAME="REDIS_URL"
 fi
@@ -72,10 +72,12 @@ case "$1" in
     if [[ -d $HOST_DIR ]]; then
         rm -rf $HOST_DIR
     fi
-
-    # unlink this container as "redis"
-    dokku link:delete "$APP" "$CONTAINER_NAME" "$PLUGIN_NAME"
-    dokku config:unset "$APP" $ENVVAR_NAME
+    
+    if $APP_EXISTS; then
+        # unlink this container as "redis"
+        dokku link:delete "$APP" "$CONTAINER_NAME" "$PLUGIN_NAME"
+        dokku config:unset "$APP" $ENVVAR_NAME
+    fi
     echo "-----> Redis container deleted: $CONTAINER_NAME"
     ;;
 
@@ -95,7 +97,7 @@ case "$1" in
             echo "You must specify a container name"
             exit 1
         fi
-        CONTAINER_NAME="$PLUGIN_NAME_$3"
+        CONTAINER_NAME="${PLUGIN_NAME}_$3"
 
         # link this container as "redis"
         dokku link:create "$APP" "$CONTAINER_NAME" "$PLUGIN_NAME"
@@ -103,7 +105,7 @@ case "$1" in
         # figure out IP to set env var
         ID=$(docker ps -a | grep "$CONTAINER_NAME" | awk '{print $1}')
         IP=$(docker inspect $ID | grep IPAddress | cut -d '"' -f 4)
-        dokku config:set "$APP" $ENVVAR_NAME="redis://${IP}:6379"
+        dokku config:set "$APP" $ENVVAR_NAME="redis://\$REDIS_PORT_6379_TCP_ADDR:\$REDIS_PORT_6379_TCP_PORT"
         echo "-----> $APP linked to $CONTAINER_NAME container"
     fi
     ;;
