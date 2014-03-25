@@ -59,3 +59,7 @@
 	url = https://github.com/jlachowski/dokku-rabbitmq-dockerfiles.git
 	path = plugins/dokku-rabbitmq/dockerfiles
 	branch = master
+[subtree "plugins/dokku-mariadb/dockerfiles"]
+	url = https://github.com/Kloadut/dokku-md-dockerfiles
+	path = plugins/dokku-mariadb/dockerfiles
+	branch = master
