@@ -9,6 +9,14 @@ all:
 
 install: dependencies copyfiles plugins version
 
+pull:
+	rsync -av dokku.home:/srv/dokku-alt/ dokku
+	rsync -av dokku.home:/srv/dokku-alt/plugins plugins
+
+push:
+	rsync -av --delete dokku dokku.home:/srv/dokku-alt/
+	rsync -av --delete plugins dokku.home:/srv/dokku-alt/
+
 copyfiles: addman
 	cp dokku /usr/local/bin/dokku
 	mkdir -p /var/lib/dokku/plugins
