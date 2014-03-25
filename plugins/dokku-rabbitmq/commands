@@ -65,7 +65,7 @@ case "$1" in
         docker stop $ID > /dev/null
     fi
     # Launch container
-    ID=$(docker run -v $VOLUME -name=$CONTAINER_NAME -d $CONTAINER_IMAGE /usr/bin/start-rabbitmq.sh $RABBITMQ_PASSWORD)
+    ID=$(docker run -v $VOLUME --name $CONTAINER_NAME -d $CONTAINER_IMAGE /usr/bin/start-rabbitmq.sh $RABBITMQ_PASSWORD)
     sleep 1
     # Link to a potential existing app
     dokku rabbitmq:link $APP $APP
