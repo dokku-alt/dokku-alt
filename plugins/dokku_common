@@ -1,5 +1,3 @@
-#!/bin/bash
-
 set -eo pipefail
 [[ $DOKKU_TRACE ]] && set -x
 
@@ -41,13 +39,26 @@ function require_image()
 	fail "$1 image not found... Did you run 'dokku plugins-install' ?"
 }
 
+function release_app()
+{
+  APP="$1"
+  info "Releasing $APP ..."
+  dokku release $APP
+  info "Release complete!"
+}
+
 function deploy_app()
 {
-  APP="$1";
-
+  APP="$1"
   info "Deploying $APP ..."
   dokku deploy $APP
   info "Deploy complete!"
+}
+
+function redeploy_app()
+{
+	release_app "$@"
+	deploy_app "$@"
 }
 
 function commit_image()
@@ -58,9 +69,6 @@ function commit_image()
 	docker rm -f "$ID"
 }
 
-if [ "$DOKKU_ROOT" == "" ]
-then
-	fail "DOKKU_ROOT not set"
-fi
+[ -z "$DOKKU_ROOT" ] && fail "DOKKU_ROOT not set"
 
 CWD="$(cd "$(dirname "$0")" && pwd)"

@@ -1,18 +1,20 @@
 #!/bin/bash
 
-source "$(dirname $0)/../dokku_common.sh"
+source "$(dirname $0)/../dokku_common"
 
-MARIADB_ROOT="$DOKKU_ROOT/.mariadb"
-MARIADB_IMAGE="kloadut/mariadb"
+DB_ROOT="$DOKKU_ROOT/.mariadb"
+DB_IMAGE="kloadut/mariadb"
 
 if [ "$(basename $0)" != "install" ]
 then
 	verify_app_name "$APP"
-	DB_APP_ROOT="$MARIADB_ROOT/$APP"
+	DB_APP_ROOT="$DB_ROOT/$APP"
+	DB_APP_ID="$DB_APP_ROOT/mariadb_id"
+	[ -f "$DB_APP_ID" ] || generate_random_password > "$DB_APP_ID" || true
 	DB_CONTAINER="mariadb_${APP}"
 	DB_CONTAINER_LINK="mariadb"
-	DB_ROOT="$DB_APP_ROOT/db"
-	DB_PASSWORD_FILE="$DB_APP_ROOT/db_password"
+	DB_HOST_VOLUME="$DB_APP_ROOT/mariadb_$(cat "$DB_APP_ID")"
+	DB_HOST_PASSWORD="$DB_APP_ROOT/mariadb_$(cat "$DB_APP_ID")_password"
 	DB_CONTAINER_VOLUME="/opt/mysql"
 	DB_CONTAINER_PASSWORD="/opt/mysql_password"
 fi

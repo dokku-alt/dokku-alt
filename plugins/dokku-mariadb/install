@@ -3,4 +3,4 @@
 source "$(dirname $0)/vars"
 
 # Build docker image
-docker build -t "$MARIADB_IMAGE" "$CWD/dockerfiles"
+docker build -t "$DB_IMAGE" "$CWD/dockerfiles"

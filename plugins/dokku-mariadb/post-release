@@ -1,15 +1,14 @@
 #!/bin/bash
 
-
 APP="$1"
 IMAGE="app/$APP"
-
 source "$(dirname $0)/vars"
 
-if [ -f "$DB_PASSWORD_FILE" ]
+# inject MARIADB_URL
+if [ -f "$DB_HOST_PASSWORD" ]
 then
 	docker run -i -a stdin "$IMAGE" /bin/bash -c "cat > /app/.profile.d/mariadb_env" <<EOF | commit_image "$IMAGE"
-export MARIADB_URL=mysql2://root:$(cat "$DB_PASSWORD_FILE")@\$MARIADB_PORT_3306_TCP_ADDR:\$MARIADB_PORT_3306_TCP_PORT/db
+export MARIADB_URL=mysql2://root:$(cat "$DB_HOST_PASSWORD")@\$MARIADB_PORT_3306_TCP_ADDR:\$MARIADB_PORT_3306_TCP_PORT/db
 EOF
 	info "$APP linked to mariadb/$APP container"
 fi
