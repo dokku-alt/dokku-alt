@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$(dirname $0)/../dokku_common.sh"
+source "$(dirname $0)/vars"
 
 # Build docker image
-docker build -t kloadut/mariadb "$CWD/dockerfiles"
+docker build -t "$MARIADB_IMAGE" "$CWD/dockerfiles"

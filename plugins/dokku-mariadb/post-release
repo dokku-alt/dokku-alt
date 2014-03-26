@@ -1,22 +1,15 @@
 #!/bin/bash
- 
-mariadb_env()
-{
- 	DB_PASSWORD=$(cat "$DB_PASSWORD_FILE")
- 	cat <<EOF
-export MARIADB_URL=mysql2://root:$DB_PASSWORD@\$MARIADB_PORT_3306_TCP_ADDR:\$MARIADB_PORT_3306_TCP_PORT/db
-EOF
-}
+
 
 APP="$1"
 IMAGE="app/$APP"
 
-source "$(dirname $0)/common.bash"
+source "$(dirname $0)/vars"
 
 if [ -f "$DB_PASSWORD_FILE" ]
 then
-  id=$(mariadb_env | docker run -i -a stdin "$IMAGE" /bin/bash -c "cat >> /app/.profile.d/mariadb_env")
-  test $(docker wait $id) -eq 0
-  docker commit $id "$IMAGE" > /dev/null
-  info "$APP linked to mariadb/$APP container"
+	docker run -i -a stdin "$IMAGE" /bin/bash -c "cat > /app/.profile.d/mariadb_env" <<EOF | commit_image "$IMAGE"
+export MARIADB_URL=mysql2://root:$(cat "$DB_PASSWORD_FILE")@\$MARIADB_PORT_3306_TCP_ADDR:\$MARIADB_PORT_3306_TCP_PORT/db
+EOF
+	info "$APP linked to mariadb/$APP container"
 fi

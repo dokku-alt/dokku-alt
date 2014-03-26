@@ -17,6 +17,9 @@ push:
 	rsync -av --delete dokku dokku.home:/srv/dokku-alt/
 	rsync -av --delete plugins dokku.home:/srv/dokku-alt/
 
+sync:
+	while true; do make push >/dev/null; sleep 3s; done
+
 copyfiles: addman
 	cp dokku /usr/local/bin/dokku
 	mkdir -p /var/lib/dokku/plugins

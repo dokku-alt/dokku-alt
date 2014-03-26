@@ -21,7 +21,7 @@ function fail()
 
 function generate_random_password()
 {
-	tr -dc A-Za-z0-9 < /dev/urandom | head -c 16
+	< /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-16}
 }
 
 function verify_app_name()
@@ -48,6 +48,14 @@ function deploy_app()
   info "Deploying $APP ..."
   dokku deploy $APP
   info "Deploy complete!"
+}
+
+function commit_image()
+{
+	read ID
+	test $(docker wait "$ID") -eq 0
+	docker commit "$ID" "$@" > /dev/null
+	docker rm -f "$ID"
 }
 
 if [ "$DOKKU_ROOT" == "" ]

@@ -3,7 +3,7 @@
 [[ $1 != mariadb:* ]] && exit 0
 
 APP="$2"
-source "$(dirname $0)/common.bash"
+source "$(dirname $0)/vars"
 
 # Create .mariadb directory if does not exist
 if [[ ! -d "$DB_APP_ROOT" ]]; then
@@ -13,15 +13,15 @@ fi
 
 case "$1" in
   mariadb:create)
-    require_image "$DB_IMAGE"
-    [ ! -f "$DB_PASSWORD_FILE" ] && generate_random_password > $DB_PASSWORD_FILE
+    require_image "$MARIADB_IMAGE"
+    [ -f "$DB_PASSWORD_FILE" ] || generate_random_password > $DB_PASSWORD_FILE || true
     docker stop "$DB_CONTAINER" 1>&2 2>/dev/null || true
     docker rm "$DB_CONTAINER" 1>&2 2>/dev/null || true
     docker run --detach --publish=3306 \
                 --volume="$DB_ROOT":"$DB_CONTAINER_VOLUME" \
                 --volume="$DB_PASSWORD_FILE":"$DB_CONTAINER_PASSWORD" \
                 --name="$DB_CONTAINER" \
-                "$DB_IMAGE" \
+                "$MARIADB_IMAGE" \
                 /usr/bin/start_mariadb.sh >/dev/null
     sleep 1s
     echo
@@ -32,18 +32,17 @@ case "$1" in
     ;;
 
   mariadb:delete)
-    docker rm -f "$DB_CONTAINER" 1>&2 2>/dev/null
-    rm -rf "$DB_PASSWORD_FILE"
-    rm -rf "$DB_VOLUME"
+    docker rm -f "$DB_CONTAINER" 1>/dev/null 2>/dev/null
+    rm -rf "$DB_PASSWORD_FILE" "$DB_ROOT"
     echo
     info "MariaDB container deleted: $DB_CONTAINER"
     ;;
 
   mariadb:info)
     [ ! -f "$DB_PASSWORD_FILE" ] && fail "Unknown (or too old) MariaDB container"
-    require_image "$DB_IMAGE"
+    require_image "$MARIADB_IMAGE"
     echo
-    docker run -i --rm --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" --volume="$DB_PASSWORD_FILE":"$DB_CONTAINER_PASSWORD" "$DB_IMAGE" bash - <<EOF
+    docker run -i --rm --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" --volume="$DB_PASSWORD_FILE":"$DB_CONTAINER_PASSWORD" "$MARIADB_IMAGE" bash - <<EOF
 echo "       Host: \$MARIADB_PORT_3306_TCP_ADDR"
 echo "       Port: \$MARIADB_PORT_3306_TCP_PORT"
 echo "       User: root"
@@ -57,12 +56,19 @@ EOF
     docker logs "$DB_CONTAINER" | tail -n 1000
     ;;
 
+  mariadb:console)
+    shift 2
+    docker run -t -i --rm --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" --volume="$DB_PASSWORD_FILE":"$DB_CONTAINER_PASSWORD" "$MARIADB_IMAGE" \
+        bash -c 'mysql -u root -h "$MARIADB_PORT_3306_TCP_ADDR" -P "$MARIADB_PORT_3306_TCP_PORT" --password="$(cat "$DB_CONTAINER_PASSWORD")" db'
+    ;;
+
   help)
     cat && cat<<EOF
     mariadb:create <app>     Create a MariaDB container
     mariadb:delete <app>     Delete specified MariaDB container
     mariadb:info <app>       Display database informations
     mariadb:logs <app>       Display last logs from MariaDB container
+    mariadb:console <app>    Launch console for MariaDB container
 EOF
     ;;
 

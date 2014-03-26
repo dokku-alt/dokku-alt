@@ -10,15 +10,17 @@ if [[ ! -f /opt/mysql_password ]]; then
 	echo "No mysql password defined"
 	exit 1
 fi
-DB_PASSWORD="$(cat "/opt/mysql_password")"
 sleep 2
 mysqld_safe &
 sleep 8
 if [[ ! -f /opt/mysql/initialized ]]; then
-	cat <<EOF | mysql -u root --password=a_stronk_password
+	DB_PASSWORD="$(cat "/opt/mysql_password")"
+	mysql -u root --password=a_stronk_password <<EOF
 CREATE DATABASE db;
-UPDATE mysql.user SET Password=PASSWORD('$DB_PASSWORD') WHERE User='root'; FLUSH PRIVILEGES;
-GRANT ALL ON *.* to root@'%' IDENTIFIED BY '$1'; FLUSH PRIVILEGES;
+UPDATE mysql.user SET Password=PASSWORD('$DB_PASSWORD') WHERE User='root';
+FLUSH PRIVILEGES;
+GRANT ALL ON *.* to root@'%' IDENTIFIED BY '$DB_PASSWORD';
+FLUSH PRIVILEGES;
 EOF
     touch /opt/mysql/initialized
 fi

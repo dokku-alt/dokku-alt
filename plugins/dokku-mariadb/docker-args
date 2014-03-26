@@ -3,11 +3,8 @@
 APP="$1"
 IMAGE="app/$APP"
 
-source "$(dirname $0)/common.bash"
+source "$(dirname $0)/vars"
 
 cat
 
-if [ -f "$DB_PASSWORD_FILE" ]
-then
-	echo " --link $DB_CONTAINER:$DB_CONTAINER_LINK"
-fi
+[ -f "$DB_PASSWORD_FILE" ] && echo " --link $DB_CONTAINER:$DB_CONTAINER_LINK"
