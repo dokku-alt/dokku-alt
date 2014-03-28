@@ -6,11 +6,5 @@ case "$1" in
   help)
     cat
     ;;
-
-  domains:list)
-	verify_app_name "$2"
-	cat "$APP_DIR/DOMAINS"
-	;;
 esac
 
-exit 0
