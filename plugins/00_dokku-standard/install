@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
+cat
+
 # Build docker image
 CWD=$(cd $(dirname $0); pwd)
 docker build -t progrium/buildstep "$CWD/buildstep"

@@ -18,7 +18,7 @@ push:
 	rsync -av --delete plugins dokku.home:/srv/dokku-alt/
 
 sync:
-	while true; do make push >/dev/null; sleep 3s; done
+	while true; do make push >/dev/null; sleep 1s; done
 
 copyfiles: addman
 	cp dokku /usr/local/bin/dokku

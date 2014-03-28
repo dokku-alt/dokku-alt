@@ -1,9 +1,18 @@
+#!/bin/bash
+
+APP_PORT=5000
+
 set -eo pipefail
 [[ $DOKKU_TRACE ]] && set -x
 
 function info()
 {
 	echo "-----> $@"
+}
+
+function info2()
+{
+	echo "=====> $@"
 }
 
 function verbose()
@@ -22,13 +31,39 @@ function generate_random_password()
 	< /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-16}
 }
 
-function verify_app_name()
+function stop_container()
+{
+    docker stop "$1" 1>/dev/null 2>/dev/null || true
+}
+
+function remove_container()
+{
+	stop_container "$@"
+    docker rm "$1" 1>/dev/null 2>/dev/null || true
+}
+
+function remove_image()
+{
+	docker rmi "$@" 1>/dev/null 2>/dev/null || true
+}
+
+function check_app_name()
 {
 	APP="$1"
 	[ "$APP" == "" ] && fail "You must specify an app name"
-    NAPP="${APP//[^a-zA-Z0-9_-]//}"
+    local NAPP="${APP//[^a-zA-Z0-9_-]//}"
 	[ "$APP" != "$NAPP" ] && fail "Invalid app name"
-	[ ! -d "$DOKKU_ROOT/$APP" ] && fail "App $APP doesn't exist"
+    IMAGE="app/$APP"
+    CACHE_DIR="$DOKKU_ROOT/$APP/cache"
+    APP_NAME="app_$APP"
+    APP_DIR="$DOKKU_ROOT/$APP"
+    return 0
+}
+
+function verify_app_name()
+{
+	check_app_name "$@"
+	[ ! -d "$APP_DIR" ] && fail "App $APP doesn't exist"
 	return 0
 }
 
@@ -66,7 +101,16 @@ function commit_image()
 	read ID
 	test $(docker wait "$ID") -eq 0
 	docker commit "$ID" "$@" > /dev/null
-	docker rm -f "$ID"
+	docker rm -f "$ID" 1>/dev/null 2>/dev/null || true
+	return 0
+}
+
+function attach_and_commit_image()
+{
+	sleep 0.5s
+	read ID
+	docker attach "$ID"
+	echo "$ID" | commit_image "$@"
 }
 
 [ -z "$DOKKU_ROOT" ] && fail "DOKKU_ROOT not set"

@@ -1,10 +1,10 @@
 #!/bin/bash
 
-cat
-
 APP="$1"
 IMAGE="app/$APP"
 source "$(dirname $0)/vars"
 
 # link mariadb with container
-[ -f "$DB_HOST_PASSWORD" ] && echo " --link $DB_CONTAINER:$DB_CONTAINER_LINK"
+[ -f "$DB_HOST_PASSWORD" ] && echo "--link $DB_CONTAINER:$DB_CONTAINER_LINK "
+
+cat

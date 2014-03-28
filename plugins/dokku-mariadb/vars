@@ -9,12 +9,23 @@ if [ "$(basename $0)" != "install" ]
 then
 	verify_app_name "$APP"
 	DB_APP_ROOT="$DB_ROOT/$APP"
-	DB_APP_ID="$DB_APP_ROOT/mariadb_id"
-	[ -f "$DB_APP_ID" ] || generate_random_password > "$DB_APP_ID" || true
+
+    # Create .mariadb directory if does not exist
+    if [[ ! -d "$DB_APP_ROOT" ]]; then
+        mkdir -p "$DB_APP_ROOT"
+        chown -R dokku: "$DB_APP_ROOT"
+    fi
+
+    # Create unique database id
+	#DB_APP_ID="$DB_APP_ROOT/mariadb_id"
+	#if [[ ! -f "$DB_APP_ID" ]]; then
+	#	generate_random_password > "$DB_APP_ID"
+	#fi
+
 	DB_CONTAINER="mariadb_${APP}"
 	DB_CONTAINER_LINK="mariadb"
-	DB_HOST_VOLUME="$DB_APP_ROOT/mariadb_$(cat "$DB_APP_ID")"
-	DB_HOST_PASSWORD="$DB_APP_ROOT/mariadb_$(cat "$DB_APP_ID")_password"
+	DB_HOST_VOLUME="$DB_APP_ROOT/mariadb"
+	DB_HOST_PASSWORD="$DB_APP_ROOT/mariadb_password"
 	DB_CONTAINER_VOLUME="/opt/mysql"
 	DB_CONTAINER_PASSWORD="/opt/mysql_password"
 fi

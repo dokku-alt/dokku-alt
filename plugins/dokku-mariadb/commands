@@ -1,14 +1,8 @@
 #!/bin/bash
 
-[[ $1 != mariadb:* ]] && exit 0
-
-APP="$2"
-source "$(dirname $0)/vars"
-
-# Create .mariadb directory if does not exist
-if [[ ! -d "$DB_APP_ROOT" ]]; then
-    mkdir -p "$DB_APP_ROOT"
-    chown -R dokku: "$DB_APP_ROOT"
+if [[ $1 == mariadb:* ]]; then
+    APP="$2"
+    source "$(dirname $0)/vars"
 fi
 
 case "$1" in
@@ -31,7 +25,11 @@ case "$1" in
 
   mariadb:delete)
     docker rm -v -f "$DB_CONTAINER" 1>/dev/null 2>/dev/null
-    rm -f "$DB_APP_ID"
+    docker run --rm -i \
+                --volume="$DB_HOST_VOLUME":"$DB_CONTAINER_VOLUME" \
+                --volume="$DB_HOST_PASSWORD":"$DB_CONTAINER_PASSWORD" \
+                "$DB_IMAGE" \
+                rm -rf "$DB_CONTAINER_VOLUME" "$DB_CONTAINER_PASSWORD"
     info "MariaDB container deleted: $DB_CONTAINER"
     redeploy_app "$APP"
     ;;

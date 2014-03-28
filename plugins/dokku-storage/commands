@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+source "$(dirname $0)/../dokku_common"
 
 # Check if name is specified
 if [[ $1 == storage:* ]]; then

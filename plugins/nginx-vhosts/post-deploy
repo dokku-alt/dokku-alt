@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+source "$(dirname $0)/../dokku_common"
+
 APP="$1"; PORT="$2"
 WILDCARD_SSL="$DOKKU_ROOT/ssl"
 SSL="$DOKKU_ROOT/$APP/ssl"

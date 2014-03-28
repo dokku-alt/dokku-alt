@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+source "$(dirname $0)/../dokku_common"
 
 git_archive_all() {
     APP=$1; REV=$2
@@ -19,14 +20,14 @@ git_archive_all() {
 
 case "$1" in
   git-hook)
-    APP=$2
+    verify_app_name "$2"
 
     while read oldrev newrev refname
     do
       # Only run this script for the master branch. You can remove this
       # if block if you wish to run it for others as well.
       if [[ $refname = "refs/heads/master" ]] ; then
-        git_archive_all $APP $newrev | dokku receive $APP | sed -u "s/^/"$'\e[1G'"/"
+        git_archive_all "$APP" "$newrev" | dokku receive "$APP" | sed -u "s/^/"$'\e[1G'"/"
       else
         echo $'\e[1G\e[K'"-----> WARNING: deploy did not complete, you must push to master."
         echo $'\e[1G\e[K'"-----> for example, try 'git push <dokku> ${refname/refs\/heads\/}:master'"
@@ -36,19 +37,21 @@ case "$1" in
     ;;
 
   git-*)
-    APP="$(echo $2 | perl -pe 's/(?<!\\)'\''//g' | sed 's/\\'\''/'\''/g')"
-    APP_PATH=$DOKKU_ROOT/$APP
+    APP="$(echo "$2" | perl -pe 's/(?<!\\)'\''//g' | sed 's/\\'\''/'\''/g')"
+    check_app_name "$APP"
 
-    if [[ $1 == "git-receive-pack" && ! -d "$APP_PATH/refs" ]]; then
-        git init --bare $APP_PATH > /dev/null
-        PRERECEIVE_HOOK="$APP_PATH/hooks/pre-receive"
-        cat > $PRERECEIVE_HOOK <<EOF
+    if [[ $1 == "git-receive-pack" && ! -d "$APP_DIR/refs" ]]; then
+        git init --bare $APP_DIR > /dev/null
+        PRERECEIVE_HOOK="$APP_DIR/hooks/pre-receive"
+        cat > "$PRERECEIVE_HOOK" <<EOF
 #!/usr/bin/env bash
 set -e; set -o pipefail;
 cat | DOKKU_ROOT="$DOKKU_ROOT" dokku git-hook $APP
 EOF
         chmod +x $PRERECEIVE_HOOK
     fi
+
+    verify_app_name "$APP"
 
     args=$@
     git-shell -c "$args"

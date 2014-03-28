@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
-cat
+source "$(dirname $0)/../dokku_common"
 
-APP="$1"
-STORAGE_FILE="$DOKKU_ROOT/$APP/STORAGE"
-STORAGE_DATA="$DOKKU_ROOT/$APP/STORAGE_DATA"
+verify_app_name "$1"
+
+STORAGE_FILE="$APP_DIR/STORAGE"
+STORAGE_DATA="$APP_DIR/STORAGE_DATA"
 
 if [ -f $STORAGE_FILE ]; then
 	while read STORAGE_LINE
@@ -15,3 +15,5 @@ if [ -f $STORAGE_FILE ]; then
 	    echo -n " -v" "$LOCAL_STORAGE_DATA":"$STORAGE_LINE"
 	done < $STORAGE_FILE
 fi
+
+cat

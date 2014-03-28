@@ -1,20 +1,10 @@
 #!/usr/bin/env bash
-set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+source "$(dirname $0)/../dokku_common"
 
 # Check if name is specified
 if [[ $1 == apps:* ]]; then
-    if [[ -z $2 ]]; then
-        echo "You must specify an app name"
-        exit 1
-    else
-        APP="$2"
-        # Check if app exists with the same name
-        if [[ -d "$DOKKU_ROOT/$APP" ]]; then
-            APP_EXISTS=true
-        else
-            APP_EXISTS=false
-        fi
-    fi
+    verify_app_name "$2"
 fi
 
 case "$1" in
@@ -23,8 +13,7 @@ case "$1" in
     ;;
 
   apps:status)
-	ID=$(< "$DOKKU_ROOT/$APP/CONTAINER")
-	if docker ps --no-trunc -q | grep -q $ID
+	if docker port "$APP_NAME" "$APP_PORT" 1>/dev/null 2>/dev/null
 	then
 		echo "$APP is running."
 	else
@@ -33,24 +22,20 @@ case "$1" in
 	;;
 
   apps:start)
-	ID=$(< "$DOKKU_ROOT/$APP/CONTAINER")
-    docker start $ID
+    docker start "$APP_NAME"
 	;;
 
   apps:stop)
-	ID=$(< "$DOKKU_ROOT/$APP/CONTAINER")
-    docker stop $ID
+    stop_container "$APP_NAME"
 	;;
 
   apps:restart)
-    ID=$(< "$DOKKU_ROOT/$APP/CONTAINER")
-    docker restart $ID
+    docker restart "$APP_NAME"
     ;;
 
   apps:top)
-    ID=$(< "$DOKKU_ROOT/$APP/CONTAINER")
     shift 2
-    docker ps $ID "$@"
+    docker ps "$APP_NAME" "$@"
     ;;
 
   help)

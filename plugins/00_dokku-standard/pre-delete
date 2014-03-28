@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
-set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
-APP="$1"
-IMAGE=app/"$1"
-CACHE_DIR="$DOKKU_ROOT/$APP/cache"
+source "$(dirname $0)/../dokku_common"
 
-docker run -v $CACHE_DIR:/cache $IMAGE find /cache -depth -mindepth 1 -maxdepth 1 -exec rm -Rf {} \;
-
-
+verify_app_name "$1"
+docker run --rm -v "$CACHE_DIR":/cache "$IMAGE" find /cache -depth -mindepth 1 -maxdepth 1 -exec rm -Rf {} \;

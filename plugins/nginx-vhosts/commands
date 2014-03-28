@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
-set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+source "$(dirname $0)/../dokku_common"
 
 case "$1" in
   help)
     cat
     ;;
+
+  domains:list)
+	verify_app_name "$2"
+	cat "$APP_DIR/DOMAINS"
+	;;
 esac
 
+exit 0
