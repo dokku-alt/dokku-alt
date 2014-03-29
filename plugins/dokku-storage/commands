@@ -30,6 +30,8 @@ storage_restart_app() {
 
 case "$1" in
   storage:list)
+    verify_max_args 1 "$@"
+    
     cat $STORAGE_FILE
 	;;
 
