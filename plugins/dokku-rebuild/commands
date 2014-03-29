@@ -5,12 +5,15 @@ source "$(dirname $0)/../dokku_common"
 case "$1" in
   rebuild)
     verify_app_name "$2"
+    verify_max_args 2 "$@"
 
     REF=$(cat "$APP_DIR/refs/heads/master")
     cd "$APP_DIR" && git archive "$REF" | dokku receive "$APP" | sed -u "s/^/"$'\e[1G'"/"
     ;;
 
   rebuild:all)
+    verify_max_args 1 "$@"
+
     for app in $(ls -d $DOKKU_ROOT/*/); do
       APP="$(basename "$app")"
       dokku rebuild $APP
