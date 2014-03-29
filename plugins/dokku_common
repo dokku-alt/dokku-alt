@@ -28,7 +28,7 @@ function fail()
 
 function generate_random_password()
 {
-	< /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-16}
+	< /dev/urandom tr -dc A-Za-z0-9 | head -c${1:-16} || true
 }
 
 function stop_container()
