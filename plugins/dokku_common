@@ -59,7 +59,7 @@ function check_app_name() {
 
 function verify_app_name() {
 	check_app_name "$@"
-	[ ! -d "$APP_DIR" ] && fail "$app: app doesn't exist"
+	[ ! -d "$APP_DIR" ] && fail "$APP: app doesn't exist"
 	return 0
 }
 
