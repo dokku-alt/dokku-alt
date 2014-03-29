@@ -114,8 +114,9 @@ EOF
             -e PGDATABASE="$DB_NAME" \
             -e PGUSER="$APP" \
             -e PGPASSWORD="$(cat "$DB_PASSWORD")" \
+            -e DB_PORT="$DB_PORT" \
             "$DB_IMAGE" \
-        bash -c 'psql --host="$POSTGRESQL_PORT_${DB_PORT}_TCP_ADDR" --port="$POSTGRESQL_PORT_${DB_PORT}_TCP_PORT"'
+        bash -c 'psql --host="$POSTGRESQL_PORT_5432_TCP_ADDR" --port="$POSTGRESQL_PORT_5432_TCP_PORT"'
     ;;
 
   help)
