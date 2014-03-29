@@ -36,27 +36,29 @@ case "$1" in
   build)
     verify_app_name "$2"
     cat | docker run -i -a stdin progrium/buildstep /bin/bash \
-                      -c "mkdir -p /app && tar -xC /app" | commit_image "$IMAGE"
+                      -c "mkdir -p /app && tar -xC /app" | commit_image "$IMAGE_GENERIC:build"
     [[ -d "$CACHE_DIR" ]] || mkdir "$CACHE_DIR"
     pluginhook pre-build "$APP"
-    docker run -d -v "$CACHE_DIR":/cache \
-                "$IMAGE" \
-                /build/builder | attach_and_commit_image "$IMAGE"
+    docker run -i -a stdin -v "$CACHE_DIR":/cache \
+                "$IMAGE_GENERIC:build" \
+                /build/builder | attach_and_commit_image "$IMAGE_GENERIC:build"
     pluginhook post-build "$APP"
     ;;
 
   release)
     verify_app_name "$2"
+    tag_image "$IMAGE_GENERIC:build" "$IMAGE_GENERIC:release"
     pluginhook pre-release "$APP"
     if [[ -f "$DOKKU_ROOT/$APP/ENV" ]]; then
-      cat "$DOKKU_ROOT/$APP/ENV" | docker run -i -a stdin "$IMAGE" \
-        /bin/bash -c "mkdir -p /app/.profile.d && cat > /app/.profile.d/app-env.sh" | commit_image "$IMAGE"
+      cat "$DOKKU_ROOT/$APP/ENV" | docker run -i -a stdin "$IMAGE_GENERIC:release" \
+        /bin/bash -c "mkdir -p /app/.profile.d && cat > /app/.profile.d/app-env.sh" | commit_image "$IMAGE_GENERIC:release"
     fi
     pluginhook post-release "$APP"
     ;;
 
   deploy)
     verify_app_name "$2"
+    tag_image "$IMAGE_GENERIC:release" "$IMAGE_GENERIC:latest"
     pluginhook pre-deploy "$APP"
 
     # kill the app when running
@@ -64,7 +66,7 @@ case "$1" in
 
     # start the app
     DOCKER_ARGS="$(: | pluginhook docker-args "$APP")"
-    id=$(docker run -d -p "$APP_PORT" -e PORT="$APP_PORT" --name="$APP_NAME" $DOCKER_ARGS "$IMAGE" /bin/bash -c "/start web")
+    id=$(docker run -d -p "$APP_PORT" -e PORT="$APP_PORT" --name="$APP_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /bin/bash -c "/start web")
     port=$(docker port $id 5000 | sed 's/0.0.0.0://')
     echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$port" > "$DOKKU_ROOT/$APP/URL"
 
