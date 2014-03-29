@@ -17,7 +17,7 @@ if [[ ! -f /opt/mongodb/initialized ]]; then
 	DB_PASSWORD="$(cat "/opt/mongodb_password")"
 	mongo <<EOF
 use admin
-db.addUser({user: "admin", pwd:"${DB_PASSWORD}", roles:["clusterAdmin"]})
+db.addUser({user: "admin", pwd:"${DB_PASSWORD}", roles:["clusterAdmin", "userAdminAnyDatabase"]})
 EOF
 	kill $(pidof mongod)
     touch /opt/mongodb/initialized
