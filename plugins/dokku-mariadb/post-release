@@ -4,8 +4,6 @@ source "$(dirname $0)/vars"
 
 verify_app_name "$1"
 
-cat
-
 DB_LINKS="$DB_APP_DATABASES$APP/"
 DB_APP_PASSWORD="$DB_APP_PASSWORDS$APP"
 
@@ -15,6 +13,6 @@ if [ -d "$DB_LINKS" ] && [ -f "$DB_APP_PASSWORD" ] && [ $(ls -1 "$DB_LINKS" | wc
 		docker run -i -a stdin "$IMAGE" /bin/bash -c "cat > /app/.profile.d/mariadb_env" <<EOF | commit_image "$IMAGE"
 [ "\$MARIADB_NAME" != "" ] && export DATABASE_URL=mysql2://$APP:$(cat "$DB_APP_PASSWORD")@\$MARIADB_PORT_3306_TCP_ADDR:\$MARIADB_PORT_3306_TCP_PORT/$DB_NAME
 EOF
-		verbose "Linking MariaDB database $DB_NAME to application"
+		verbose "Linking MariaDB database $DB_NAME to application" 1>&2
 	done
 fi
