@@ -100,19 +100,32 @@ function tag_image() {
 	docker tag -f "$1" "$2"
 }
 
+function wait_for_container() {
+	for i in 1 2 3 4 5 6 7 8 9 0; do
+		if docker inspect "$1" > /dev/null; then
+			return 0
+		fi
+		sleep 0.3s
+	done
+	return 0
+}
+
 function commit_image() {
 	read ID
+	wait_for_container "$1"
 	test $(docker wait "$ID") -eq 0
-	docker commit "$ID" "$@" > /dev/null
+	docker commit "$ID" "$@" 1>/dev/null 2>/dev/null 
 	docker rm -f "$ID" 1>/dev/null 2>/dev/null || true
 	return 0
 }
 
 function attach_and_commit_image() {
-	sleep 0.5s
 	read ID
+	wait_for_container "$1"
 	docker attach "$ID"
-	echo "$ID" | commit_image "$@"
+	docker commit "$ID" "$@" 1>/dev/null 2>/dev/null 
+	docker rm -f "$ID" 1>/dev/null 2>/dev/null || true
+	return 0
 }
 
 [ -z "$DOKKU_ROOT" ] && fail "DOKKU_ROOT not set"
