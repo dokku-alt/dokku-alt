@@ -25,6 +25,8 @@ mysql_admin() {
 case "$1" in
   mariadb:create)
     verify_db_name "$2"
+    verify_max_args 2 "$@"
+    
     mysql_admin <<EOF
 CREATE DATABASE IF NOT EXISTS \`$DB_NAME\` DEFAULT CHARACTER SET \`utf8\` COLLATE \`utf8_unicode_ci\`;
 EOF
@@ -33,6 +35,8 @@ EOF
 
   mariadb:delete)
     verify_db_name "$2"
+    verify_max_args 2 "$@"
+
     mysql_admin <<EOF
 DROP DATABASE IF EXISTS \`$DB_NAME\`;
 EOF
@@ -42,6 +46,8 @@ EOF
 
   mariadb:list)
     verify_app_name "$2"
+    verify_max_args 2 "$@"
+
     DB_LINKS="$DB_APP_DATABASES$APP/"
     mkdir -p "$DB_LINKS"
     ls -1 "$DB_LINKS"
@@ -50,6 +56,8 @@ EOF
   mariadb:info)
     verify_app_name "$2"
     verify_db_name "$3"
+    verify_max_args 3 "$@"
+
     DB_PASSWORD="$DB_APP_PASSWORDS$APP"
     DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
     [ ! -f "$DB_LINK" ] && fail "$DB_NAME: database is not linked to $APP"
@@ -75,6 +83,8 @@ EOF
   mariadb:link)
     verify_app_name "$2"
     verify_db_name "$3"
+    verify_max_args 3 "$@"
+
     DB_APP_PASSWORD="$DB_APP_PASSWORDS$APP"
     if [ ! -f "$DB_APP_PASSWORD" ]; then
         DB_NEW_PASSWORD="$(generate_random_password)"
@@ -94,6 +104,8 @@ EOF
   mariadb:unlink)
     verify_app_name "$2"
     verify_db_name "$3"
+    verify_max_args 3 "$@"
+
     mysql_admin <<EOF
 REVOKE ALL ON \`$DB_NAME\`.* FROM '$APP'@'%';
 EOF
@@ -104,6 +116,8 @@ EOF
   mariadb:console)
     verify_app_name "$2"
     verify_db_name "$3"
+    verify_max_args 3 "$@"
+
     DB_PASSWORD="$DB_APP_PASSWORDS$APP"
     DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
     [ ! -f "$DB_LINK" ] && fail "$DB_NAME: database is not linked to $APP"
