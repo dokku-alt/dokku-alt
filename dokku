@@ -103,6 +103,11 @@ case "$1" in
 EOF
     ;;
 
+  *:help)
+    CATEGORY="$(echo "$1" | cut -d':' -f1):"
+    dokku help | grep "^\s*$CATEGORY"
+    ;;
+
   *)
     for script in $(ls -d /var/lib/dokku/plugins/*/commands); do
       $script "$@"
