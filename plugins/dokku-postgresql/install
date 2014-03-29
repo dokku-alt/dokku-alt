@@ -1,5 +1,28 @@
 #!/bin/bash
 
+source "$(dirname $0)/vars"
+
 # Build docker image
-CWD=$(cd $(dirname $0); pwd)
-docker build -q=true -t kloadut/postgresql "$CWD/dockerfiles"
+docker build -t "$DB_IMAGE" "$CWD/dockerfiles"
+
+# Create .mariadb directory if does not exist
+if [[ ! -d "$DB_ROOT" ]]; then
+    mkdir -p "$DB_ROOT"
+    chown -R dokku: "$DB_ROOT"
+fi
+
+# Create root password if not specified
+if [[ ! -f "$DB_ADMIN_PASSWORD" ]]; then
+	generate_random_password > "$DB_ADMIN_PASSWORD"
+fi
+
+remove_container "$DB_CONTAINER"
+
+docker run --detach "--publish=$DB_PORT" \
+           --volume="$DB_VOLUME":"$DB_CONTAINER_VOLUME" \
+           --volume="$DB_ADMIN_PASSWORD":"$DB_CONTAINER_PASSWORD" \
+           --name="$DB_CONTAINER" \
+           "$DB_IMAGE" \
+           /usr/bin/start_pgsql.sh >/dev/null
+
+cat

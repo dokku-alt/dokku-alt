@@ -1,20 +1,14 @@
-PostgreSQL plugin for Dokku
----------------------------
+MariaDB plugin for Dokku
+------------------------
 
 Project: https://github.com/progrium/dokku
 
-**Warning: This plugin is under development and still only tested with the below dependencies**
-
-Requirements
-------------
-* Docker version `0.7.2` or higher
-* Dokku version `0.2.1` or higher
 
 Installation
 ------------
 ```
 cd /var/lib/dokku/plugins
-git clone https://github.com/Kloadut/dokku-pg-plugin postgresql
+git clone https://github.com/Kloadut/dokku-md-plugin mariadb
 dokku plugins-install
 ```
 
@@ -23,14 +17,11 @@ Commands
 --------
 ```
 $ dokku help
-    postgresql:create <db>                         Create a PostgreSQL container
-    postgresql:delete <db>                         Delete specified PostgreSQL container
-    postgresql:dump <db> > dump_file.sql           Dump database data
-    postgresql:info <db>                           Display database informations
-    postgresql:link <app> <db>                      Link an app to a PostgreSQL database
-    postgresql:list                                 Display list of PostgreSQL containers
-    postgresql:logs <db>                           Display last logs from PostgreSQL container
-    postgresql:restore <db> < dump_file.sql        Restore database data from a previous dump
+     mariadb:create <app>     Create a MariaDB container
+     mariadb:delete <app>     Delete specified MariaDB container
+     mariadb:info <app>       Display database informations
+     mariadb:link <app> <db>  Link an app to a MariaDB database
+     mariadb:logs <app>       Display last logs from MariaDB contain
 ```
 
 Simple usage
@@ -38,12 +29,12 @@ Simple usage
 
 Create a new DB:
 ```
-$ dokku postgresql:create foo            # Server side
-$ ssh dokku@server postgresql:create foo # Client side
+$ dokku mariadb:create foo            # Server side
+$ ssh dokku@server mariadb:create foo # Client side
 
------> PostgreSQL container created: postgresql/foo
+-----> MariaDB container created: mariadb/foo
 
-       Host: 172.17.42.1
+       Host: 172.16.0.104
        User: 'root'
        Password: 'RDSBYlUrOYMtndKb'
        Database: 'db'
@@ -54,12 +45,27 @@ Deploy your app with the same name (client side):
 ```
 $ git remote add dokku git@server:foo
 $ git push dokku master
+Counting objects: 155, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (70/70), done.
+Writing objects: 100% (155/155), 22.44 KiB | 0 bytes/s, done.
+Total 155 (delta 92), reused 131 (delta 80)
+remote: -----> Building foo ...
+remote:        Ruby/Rack app detected
+remote: -----> Using Ruby version: ruby-2.0.0
 
-```
+... blah blah blah ...
 
-Link your app to the database
-```bash
-dokku postgresql:link app_name database_name
+remote: -----> Deploying foo ...
+remote: 
+remote: -----> App foo linked to mariadb/foo database
+remote:        DATABASE_URL=mysql://root:RDSBYlUrOYMtndKb@172.16.0.104/db
+remote: 
+remote: -----> Deploy complete!
+remote: -----> Cleaning up ...
+remote: -----> Cleanup complete!
+remote: =====> Application deployed:
+remote:        http://foo.server
 ```
 
 
@@ -68,40 +74,25 @@ Advanced usage
 
 Inititalize the database with SQL statements:
 ```
-cat init.sql | dokku postgresql:create foo
+cat init.sql | dokku mariadb:create foo
 ```
 
 Deleting databases:
 ```
-dokku postgresql:delete foo
+dokku mariadb:delete foo
 ```
 
 Linking an app to a specific database:
 ```
-dokku postgresql:link foo bar
+dokku mariadb:link foo bar
 ```
 
-PostgreSQL logs (per database):
+MariaDB logs (per database):
 ```
-dokku postgresql:logs foo
+dokku mariadb:logs foo
 ```
 
 Database informations:
 ```
-dokku postgresql:info foo
-```
-
-List of containers:
-```
-dokku postgresql:list
-```
-
-Dump a database:
-```
-dokku postgresql:dump foo > foo.sql
-```
-
-Restore a database:
-```
-dokku postgresql:restore foo < foo.sql
+dokku mariadb:info foo
 ```

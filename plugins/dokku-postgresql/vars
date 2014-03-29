@@ -1,0 +1,16 @@
+#!/bin/bash
+
+source "$(dirname $0)/../dokku_common"
+
+DB_ROOT="$DOKKU_ROOT/.pgsql"
+DB_IMAGE="kloadut/postgresql"
+DB_VOLUME="$DB_ROOT/postgresql"
+DB_ADMIN_PASSWORD="$DB_ROOT/postgresql_password"
+DB_CONTAINER="postgresql_single_container"
+DB_CONTAINER_LINK="postgresql"
+DB_CONTAINER_VOLUME="/opt/postgresql"
+DB_CONTAINER_PASSWORD="/opt/postgresql_password"
+DB_PORT=5432
+
+DB_APP_PASSWORDS="$DB_ROOT/pwd_app_"
+DB_APP_DATABASES="$DB_ROOT/dbs_app_"
