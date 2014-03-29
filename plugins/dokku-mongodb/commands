@@ -28,6 +28,8 @@ mongo_admin() {
 case "$1" in
   mongodb:create)
     verify_db_name "$2"
+    verify_max_args 2 "$@"
+    
     mongo_admin <<EOF
 use $DB_NAME
 EOF
@@ -36,6 +38,8 @@ EOF
 
   mongodb:delete)
     verify_db_name "$2"
+    verify_max_args 2 "$@"
+
     mongo_admin <<EOF
 use $DB_NAME
 db.dropDatabase()
@@ -46,6 +50,8 @@ EOF
 
   mongodb:list)
     verify_app_name "$2"
+    verify_max_args 2 "$@"
+
     DB_LINKS="$DB_APP_DATABASES$APP/"
     mkdir -p "$DB_LINKS"
     ls -1 "$DB_LINKS"
@@ -54,6 +60,8 @@ EOF
   mongodb:info)
     verify_app_name "$2"
     verify_db_name "$3"
+    verify_max_args 3 "$@"
+
     DB_PASSWORD="$DB_APP_PASSWORDS$APP"
     DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
     [ ! -f "$DB_LINK" ] && fail "$DB_NAME: database is not linked to $APP"
@@ -79,6 +87,8 @@ EOF
   mongodb:link)
     verify_app_name "$2"
     verify_db_name "$3"
+    verify_max_args 3 "$@"
+
     DB_APP_PASSWORD="$DB_APP_PASSWORDS$APP"
     if [ ! -f "$DB_APP_PASSWORD" ]; then
         DB_NEW_PASSWORD="$(generate_random_password)"
@@ -96,6 +106,8 @@ EOF
   mongodb:unlink)
     verify_app_name "$2"
     verify_db_name "$3"
+    verify_max_args 3 "$@"
+
     mongo_admin <<EOF
 use $3
 db.removeUser("$2")
@@ -104,13 +116,11 @@ EOF
     redeploy_app "$APP"
     ;;
 
-  mongodb:shell)
-    mongo_admin
-    ;;
-
   mongodb:console)
     verify_app_name "$2"
     verify_db_name "$3"
+    verify_max_args 3 "$@"
+
     DB_PASSWORD="$DB_APP_PASSWORDS$APP"
     DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
     [ ! -f "$DB_LINK" ] && fail "$DB_NAME: database is not linked to $APP"
@@ -125,7 +135,7 @@ EOF
 
   help)
     cat && cat<<EOF
-    mongodb:create <db>         Create a MongoDB MongoDB
+    mongodb:create <db>         Create a MongoDB database
     mongodb:delete <db>         Delete specified MongoDB database
     mongodb:list <app>          List linked databases
     mongodb:link <app> <db>     Link database to app
