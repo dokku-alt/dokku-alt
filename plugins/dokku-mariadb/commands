@@ -13,10 +13,9 @@ mysql_shell() {
     shift 2
     docker run -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
-            -e USER="$DB_USER" \
             -e MYSQL_PWD="$(cat "$DB_PASSWORD")" \
             "$DB_IMAGE" \
-        bash -c "mysql --host=\"\$MARIADB_PORT_3306_TCP_ADDR\" --port=\"\$MARIADB_PORT_3306_TCP_PORT\" $@"
+        bash -c "mysql --user=\"$DB_USER\" --host=\"\$MARIADB_PORT_3306_TCP_ADDR\" --port=\"\$MARIADB_PORT_3306_TCP_PORT\" $@"
 }
 
 mysql_admin() {
@@ -112,10 +111,10 @@ EOF
     docker run -t -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
             -e DB_DATABASE="$DB_NAME" \
-            -e USER="$APP" \
+            -e DB_USER="$APP" \
             -e MYSQL_PWD="$(cat "$DB_PASSWORD")" \
             "$DB_IMAGE" \
-        bash -c 'mysql -h "$MARIADB_PORT_3306_TCP_ADDR" -P "$MARIADB_PORT_3306_TCP_PORT" "$DB_DATABASE"'
+        bash -c 'mysql -u "$DB_USER" -h "$MARIADB_PORT_3306_TCP_ADDR" -P "$MARIADB_PORT_3306_TCP_PORT" "$DB_DATABASE"'
     ;;
 
   help)
