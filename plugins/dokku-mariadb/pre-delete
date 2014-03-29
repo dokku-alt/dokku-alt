@@ -1,8 +1,0 @@
-#!/bin/bash
-
-APP="$1"
-IMAGE="app/$APP"
-source "$(dirname $0)/vars"
-
-# delete hypothetical container
-dokku mariadb:delete "$APP" || true

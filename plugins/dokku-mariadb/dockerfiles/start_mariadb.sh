@@ -16,10 +16,9 @@ sleep 8
 if [[ ! -f /opt/mysql/initialized ]]; then
 	DB_PASSWORD="$(cat "/opt/mysql_password")"
 	mysql -u root --password=a_stronk_password <<EOF
-CREATE DATABASE db;
 UPDATE mysql.user SET Password=PASSWORD('$DB_PASSWORD') WHERE User='root';
 FLUSH PRIVILEGES;
-GRANT ALL ON *.* to root@'%' IDENTIFIED BY '$DB_PASSWORD';
+GRANT ALL ON *.* to root@'%' IDENTIFIED BY '$DB_PASSWORD' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 EOF
     touch /opt/mysql/initialized

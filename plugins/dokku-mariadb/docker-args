@@ -1,10 +1,16 @@
 #!/bin/bash
 
-APP="$1"
-IMAGE="app/$APP"
 source "$(dirname $0)/vars"
+source "$(dirname $0)/../dokku_common"
 
-# link mariadb with container
-[ -f "$DB_HOST_PASSWORD" ] && echo "--link $DB_CONTAINER:$DB_CONTAINER_LINK "
+verify_app_name "$1"
+
+DB_LINKS="$DB_APP_DATABASES$APP/"
+
+if [ -d "$DB_LINKS" ]; then
+	if [ $(ls -1 "$DB_LINKS" | wc -l) -gt 0 ]; then
+		echo "--link $DB_CONTAINER:$DB_CONTAINER_LINK "
+	fi
+fi
 
 cat
