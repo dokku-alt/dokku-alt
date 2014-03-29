@@ -89,6 +89,10 @@ function redeploy_app() {
 	deploy_app "$@"
 }
 
+function fork_image() {
+	docker run --detach "$1" "exit 0" | commit_image "$2"
+}
+
 function commit_image() {
 	read ID
 	test $(docker wait "$ID") -eq 0
