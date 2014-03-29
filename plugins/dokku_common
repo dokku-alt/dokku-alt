@@ -39,6 +39,11 @@ function remove_image() {
 	docker rmi "$@" 1>/dev/null 2>/dev/null || true
 }
 
+function verify_max_args() {
+	local MAX_ARGS="$1"
+	[ $# -le $((MAX_ARGS+1)) ] || fail "Invalid number of arguments ($(($#-1)), expected $MAX_ARGS)."
+}
+
 function sanitize_name() {
 	local NAME="$1"
 	[ "$NAME" == "" ] && fail "You must specify an $2"
