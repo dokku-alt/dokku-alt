@@ -4,6 +4,8 @@ source "$(dirname $0)/../dokku_common"
 
 verify_app_name "$1"
 
+cat
+
 SOURCE_ENV_PATH="$APP_DIR/ENV"
 
 if [[ -f "$SOURCE_ENV_PATH" ]]; then
