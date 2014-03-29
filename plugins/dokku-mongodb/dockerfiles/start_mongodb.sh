@@ -23,5 +23,4 @@ EOF
     touch /opt/mongodb/initialized
 fi
 
-/usr/bin/mongod --dbpath=/opt/mongodb --repair
 exec /usr/bin/mongod --dbpath=/opt/mongodb --auth

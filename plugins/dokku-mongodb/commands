@@ -29,7 +29,7 @@ case "$1" in
   mongodb:create)
     verify_db_name "$2"
     mongo_admin <<EOF
-use '$DB_NAME'
+use $DB_NAME
 EOF
     info "MongoDB database created: $DB_NAME"
     ;;
@@ -37,7 +37,7 @@ EOF
   mongodb:delete)
     verify_db_name "$2"
     mongo_admin <<EOF
-use '$DB_NAME'
+use $DB_NAME
 db.dropDatabase()
 EOF
     rm -f $DB_APP_DATABASES*/$DB_NAME
@@ -85,7 +85,7 @@ EOF
         echo "$DB_NEW_PASSWORD" > "$DB_APP_PASSWORD"
     fi
     mongo_admin <<EOF
-use '$3'
+use $3
 db.addUser("$2", "$(cat "$DB_APP_PASSWORD")")
 EOF
     mkdir -p "$DB_APP_DATABASES$APP"
@@ -97,11 +97,15 @@ EOF
     verify_app_name "$2"
     verify_db_name "$3"
     mongo_admin <<EOF
-use '$3'
+use $3
 db.removeUser("$2")
 EOF
     rm "$DB_APP_DATABASES$APP/$DB_NAME"
     redeploy_app "$APP"
+    ;;
+
+  mongodb:shell)
+    mongo_admin
     ;;
 
   mongodb:console)
