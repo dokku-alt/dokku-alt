@@ -2,38 +2,48 @@
 
 source "$(dirname $0)/../dokku_common"
 
-# Check if name is specified
-if [[ $1 == apps:* ]]; then
-    verify_app_name "$2"
-fi
-
 case "$1" in
   apps)
     ls -1 -d $DOKKU_ROOT/*/ | xargs -L1 basename
     ;;
 
   apps:status)
-	if docker port "$APP_NAME" "$APP_PORT" 1>/dev/null 2>/dev/null
-	then
-		echo "$APP is running."
-	else
-		echo "$APP is stopped."
-	fi
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+
+  	if docker port "$APP_NAME" "$APP_PORT" 1>/dev/null 2>/dev/null
+  	then
+  		echo "$APP is running."
+  	else
+  		echo "$APP is stopped."
+  	fi
 	;;
 
   apps:start)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    
     docker start "$APP_NAME"
 	;;
 
   apps:stop)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    
     stop_container "$APP_NAME"
 	;;
 
   apps:restart)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    
     docker restart "$APP_NAME"
     ;;
 
   apps:top)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    
     shift 2
     docker ps "$APP_NAME" "$@"
     ;;
@@ -42,8 +52,8 @@ case "$1" in
     cat && cat<<EOF
     apps                      List apps
     apps:status <app>         Status of specific apps
-    apps:start <app>	      Stop specific apps
-    apps:stop <app>		      Stop specific apps
+    apps:start <app>	        Stop specific apps
+    apps:stop <app>		        Stop specific apps
     apps:restart <app>        Restart specific apps
     apps:top <app> [args...]  Show running processes
 EOF
