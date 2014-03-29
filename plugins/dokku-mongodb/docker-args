@@ -1,13 +1,16 @@
-#!/usr/bin/env bash
-set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+#!/bin/bash
 
-STDIN=$(cat)
-APP="$1"
-db_image="jeffutter/mongodb"
-db_name="dokku-mongodb"
-echo -n $STDIN
-output=""
-if [[ -f "$DOKKU_ROOT/.mongodb/pass_${APP}" ]]; then
-  output=" --link $db_name:mongodb"
+source "$(dirname $0)/vars"
+source "$(dirname $0)/../dokku_common"
+
+verify_app_name "$1"
+
+cat
+
+DB_LINKS="$DB_APP_DATABASES$APP/"
+
+if [ -d "$DB_LINKS" ]; then
+	if [ $(ls -1 "$DB_LINKS" | wc -l) -gt 0 ]; then
+		echo "--link $DB_CONTAINER:$DB_CONTAINER_LINK "
+	fi
 fi
-echo "$STDIN$output"

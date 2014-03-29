@@ -1,4 +1,1 @@
-.cache
-.vagrant
-Berksfile.lock
-*.swp
+.*.swp

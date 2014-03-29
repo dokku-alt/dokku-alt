@@ -1,12 +1,14 @@
-MongoDB plugin for Dokku
----------------------------
-Plugin to setup Mongodb accounts for containers deployed to Dokku
+MariaDB plugin for Dokku
+------------------------
+
+Project: https://github.com/progrium/dokku
 
 
 Installation
 ------------
 ```
-git clone https://github.com/jeffutter/dokku-mongodb-plugin.git /var/lib/dokku/plugins/mongodb
+cd /var/lib/dokku/plugins
+git clone https://github.com/Kloadut/dokku-md-plugin mariadb
 dokku plugins-install
 ```
 
@@ -15,42 +17,82 @@ Commands
 --------
 ```
 $ dokku help
-     mongodb:create <app>   Create a Mongo database
-     mongodb:delete <app>   Delete specified Mongo database
-     mongodb:list           List all databases
-     mongodb:console        Launch a mongodb console as admin
+     mariadb:create <app>     Create a MariaDB container
+     mariadb:delete <app>     Delete specified MariaDB container
+     mariadb:info <app>       Display database informations
+     mariadb:link <app> <db>  Link an app to a MariaDB database
+     mariadb:logs <app>       Display last logs from MariaDB contain
 ```
 
 Simple usage
 ------------
-Your need to have app running with the same name!
 
 Create a new DB:
 ```
-$ dokku mongodb:create foo            # Server side
-$ ssh dokku@server mongodb:create foo # Client side
+$ dokku mariadb:create foo            # Server side
+$ ssh dokku@server mariadb:create foo # Client side
 
-    {
-        "_id" : ObjectId("524c90dc45addf0edad783a2"),
-        "user" : "foo",
-        "readOnly" : false,
-        "pwd" : "825ec0deacccb3c6bb621d84153e5877"
-    }
+-----> MariaDB container created: mariadb/foo
 
+       Host: 172.16.0.104
+       User: 'root'
+       Password: 'RDSBYlUrOYMtndKb'
+       Database: 'db'
+       Public port: 49187
 ```
 
-Now if you push your app again, you will have the following ENV variables
+Deploy your app with the same name (client side):
 ```
-MONGODB_DATABASE
-MONGODB_PORT
-MONGODB_USERNAME
-MONGODB_PASSWORD
-MONGO_URL
+$ git remote add dokku git@server:foo
+$ git push dokku master
+Counting objects: 155, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (70/70), done.
+Writing objects: 100% (155/155), 22.44 KiB | 0 bytes/s, done.
+Total 155 (delta 92), reused 131 (delta 80)
+remote: -----> Building foo ...
+remote:        Ruby/Rack app detected
+remote: -----> Using Ruby version: ruby-2.0.0
+
+... blah blah blah ...
+
+remote: -----> Deploying foo ...
+remote: 
+remote: -----> App foo linked to mariadb/foo database
+remote:        DATABASE_URL=mysql://root:RDSBYlUrOYMtndKb@172.16.0.104/db
+remote: 
+remote: -----> Deploy complete!
+remote: -----> Cleaning up ...
+remote: -----> Cleanup complete!
+remote: =====> Application deployed:
+remote:        http://foo.server
 ```
 
-Persistence
------------
 
-The Mongo DB data is stored outside the container on the host at `$DOKKU_ROOT/.mongodb/data`. Inside the container, this location is bound to `/tmp/mongo` and will be there. 
-Since the data is stored outside the container, it will persistent through container restarts, and also be available to future revisions of your container. 
+Advanced usage
+--------------
 
+Inititalize the database with SQL statements:
+```
+cat init.sql | dokku mariadb:create foo
+```
+
+Deleting databases:
+```
+dokku mariadb:delete foo
+```
+
+Linking an app to a specific database:
+```
+dokku mariadb:link foo bar
+```
+
+MariaDB logs (per database):
+```
+dokku mariadb:logs foo
+```
+
+Database informations:
+```
+dokku mariadb:info foo
+```

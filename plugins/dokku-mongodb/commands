@@ -1,112 +1,134 @@
 #!/bin/bash
-#set -e;
 
-APP=$2
-IMAGE="jeffutter/mongodb"
+source "$(dirname $0)/vars"
 
-OLDHOME=$HOME
-HOME="$DOKKU_ROOT/.mongodb"
-
-check_exists() {
-  if [[ ! -d "$DOKKU_ROOT/$APP" ]]; then
-    echo "App must exist before creating mongodb storage for it"
-    exit 1
-  fi
+verify_db_name() {
+    sanitize_name "$1" "database name"
+    DB_NAME="$1"
 }
 
-check_app() {
-  if [[ -z "$APP" ]]; then
-    echo "You must specify an app name"
-    exit 1
-  fi
+mongo_shell() {
+    local DB_USER="$1"
+    local DB_PASSWORD="$2"
+    local DB_NAME="$3"
+    shift 3
+    docker run -i --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            -e DB_USER="$DB_USER" \
+            -e DB_PASSWORD="$(cat "$DB_PASSWORD")" \
+            -e DB_NAME="$DB_NAME" \
+            "$DB_IMAGE" \
+        bash -c "mongo --quiet -u \"\$DB_USER\" -p \"\$DB_PASSWORD\" \"\$MONGODB_PORT_27017_TCP_ADDR:\$MONGODB_PORT_27017_TCP_PORT/\$DB_NAME\" $@"
 }
 
-check_container() {
-  if [[ -z "$id" ]]; then
-    echo "MongoDB container not started cannot continue. Start with dokku mongodb:start"
-    exit 1
-  fi
+mongo_admin() {
+    mongo_shell "admin" "$DB_ADMIN_PASSWORD" "admin" "$@"
 }
-
-admin_pass=$(cat "$DOKKU_ROOT/.mongodb/admin_pw")
-mongodb_database="${APP//./_}-production"
-
-db_image="jeffutter/mongodb"
-id=$(docker ps | grep "$db_image":latest |  awk '{print $1}')
-if [[ -n "$id" ]]; then
-  mongodb_public_ip=$(docker port ${id} 27017 | awk '{split($0,a,":"); print a[1]}')
-  mongodb_port=$(docker port ${id} 27017 | awk '{split($0,a,":"); print a[2]}')
-  if [[ $mongodb_public_ip = "0.0.0.0" ]]; then
-    mongodb_public_ip=localhost
-  fi
-fi
 
 case "$1" in
-  mongodb:console)
-    check_container
-    mongo $mongodb_public_ip:$mongodb_port -u admin -p"$admin_pass" --authenticationDatabase="admin"
-    ;;
   mongodb:create)
-    check_container
-    check_app
-
-    mongodb_password=$(openssl rand -base64 32|base64)
-    echo $mongodb_password > "$DOKKU_ROOT/.mongodb/pass_${APP}"
-
-    mongodb_username=$APP
-    mongo $mongodb_public_ip:$mongodb_port/$mongodb_database --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "db.addUser(\"${mongodb_username}\", \"${mongodb_password}\")"
+    verify_db_name "$2"
+    mongo_admin <<EOF
+use '$DB_NAME'
+EOF
+    info "MongoDB database created: $DB_NAME"
     ;;
+
   mongodb:delete)
-    check_container
-    check_app
-    check_exists
+    verify_db_name "$2"
+    mongo_admin <<EOF
+use '$DB_NAME'
+db.dropDatabase()
+EOF
+    rm -f $DB_APP_DATABASES*/$DB_NAME
+    info "MongoDB database deleted: $DB_NAME"
+    ;;
 
-    mongo $mongodb_public_ip:$mongodb_port/$mongodb_database --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "printjson(db.dropDatabase())"
-    rm -f "$DOKKU_ROOT/.mongodb/pass_${APP}"
-    ;;
   mongodb:list)
-    check_container
-    mongo $mongodb_public_ip:$mongodb_port --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "printjson(db.adminCommand('listDatabases'));" | grep name | cut -d \" -f 4 |grep -v admin | grep -v test
+    verify_app_name "$2"
+    DB_LINKS="$DB_APP_DATABASES$APP/"
+    mkdir -p "$DB_LINKS"
+    ls -1 "$DB_LINKS"
     ;;
-  mongodb:logs)
-    check_container
-    docker logs dokku-mongodb | tail -n 100
+
+  mongodb:info)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    DB_PASSWORD="$DB_APP_PASSWORDS$APP"
+    DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
+    [ ! -f "$DB_LINK" ] && fail "$DB_NAME: database is not linked to $APP"
+    echo
+    DB_USER="$APP"
+    DB_PASSWORD="$(cat "$DB_PASSWORD")"
+    DB_DATABASE="$DB_NAME"
+    docker run -i --rm \
+                --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+                "$DB_IMAGE" \
+                bash - <<EOF
+echo "       Host: \$MONGODB_PORT_${DB_PORT}_TCP_ADDR"
+echo "       Port: \$MONGODB_PORT_${DB_PORT}_TCP_PORT"
+echo "       User: $DB_USER"
+echo "       Password: $DB_PASSWORD"
+echo "       Database: $DB_DATABASE"
+echo
+echo "       MONGODB_URL=mongodb://$DB_USER:$DB_PASSWORD@\$MONGODB_PORT_${DB_PORT}_TCP_ADDR:\$MONGODB_PORT_${DB_PORT}_TCP_PORT/$DB_DATABASE"
+EOF
+    echo
     ;;
-  mongodb:start)
-    if [[ "$id" != "" ]]; then
-      echo "MongoDB container already running with ID: ${id}"
-    else
-      stopped_id=$(docker ps -a | grep "$db_image:latest[[:space:]].\+[[:space:]]dokku-mongodb[[:space:]]*$" |  awk '{print $1}')
-      if [[ "$stopped_id" != "" ]]; then
-        docker start $stopped_id
-      else
-        docker run -p 27017 -v "$DOKKU_ROOT/.mongodb/data":/tmp/mongo --name="dokku-mongodb" -d "$IMAGE" /usr/bin/mongod --dbpath=/tmp/mongo --auth
-      fi
+
+  mongodb:link)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    DB_APP_PASSWORD="$DB_APP_PASSWORDS$APP"
+    if [ ! -f "$DB_APP_PASSWORD" ]; then
+        DB_NEW_PASSWORD="$(generate_random_password)"
+        echo "$DB_NEW_PASSWORD" > "$DB_APP_PASSWORD"
     fi
+    mongo_admin <<EOF
+use '$3'
+db.addUser("$2", "$(cat "$DB_APP_PASSWORD")")
+EOF
+    mkdir -p "$DB_APP_DATABASES$APP"
+    touch "$DB_APP_DATABASES$APP/$DB_NAME"
+    redeploy_app "$APP"
     ;;
-  mongodb:stop)
-    check_container
-    mongo $mongodb_public_ip:$mongodb_port/admin --quiet -u admin -p"$admin_pass" --authenticationDatabase="admin" --eval "db.shutdownServer()"
+
+  mongodb:unlink)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    mongo_admin <<EOF
+use '$3'
+db.removeUser("$2")
+EOF
+    rm "$DB_APP_DATABASES$APP/$DB_NAME"
+    redeploy_app "$APP"
     ;;
-  mongodb:status)
-    if [[ "$id" != "" ]]; then
-      echo "MongoDB container running with ID: ${id}"
-    else
-      echo "MongoDB container not running"
-    fi
+
+  mongodb:console)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    DB_PASSWORD="$DB_APP_PASSWORDS$APP"
+    DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
+    [ ! -f "$DB_LINK" ] && fail "$DB_NAME: database is not linked to $APP"
+    docker run -t -i --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            -e DB_USER="$APP" \
+            -e DB_PASSWORD="$(cat "$DB_PASSWORD")" \
+            -e DB_NAME="$3" \
+            "$DB_IMAGE" \
+        bash -c 'mongo -u "$DB_USER" -p "$DB_PASSWORD" "$MONGODB_PORT_27017_TCP_ADDR:$MONGODB_PORT_27017_TCP_PORT/$DB_NAME"'
     ;;
+
   help)
     cat && cat<<EOF
-    mongodb:console       Launch an admin mongodb console
-    mongodb:create <app>  Create a Mongo database
-    mongodb:delete <app>  Delete specified Mongo database
-    mongodb:list          List all databases
-    mongodb:logs          Show logs from MongoDB program
-    mongodb:start         Start the MongoDB docker container if it isn't running
-    mongodb:stop          Stop the MongoDB docker container
-    mongodb:status        Shows status of MongoDB
+    mongodb:create <db>         Create a MongoDB MongoDB
+    mongodb:delete <db>         Delete specified MongoDB database
+    mongodb:list <app>          List linked databases
+    mongodb:link <app> <db>     Link database to app
+    mongodb:unlink <app> <db>   Unlink database from app
+    mongodb:info <app> <db>     Display application informations
+    mongodb:console <app> <db>  Launch console for MongoDB container
 EOF
     ;;
-esac
 
-HOME=$OLDHOME
+esac
