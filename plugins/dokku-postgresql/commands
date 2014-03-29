@@ -26,6 +26,8 @@ pgsql_admin() {
 case "$1" in
   postgresql:create)
     verify_db_name "$2"
+    verify_max_args 2 "$@"
+    
     pgsql_admin <<EOF
 CREATE DATABASE "$DB_NAME";
 EOF
@@ -34,6 +36,8 @@ EOF
 
   postgresql:delete)
     verify_db_name "$2"
+    verify_max_args 2 "$@"
+
     pgsql_admin <<EOF
 DROP DATABASE "$DB_NAME";
 EOF
@@ -43,6 +47,8 @@ EOF
 
   postgresql:list)
     verify_app_name "$2"
+    verify_max_args 2 "$@"
+
     DB_LINKS="$DB_APP_DATABASES$APP/"
     mkdir -p "$DB_LINKS"
     ls -1 "$DB_LINKS"
@@ -51,6 +57,8 @@ EOF
   postgresql:info)
     verify_app_name "$2"
     verify_db_name "$3"
+    verify_max_args 3 "$@"
+
     DB_PASSWORD="$DB_APP_PASSWORDS$APP"
     DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
     [ ! -f "$DB_LINK" ] && fail "$DB_NAME: database is not linked to $APP"
@@ -76,6 +84,8 @@ EOF
   postgresql:link)
     verify_app_name "$2"
     verify_db_name "$3"
+    verify_max_args 3 "$@"
+
     DB_APP_PASSWORD="$DB_APP_PASSWORDS$APP"
     if [ ! -f "$DB_APP_PASSWORD" ]; then
         DB_NEW_PASSWORD="$(generate_random_password)"
@@ -95,6 +105,8 @@ EOF
   postgresql:unlink)
     verify_app_name "$2"
     verify_db_name "$3"
+    verify_max_args 3 "$@"
+
     pgsql_admin <<EOF
 REVOKE ALL PRIVILEGES ON DATABASE "$DB_NAME" FROM "$APP";
 EOF
@@ -105,6 +117,8 @@ EOF
   postgresql:console)
     verify_app_name "$2"
     verify_db_name "$3"
+    verify_max_args 3 "$@"
+
     DB_PASSWORD="$DB_APP_PASSWORDS$APP"
     DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
     [ ! -f "$DB_LINK" ] && fail "$DB_NAME: database is not linked to $APP"
