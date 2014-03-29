@@ -2,6 +2,4 @@
 
 source "$(dirname $0)/../dokku_common"
 
-cat
-
 sudo /etc/init.d/nginx reload > /dev/null
