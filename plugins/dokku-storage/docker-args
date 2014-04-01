@@ -1,19 +1,13 @@
 #!/usr/bin/env bash
 
-source "$(dirname $0)/../dokku_common"
+source "$(dirname $0)/vars"
 
 verify_app_name "$1"
+storage_for_app "$APP"
 
-STORAGE_FILE="$APP_DIR/STORAGE"
-STORAGE_DATA="$APP_DIR/STORAGE_DATA"
-
-if [ -f $STORAGE_FILE ]; then
-	while read STORAGE_LINE
-	do
-	    LOCAL_STORAGE_DATA="$STORAGE_DATA/$STORAGE_LINE"
-	    mkdir -p $LOCAL_STORAGE_DATA
-	    echo -n " -v" "$LOCAL_STORAGE_DATA":"$STORAGE_LINE"
-	done < $STORAGE_FILE
-fi
+while read VOLUME
+do
+    echo " -v" "$STORAGE_VOLUMES$STORAGE_LINE":"$VOLUME"
+done < $STORAGE_PATHS
 
 cat

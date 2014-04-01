@@ -1,64 +1,47 @@
 #!/usr/bin/env bash
 
-source "$(dirname $0)/../dokku_common"
-
-# Check if name is specified
-if [[ $1 == storage:* ]]; then
-    if [[ -z $2 ]]; then
-        echo "You must specify an app name"
-        exit 1
-    fi
-
-    APP="$2"
-    # Check if app exists with the same name
-    if [[ ! -d "$DOKKU_ROOT/$APP" ]]; then
-      echo "App $APP does not exist"
-      exit 1
-    fi
-
-    STORAGE_FILE="$DOKKU_ROOT/$APP/STORAGE"
-    [ ! -f $STORAGE_FILE ] && touch $STORAGE_FILE
-fi
-
-storage_restart_app() {
-  APP="$1";
-
-  echo "-----> Deploying $APP ..."
-  dokku deploy $APP
-  echo "-----> Deploy complete!"
-}
+source "$(dirname $0)/vars"
 
 case "$1" in
   storage:list)
-    verify_max_args 1 "$@"
-    
-    cat $STORAGE_FILE
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    storage_for_app "$APP"
+    cat "$STORAGE_PATHS"
 	;;
 
   storage:add)
-    while read STORAGE_LINE
-    do
-        if [[ "$STORAGE_LINE" == "$3" ]]; then
-            exit 0
-        fi
-    done < $STORAGE_FILE
-    echo $3 >> $STORAGE_FILE
-    storage_restart_app $APP
+    verify_app_name "$2"
+    verify_max_args 3 "$@"
+    storage_for_app "$APP"
+
+    realpath="$(readlink -m "$3")"
+    [ "$3" == "$realpath" ] || fail "$3: invalid path ($realpath)"
+
+    info "Adding path '$realpath' to '$APP' application"
+    info "Current paths for '$APP' application"
+
+    cat "$STORAGE_PATHS" | (
+      cat;
+      echo "$realpath"
+    ) | sort -u | tee "$STORAGE_PATHS.tmp" && mv "$STORAGE_PATHS.tmp" "$STORAGE_PATHS"
+
+    deploy_app "$APP"
 	;;
 
   storage:remove)
-    FOUND=0
-    while read STORAGE_LINE
-    do
-        if [[ "$STORAGE_LINE" == "$3" ]]; then
-            FOUND=1
-            continue
-        fi
-        echo $STORAGE_LINE
-    done < $STORAGE_FILE > $STORAGE_FILE.tmp
-    [ "$FOUND" == "0" ] && exit 0
-    mv $STORAGE_FILE.tmp $STORAGE_FILE
-    storage_restart_app $APP
+    verify_app_name "$2"
+    verify_max_args 3 "$@"
+    storage_for_app "$APP"
+
+    realpath="$(readlink -m "$3")"
+    [ "$3" == "$realpath" ] || fail "$3: invalid path ($realpath)"
+
+    info "Removing path '$realpath' from '$APP' application"
+    info "Current paths for '$APP' application"
+    comm -23 "$STORAGE_PATHS" <(echo "$realpath") | tee "$STORAGE_PATHS.tmp" && mv "$STORAGE_PATHS.tmp" "$STORAGE_PATHS" 
+
+    deploy_app "$APP"
 	;;
 
   help)
