@@ -3,7 +3,7 @@
 source "$(dirname $0)/../dokku_common"
 
 case "$1" in
-  apps)
+  apps:list)
     ls -1 -d $DOKKU_ROOT/*/ | xargs -L1 basename
     ;;
 
@@ -30,7 +30,7 @@ case "$1" in
     verify_app_name "$2"
     verify_max_args 2 "$@"
     
-    stop_container "$APP_NAME"
+    docker stop "$APP_NAME"
 	;;
 
   apps:restart)
@@ -45,12 +45,12 @@ case "$1" in
     verify_max_args 2 "$@"
     
     shift 2
-    docker ps "$APP_NAME" "$@"
+    docker top "$APP_NAME"
     ;;
 
   help)
     cat && cat<<EOF
-    apps                      List apps
+    apps:list                 List apps
     apps:status <app>         Status of specific apps
     apps:start <app>	        Stop specific apps
     apps:stop <app>		        Stop specific apps
