@@ -85,7 +85,7 @@ case "$1" in
     ;;
 
   plugins-install)
-    [ "$(id -un)" != "root" ] && fail "Plugins install have to be run as root!"
+    [ "$(id -un)" != "root" ] && fail "Plugins install can be run only as root!"
     : | pluginhook install
     ;;
 
@@ -111,7 +111,7 @@ EOF
     ;;
 
   *)
-    for script in $(ls -d /var/lib/dokku/plugins/*/commands); do
+    for script in $(ls -d $PLUGIN_PATH/*/commands); do
       $script "$@"
     done
     ;;
