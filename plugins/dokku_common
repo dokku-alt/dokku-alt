@@ -41,14 +41,14 @@ function remove_image() {
 
 function verify_max_args() {
 	local MAX_ARGS="$1"
-	[ $# -le $((MAX_ARGS+1)) ] || fail "Invalid number of arguments ($(($#-1)), expected $MAX_ARGS)."
+	[[ $# -le $((MAX_ARGS+1)) ]] || fail "Invalid number of arguments ($(($#-1)), expected $MAX_ARGS)."
 }
 
 function sanitize_name() {
 	local NAME="$1"
-	[ "$NAME" == "" ] && fail "You must specify an $2"
+	[[ "$NAME" == "" ]] && fail "You must specify an $2"
     local NAME2="${NAME//[^a-zA-Z0-9_-]//}"
-	[ "$NAME" != "$NAME2" ] && fail "Invalid $2"
+	[[ "$NAME" != "$NAME2" ]] && fail "Invalid $2"
 	return 0
 }
 
@@ -56,9 +56,9 @@ function check_app_name() {
 	sanitize_name "$1" "app name"
 	APP="$1"
     IMAGE_GENERIC="app/$APP"
-    if [ "$(basename $0)" == "pre-build" ] || [ "$(basename $0)" == "post-build" ]; then
+    if [[ "$(basename $0)" == "pre-build" ]] || [[ "$(basename $0)" == "post-build" ]]; then
     	IMAGE="$IMAGE_GENERIC:build"
-    elif [ "$(basename $0)" == "pre-release" ] || [ "$(basename $0)" == "post-release" ]; then
+    elif [[ "$(basename $0)" == "pre-release" ]] || [[ "$(basename $0)" == "post-release" ]]; then
     	IMAGE="$IMAGE_GENERIC:release"
     else
     	IMAGE="$IMAGE_GENERIC:latest"
@@ -72,13 +72,13 @@ function check_app_name() {
 
 function verify_app_name() {
 	check_app_name "$@"
-	[ ! -d "$APP_DIR" ] && fail "$APP: app doesn't exist"
+	[[ ! -d "$APP_DIR" ]] && fail "$APP: app doesn't exist"
 	return 0
 }
 
 function require_image() {
 	IMAGES=$(docker images "$1" | wc -l)
-	[ $IMAGES -ne 0 ] && return
+	[[ $IMAGES -ne 0 ]] && return
 	fail "$1 image not found... Did you run 'dokku plugins-install' ?"
 }
 
@@ -133,6 +133,6 @@ function attach_and_commit_image() {
 	return 0
 }
 
-[ -z "$DOKKU_ROOT" ] && fail "DOKKU_ROOT not set"
+[[ -z "$DOKKU_ROOT" ]] && fail "DOKKU_ROOT not set"
 
 CWD="$(cd "$(dirname "$0")" && pwd)"

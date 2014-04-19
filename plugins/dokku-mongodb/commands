@@ -64,7 +64,7 @@ EOF
 
     DB_PASSWORD="$DB_APP_PASSWORDS$APP"
     DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
-    [ ! -f "$DB_LINK" ] && fail "$DB_NAME: database is not linked to $APP"
+    [[ ! -f "$DB_LINK" ]] && fail "$DB_NAME: database is not linked to $APP"
     echo
     DB_USER="$APP"
     DB_PASSWORD="$(cat "$DB_PASSWORD")"
@@ -90,7 +90,7 @@ EOF
     verify_max_args 3 "$@"
 
     DB_APP_PASSWORD="$DB_APP_PASSWORDS$APP"
-    if [ ! -f "$DB_APP_PASSWORD" ]; then
+    if [[ ! -f "$DB_APP_PASSWORD" ]]; then
         DB_NEW_PASSWORD="$(generate_random_password)"
         echo "$DB_NEW_PASSWORD" > "$DB_APP_PASSWORD"
     fi
@@ -123,7 +123,7 @@ EOF
 
     DB_PASSWORD="$DB_APP_PASSWORDS$APP"
     DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
-    [ ! -f "$DB_LINK" ] && fail "$DB_NAME: database is not linked to $APP"
+    [[ ! -f "$DB_LINK" ]] && fail "$DB_NAME: database is not linked to $APP"
     docker run -t -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
             -e DB_USER="$APP" \

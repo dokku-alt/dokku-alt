@@ -8,7 +8,7 @@ DB_LINKS="$DB_APP_DATABASES$APP/"
 DB_APP_PASSWORD="$DB_APP_PASSWORDS$APP"
 
 # inject MONGODB_URL
-if [ -d "$DB_LINKS" ] && [ -f "$DB_APP_PASSWORD" ] && [ $(ls -1 "$DB_LINKS" | wc -l) -gt 0 ]; then
+if [[ -d "$DB_LINKS" ]] && [[ -f "$DB_APP_PASSWORD" ]] && [[ $(ls -1 "$DB_LINKS" | wc -l) -gt 0 ]]; then
 	ls -1 "$DB_LINKS" | while read DB_NAME; do
 		docker run -i -a stdin "$IMAGE" /bin/bash -c "cat > /app/.profile.d/mongodb_env" <<EOF | commit_image "$IMAGE"
 [ "\$MONGODB_NAME" != "" ] && export MONGODB_URL=mongodb://$APP:$(cat "$DB_APP_PASSWORD")@\$MONGODB_PORT_${DB_PORT}_TCP_ADDR:\$MONGODB_PORT_${DB_PORT}_TCP_PORT/$DB_NAME

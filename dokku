@@ -85,7 +85,7 @@ case "$1" in
     ;;
 
   plugins-install)
-    [ "$(id -un)" != "root" ] && fail "Plugins install can be run only as root!"
+    [[ "$(id -un)" != "root" ]] && fail "Plugins install can be run only as root!"
     : | pluginhook install
     ;;
 

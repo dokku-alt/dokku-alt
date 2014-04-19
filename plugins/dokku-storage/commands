@@ -16,7 +16,7 @@ case "$1" in
     storage_for_app "$APP"
 
     realpath="$(readlink -m "$3")"
-    [ "$3" == "$realpath" ] || fail "$3: invalid path ($realpath)"
+    [[ "$3" == "$realpath" ]] || fail "$3: invalid path ($realpath)"
 
     info "Adding path '$realpath' to '$APP' application"
     info "Current paths for '$APP' application"
@@ -35,7 +35,7 @@ case "$1" in
     storage_for_app "$APP"
 
     realpath="$(readlink -m "$3")"
-    [ "$3" == "$realpath" ] || fail "$3: invalid path ($realpath)"
+    [[ "$3" == "$realpath" ]] || fail "$3: invalid path ($realpath)"
 
     info "Removing path '$realpath' from '$APP' application"
     info "Current paths for '$APP' application"
