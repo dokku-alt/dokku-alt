@@ -1,13 +1,49 @@
 DOKKU_VERSION = master
-
 DOKKU_ROOT ?= /home/dokku
 
-.PHONY: all install copyfiles version plugins dependencies sshcommand pluginhook docker aufs count
+.PHONY: all install devinstall pull push sync
 
 all:
 	# Type "make install" to install.
 
-install: dependencies copyfiles plugins version
+install:
+	# install dependencies
+	apt-get update
+	apt-get -y install ruby
+
+	# install docker
+	egrep -i "^docker" /etc/group || groupadd docker
+	apt-get -y install docker.io # requires ubuntu 14.04 LTS
+
+	# dokku man
+	mkdir -p /usr/local/share/man/man1
+	cp dokku.1 /usr/local/share/man/man1/dokku.1
+	mandb
+
+	# install dokku
+	cp dokku /usr/local/bin/dokku
+	cp sshcommand/sshcommand /usr/local/bin/sshcommand
+	cp gitreceive/gitreceive /usr/local/bin/gitreceive
+	cp pluginhook/pluginhook /usr/local/bin/pluginhook
+	mkdir -p /var/lib/dokku-alt/plugins
+	cp -r plugins/* /var/lib/dokku-alt/plugins
+
+	# configure dokku
+	sshcommand create dokku /usr/local/bin/dokku
+	usermod -aG docker dokku
+
+	# version
+	git describe --tags > /var/lib/dokku-alt/VERSION  2> /dev/null || echo '~${DOKKU_VERSION} ($(shell date -uIminutes))' > /var/lib/dokku-alt/VERSION
+
+	# install plugins
+	dokku plugins-install
+
+devinstall: install
+	ln -sf "$(PWD)/dokku" /usr/local/bin/dokku
+	ln -sf "$(PWD)/sshcommand/sshcommand" /usr/local/bin/sshcommand
+	ln -sf "$(PWD)/gitreceive/gitreceive" /usr/local/bin/gitreceive
+	ln -sf "$(PWD)/pluginhook/pluginhook" /usr/local/bin/pluginhook
+	ln -sf "$(PWD)/plugins" /var/lib/dokku-alt/plugins
 
 pull:
 	rsync -av dokku.home:/srv/dokku-alt/ dokku
@@ -19,47 +55,6 @@ push:
 
 sync:
 	while true; do make push >/dev/null; sleep 1s; done
-
-copyfiles: addman
-	cp dokku /usr/local/bin/dokku
-	mkdir -p /var/lib/dokku/plugins
-	cp -r plugins/* /var/lib/dokku/plugins
-
-addman:
-	mkdir -p /usr/local/share/man/man1
-	cp dokku.1 /usr/local/share/man/man1/dokku.1
-	mandb
-
-version:
-	git describe --tags > ${DOKKU_ROOT}/VERSION  2> /dev/null || echo '~${DOKKU_VERSION} ($(shell date -uIminutes))' > ${DOKKU_ROOT}/VERSION
-
-plugins: pluginhook docker
-	dokku plugins-install
-
-dependencies: sshcommand pluginhook docker
-
-sshcommand:
-	make -C sshcommand install
-	sshcommand create dokku /usr/local/bin/dokku
-
-pluginhook:
-	make -C pluginhook install
-
-docker: aufs
-	egrep -i "^docker" /etc/group || groupadd docker
-	usermod -aG docker dokku
-	curl https://get.docker.io/gpg | apt-key add -
-	echo deb http://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list
-	apt-get update
-ifdef DOCKER_VERSION
-	apt-get install -y lxc-docker-${DOCKER_VERSION}
-else
-	apt-get install -y lxc-docker
-endif
-	sleep 2 # give docker a moment i guess
-
-aufs:
-	lsmod | grep aufs || modprobe aufs || apt-get install -y linux-image-extra-`uname -r`
 
 count:
 	@echo "Core lines:"
