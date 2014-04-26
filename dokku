@@ -8,6 +8,11 @@ if [[ $(id -un) != "dokku" && $1 != "plugins-install" ]]; then
   exit
 fi
 
+# locale
+export LANGUAGE=${LANGUAGE:-en_US.UTF-8}
+export LANG=${LANG:-en_US.UTF-8}
+export LC_ALL=${LC_ALL:-en_US.UTF-8}
+
 source "$PLUGIN_PATH/dokku_common"
 
 [[ -f $DOKKU_ROOT/dokkurc ]] && source $DOKKU_ROOT/dokkurc

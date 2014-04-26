@@ -10,7 +10,8 @@ all:
 install:
 	# install dependencies
 	apt-get update
-	apt-get -y install ruby ruby-sinatra
+	apt-get -y install ruby ruby-sinatra locales
+	locale-gen en_US.UTF-8
 
 	# install docker
 	egrep -i "^docker" /etc/group || groupadd docker
