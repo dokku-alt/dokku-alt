@@ -1,5 +1,6 @@
 DOKKU_VERSION = master
 DOKKU_ROOT ?= /home/dokku
+PLUGINHOOK_URL ?= https://s3.amazonaws.com/progrium-pluginhook/pluginhook_0.1.0_amd64.deb
 
 .PHONY: all install devinstall pull push sync
 
@@ -21,11 +22,14 @@ install:
 	cp dokku.1 /usr/local/share/man/man1/dokku.1
 	mandb
 
-	# install dokku
-	cp dokku /usr/local/bin/dokku
+	# install dependencies
+	wget -qO pluginhook_0.1.0_amd64.deb ${PLUGINHOOK_URL}
+	dpkg -i pluginhook_0.1.0_amd64.deb
 	cp sshcommand/sshcommand /usr/local/bin/sshcommand
 	cp gitreceive/gitreceive /usr/local/bin/gitreceive
-	cp pluginhook/pluginhook /usr/local/bin/pluginhook
+
+	# install dokku
+	cp dokku /usr/local/bin/dokku
 	mkdir -p /var/lib/dokku-alt/plugins
 	cp -r plugins/* /var/lib/dokku-alt/plugins
 
