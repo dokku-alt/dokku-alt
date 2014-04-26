@@ -9,7 +9,7 @@ all:
 install:
 	# install dependencies
 	apt-get update
-	apt-get -y install ruby
+	apt-get -y install ruby ruby-sinatra
 
 	# install docker
 	egrep -i "^docker" /etc/group || groupadd docker
