@@ -82,7 +82,9 @@ case "$1" in
     pluginhook post-deploy "$APP" "$port"
 
     # cleanup at the end
-    flock -n "$DOKKU_ROOT/cleanup.lock" dokku cleanup || true
+    sleep 2s
+    remove_container $APP_ALL_NAMES
+    flock -n "$DOKKU_ROOT/cleanup.lock" dokku cleanup &
     ;;
 
   cleanup)
