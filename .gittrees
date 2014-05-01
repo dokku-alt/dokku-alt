@@ -27,7 +27,7 @@
 	path = plugins/dokku-rabbitmq
 	branch = master
 [subtree "plugins/dokku-redis"]
-	url = https://github.com/jezdez/dokku-redis-plugin.git
+	url = https://github.com/luxifer/dokku-redis-plugin
 	path = plugins/dokku-redis
 	branch = master
 [subtree "plugins/dokku-user-env-compile"]
