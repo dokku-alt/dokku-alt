@@ -67,7 +67,7 @@ case "$1" in
     pluginhook pre-deploy "$APP"
 
     # kill the app when running
-    stop_and_remove_container "$APP_ALL_NAMES"
+    stop_and_remove_container $APP_ALL_NAMES
 
     # start the app
     DOCKER_ARGS="$(: | pluginhook docker-args "$APP")"

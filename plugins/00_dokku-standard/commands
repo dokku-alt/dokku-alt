@@ -13,7 +13,7 @@ case "$1" in
 
     pluginhook pre-delete $APP
 
-    stop_and_remove_container "$APP_ALL_NAMES"
+    stop_and_remove_container $APP_ALL_NAMES
     remove_image "$IMAGE"
 
     pluginhook post-delete $APP
