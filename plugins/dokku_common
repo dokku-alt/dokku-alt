@@ -27,12 +27,16 @@ function generate_random_password() {
 }
 
 function stop_container() {
-    docker stop "$1" 1>/dev/null 2>/dev/null || true
+    docker stop "$@" 1>/dev/null 2>/dev/null || true
 }
 
 function remove_container() {
+    docker rm "$@" 1>/dev/null 2>/dev/null || true
+}
+
+function stop_and_remove_container() {
 	stop_container "$@"
-    docker rm "$1" 1>/dev/null 2>/dev/null || true
+	remove_container "$@"
 }
 
 function remove_image() {
@@ -66,7 +70,9 @@ function check_app_name() {
     CACHE_DIR="$DOKKU_ROOT/$APP/cache"
     APP_NAME="dokku_$APP"
     APP_DIR="$DOKKU_ROOT/$APP"
+    APP_WORKER_NAME="dokku_worker_$APP"
     APP_RUN_NAME="run_$APP"
+    APP_ALL_NAMES="$APP_NAME $APP_WORKER_NAME $APP_RUN_NAME"
     return 0
 }
 
@@ -117,7 +123,7 @@ function wait_for_container() {
 
 function commit_image() {
 	read ID
-	wait_for_container "$1"
+	wait_for_container "$ID"
 	test $(docker wait "$ID") -eq 0
 	docker commit "$ID" "$@" 1>/dev/null 2>/dev/null 
 	docker rm -f "$ID" 1>/dev/null 2>/dev/null || true

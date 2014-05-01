@@ -16,7 +16,7 @@ if [[ ! -f "$DB_ADMIN_PASSWORD" ]]; then
 	generate_random_password > "$DB_ADMIN_PASSWORD"
 fi
 
-remove_container "$DB_CONTAINER"
+stop_and_remove_container "$DB_CONTAINER"
 
 docker run --detach "--publish=$DB_PORT" \
            --volume="$DB_VOLUME":"$DB_CONTAINER_VOLUME" \
