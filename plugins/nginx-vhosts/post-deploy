@@ -96,7 +96,7 @@ server {
   listen      [::]:80;
   listen      80;
   server_name ${hostnames[@]:1};
-  return 301 https://$hostname\$request_uri;
+  return 302 http://$hostname\$request_uri;
 }
 EOF
   fi
