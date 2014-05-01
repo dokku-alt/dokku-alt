@@ -26,7 +26,7 @@ case "$1" in
   receive)
     verify_app_name "$2"
     info "Cleaning up ..."
-    flock -n "$DOKKU_ROOT/cleanup.lock" dokku cleanup
+    flock -n "$DOKKU_ROOT/cleanup.lock" dokku cleanup || true
     info "Building $APP ..."
     cat | dokku build $APP
     info "Releasing $APP ..."
@@ -82,14 +82,14 @@ case "$1" in
     pluginhook post-deploy "$APP" "$port"
 
     # cleanup at the end
-    flock -n "$DOKKU_ROOT/cleanup.lock" dokku cleanup
+    flock -n "$DOKKU_ROOT/cleanup.lock" dokku cleanup || true
     ;;
 
   cleanup)
-    # delete all non-running container
-    docker ps -a | grep 'Exit' |  awk '{print $1}' | xargs docker rm &> /dev/null
+    # delete all non-running container - it's not very wise
+    # docker ps -a | grep 'Exit' |  awk '{print $1}' | xargs docker rm &> /dev/null || true
     # delete unused images
-    docker images | grep '<none>' |  awk '{print $3}'  | xargs docker rmi &> /dev/null
+    docker images | grep '<none>' |  awk '{print $3}'  | xargs docker rmi &> /dev/null || true
     ;;
 
   plugins)
