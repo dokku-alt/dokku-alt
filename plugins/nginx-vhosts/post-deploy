@@ -74,7 +74,7 @@ upstream $APP { server 127.0.0.1:$PORT; }
 server {
   listen      [::]:80;
   listen      80;
-  server_name ${hostnames[@]};
+  server_name $hostname;
   location    / {
     proxy_pass  http://$APP;
     proxy_redirect http://$hostname:5000/ http://$hostname/;
@@ -89,6 +89,17 @@ server {
   }
 }
 EOF
+
+  if [[ ${#hostname[@]} -gt 1 ]]; then
+    cat<<EOF >> $DOKKU_ROOT/$APP/nginx.conf
+server {
+  listen      [::]:80;
+  listen      80;
+  server_name ${hostnames[@]:1};
+  return 301 https://$hostname\$request_uri;
+}
+EOF
+  fi
 
   echo "http://$hostname" > "$DOKKU_ROOT/$APP/URL"
   fi
