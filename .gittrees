@@ -63,3 +63,7 @@
 	url = https://github.com/Kloadut/dokku-md-dockerfiles
 	path = plugins/dokku-mariadb/dockerfiles
 	branch = master
+[subtree "plugins/dokku-redis/dockerfiles"]
+	url = https://github.com/luxifer/dokku-redis-dockerfiles
+	path = plugins/dokku-redis/dockerfiles
+	branch = master
