@@ -76,7 +76,7 @@ case "$1" in
     echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$port" > "$DOKKU_ROOT/$APP/URL"
 
     # start the worker
-    docker run -d --name="$APP_WORKER_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /bin/bash -c "/start worker"
+    docker run -d --name="$APP_WORKER_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /bin/bash -c "/start worker" > /dev/null
 
     # finish deployment
     pluginhook post-deploy "$APP" "$port"
