@@ -48,7 +48,6 @@ devinstall:
 	ln -sf "$(PWD)/dokku" /usr/local/bin/dokku
 	ln -sf "$(PWD)/sshcommand/sshcommand" /usr/local/bin/sshcommand
 	ln -sf "$(PWD)/gitreceive/gitreceive" /usr/local/bin/gitreceive
-	ln -sf "$(PWD)/pluginhook/pluginhook" /usr/local/bin/pluginhook
 	ln -sf "$(PWD)/plugins" /var/lib/dokku-alt/plugins
 
 pull:
