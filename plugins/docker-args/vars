@@ -1,13 +1,3 @@
 #!/bin/bash
 
 source "$(dirname $0)/../dokku_common"
-
-STORAGE_ROOT="$DOKKU_ROOT/.storage"
-
-function storage_for_app() {
-	STORAGE_PATHS="$STORAGE_ROOT/$1/paths"
-	STORAGE_VOLUMES="$STORAGE_ROOT/$1/volumes/"
-
-	mkdir -p "$STORAGE_VOLUMES"
-	touch "$STORAGE_PATHS"
-}
