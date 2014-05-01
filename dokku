@@ -26,7 +26,7 @@ case "$1" in
   receive)
     verify_app_name "$2"
     info "Cleaning up ..."
-    dokku cleanup
+    flock -n "$DOKKU_ROOT/cleanup.lock" dokku cleanup
     info "Building $APP ..."
     cat | dokku build $APP
     info "Releasing $APP ..."
@@ -76,20 +76,20 @@ case "$1" in
     echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$port" > "$DOKKU_ROOT/$APP/URL"
 
     # start the worker
-    docker run -d --name="$APP_WOREKR_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /bin/bash -c "/start worker"
+    docker run -d --name="$APP_WORKER_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /bin/bash -c "/start worker"
 
-    # remove leftovers, ie. not existing workers
-    sleep 3s
-    remove_container "$APP_ALL_NAMES"
-
+    # finish deployment
     pluginhook post-deploy "$APP" "$port"
+
+    # cleanup at the end
+    flock -n "$DOKKU_ROOT/cleanup.lock" dokku cleanup
     ;;
 
   cleanup)
     # delete all non-running container
-    docker ps -a | grep 'Exit' |  awk '{print $1}' | xargs docker rm &> /dev/null &
+    docker ps -a | grep 'Exit' |  awk '{print $1}' | xargs docker rm &> /dev/null
     # delete unused images
-    docker images | grep '<none>' |  awk '{print $3}'  | xargs docker rmi &> /dev/null &
+    docker images | grep '<none>' |  awk '{print $3}'  | xargs docker rmi &> /dev/null
     ;;
 
   plugins)
