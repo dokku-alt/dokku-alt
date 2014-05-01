@@ -44,7 +44,7 @@ install:
 	# install plugins
 	dokku plugins-install
 
-devinstall: install
+devinstall:
 	ln -sf "$(PWD)/dokku" /usr/local/bin/dokku
 	ln -sf "$(PWD)/sshcommand/sshcommand" /usr/local/bin/sshcommand
 	ln -sf "$(PWD)/gitreceive/gitreceive" /usr/local/bin/gitreceive
