@@ -15,13 +15,11 @@ if [[ -f "$DOKKU_ROOT/VHOST" ]]; then
     hostname="${APP/\//-}.$VHOST"
   fi
 
-  if [[ -f "$DOKKU_ROOT/$APP/HOSTNAME" ]]; then
-    hostname="$(cat "$DOKKU_ROOT/$APP/HOSTNAME")"
-  fi
+  hostnames="$hostname"
 
-  extra_hostnames=""
-  if [[ -f "$DOKKU_ROOT/$APP/EXTRA_HOSTNAMES" ]]; then
-    extra_hostnames="$(cat "$DOKKU_ROOT/$APP/EXTRA_HOSTNAMES")"
+  if [[ -f "$DOKKU_ROOT/$APP/HOSTNAME" ]]; then
+    readarray hostnames < "$DOKKU_ROOT/$APP/HOSTNAME"
+    hostname="${hostnames[0]}"
   fi
 
   if [[ -f "$SSL/server.crt" ]] && [[ -f "$SSL/server.key" ]]; then
@@ -37,7 +35,7 @@ upstream $APP { server 127.0.0.1:$PORT; }
 server {
   listen      [::]:80;
   listen      80;
-  server_name $hostname $extra_hostnames;
+  server_name ${hostnames[@]};
   return 301 https://$hostname\$request_uri;
 }
 
@@ -76,7 +74,7 @@ upstream $APP { server 127.0.0.1:$PORT; }
 server {
   listen      [::]:80;
   listen      80;
-  server_name $hostname $extra_hostnames;
+  server_name ${hostnames[@]};
   location    / {
     proxy_pass  http://$APP;
     proxy_redirect http://$hostname:5000/ http://$hostname/;
