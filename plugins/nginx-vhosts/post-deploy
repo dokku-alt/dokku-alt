@@ -18,7 +18,7 @@ if [[ -f "$DOKKU_ROOT/VHOST" ]]; then
   hostnames="$hostname"
 
   if [[ -f "$DOKKU_ROOT/$APP/HOSTNAME" ]]; then
-    readarray hostnames < "$DOKKU_ROOT/$APP/HOSTNAME"
+    hostnames=($(<"$DOKKU_ROOT/$APP/HOSTNAME"))
     hostname="${hostnames[0]}"
   fi
 
@@ -90,7 +90,7 @@ server {
 }
 EOF
 
-  if [[ ${#hostname[@]} -gt 1 ]]; then
+  if [[ ${#hostnames[@]} -gt 1 ]]; then
     cat<<EOF >> $DOKKU_ROOT/$APP/nginx.conf
 server {
   listen      [::]:80;
