@@ -13,7 +13,7 @@ case "$1" in
            --volume="$DB_VOLUME":"$DB_CONTAINER_VOLUME" \
            --name="$DB_CONTAINER" \
            "$DB_IMAGE" \
-           /bin/start_redis.sh >/dev/null
+           /usr/bin/start_redis.sh >/dev/null
 
     info "Redis database created: $DB_CONTAINER"
 
