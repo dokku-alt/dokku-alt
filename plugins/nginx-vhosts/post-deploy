@@ -38,7 +38,7 @@ server {
   listen      [::]:80;
   listen      80;
   server_name $hostname $extra_hostnames;
-  return 301 https://\$hostname\$request_uri;
+  return 301 https://$hostname\$request_uri;
 }
 
 server {
