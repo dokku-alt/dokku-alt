@@ -1,11 +1,13 @@
 FROM ubuntu:quantal
 MAINTAINER luxifer "luxifer666@gmail.com"
 
-RUN apt-get update
-RUN apt-get -y install redis-server
-RUN sed -i 's@bind 127.0.0.1@bind 0.0.0.0@' /etc/redis/redis.conf
-RUN sed -i 's@daemonize yes@daemonize no@' /etc/redis/redis.conf
+RUN LC_ALL=C DEBIAN_FRONTEND=noninteractive \
+	apt-get update && \
+	apt-get install -y redis-server && \
+	sed -i 's@bind 127.0.0.1@bind 0.0.0.0@' /etc/redis/redis.conf && \
+	sed -i 's@daemonize yes@daemonize no@' /etc/redis/redis.conf && \
+	rm -rf /var/lib/apt/lists/* && \
+	apt-get clean && \
+	rm /usr/sbin/policy-rc.d
 
-ADD . /bin
-RUN chmod +x /bin/start_redis.sh
-RUN mkdir -p /var/lib/redis
+ADD start_redis.sh /usr/bin/start_redis.sh

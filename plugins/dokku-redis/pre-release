@@ -1,4 +1,0 @@
-#!/bin/bash
-
-APP="$1"; IMAGE="app/$APP";
-dokku redis:link $APP $APP

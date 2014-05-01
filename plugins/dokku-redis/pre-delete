@@ -1,0 +1,13 @@
+#!/bin/bash
+
+source "$(dirname $0)/vars"
+
+redis_for_app "$1"
+remove_container "$DB_CONTAINER"
+
+if [[ -d "$DB_VOLUME" ]]; then
+	docker run --rm \
+			--volume "$DB_VOLUME:$DB_CONTAINER_VOLUME"
+			"$DB_IMAGE" \
+			bash -c 'rm -rf /var/lib/redis'
+fi

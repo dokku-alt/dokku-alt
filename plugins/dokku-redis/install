@@ -1,6 +1,14 @@
 #!/bin/bash
 
+source "$(dirname $0)/vars"
+
 # Build docker image
-git clone https://github.com/luxifer/dokku-redis-dockerfiles.git /tmp/dokku-redis-dockerfiles
-docker build -q=true -t luxifer/redis /tmp/dokku-redis-dockerfiles
-rm -rf /tmp/dokku-redis-dockerfiles
+docker build -t "$DB_IMAGE" "$CWD/dockerfiles"
+
+# Create .redis directory if does not exist
+if [[ ! -d "$DB_ROOT" ]]; then
+    mkdir -p "$DB_ROOT"
+    chown -R dokku: "$DB_ROOT"
+fi
+
+cat
