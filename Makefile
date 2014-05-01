@@ -15,7 +15,7 @@ install:
 
 	# install docker
 	egrep -i "^docker" /etc/group || groupadd docker
-	apt-get -y install docker.io # requires ubuntu 14.04 LTS
+	[ -x /usr/bin/docker ] || apt-get -y install docker.io # requires ubuntu 14.04 LTS
 	[ -x /usr/bin/docker.io ] && ln -sf /usr/bin/docker.io /usr/local/bin/docker
 
 	# dokku man
