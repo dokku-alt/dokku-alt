@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+source "$(dirname $0)/../dokku_common"
+
+cron_job() {
+  verify_app_name "$1"
+
+  DOCKER_ARGS="$(: | pluginhook docker-args "$1")"
+  remove_container "$APP_CRON_NAME"
+  docker run --rm --name="$APP_CRON_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /bin/bash -c "/start $2" &
+}
+
+cron_job_all_apps() {
+  ls -1 -d $DOKKU_ROOT/*/ | while read APP; do
+    cron_job "$(basename "$APP")" "$1"
+  done
+}
+
+case "$1" in
+  cron:hourly)
+    cron_job_all_apps "hourly"
+    ;;
+
+  cron:daily)
+    cron_job_all_apps "daily"
+    ;;
+
+  cron:weekly)
+    cron_job_all_apps "weekly"
+    ;;
+
+  cron:monthly)
+    cron_job_all_apps "monthly"
+    ;;
+esac

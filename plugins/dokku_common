@@ -72,7 +72,8 @@ function check_app_name() {
     APP_DIR="$DOKKU_ROOT/$APP"
     APP_WORKER_NAME="dokku_worker_$APP"
     APP_RUN_NAME="run_$APP"
-    APP_ALL_NAMES="$APP_NAME $APP_WORKER_NAME $APP_RUN_NAME"
+    APP_CRON_NAME="cron_$APP"
+    APP_ALL_NAMES="$APP_NAME $APP_WORKER_NAME $APP_RUN_NAME $APP_CRON_NAME"
     return 0
 }
 
