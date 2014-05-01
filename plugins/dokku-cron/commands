@@ -32,4 +32,8 @@ case "$1" in
   cron:monthly)
     cron_job_all_apps "monthly"
     ;;
+
+  help)
+    cat
+    ;;
 esac
