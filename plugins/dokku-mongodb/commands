@@ -100,7 +100,7 @@ db.addUser("$2", "$(cat "$DB_APP_PASSWORD")")
 EOF
     mkdir -p "$DB_APP_DATABASES$APP"
     touch "$DB_APP_DATABASES$APP/$DB_NAME"
-    rebuild_app "$APP"
+    redeploy_app "$APP"
     ;;
 
   mongodb:unlink)
