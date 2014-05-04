@@ -99,7 +99,7 @@ GRANT ALL PRIVILEGES ON DATABASE "$DB_NAME" TO "$APP";
 EOF
     mkdir -p "$DB_APP_DATABASES$APP"
     touch "$DB_APP_DATABASES$APP/$DB_NAME"
-    redeploy_app "$APP"
+    rebuild_app "$APP"
     ;;
 
   postgresql:unlink)

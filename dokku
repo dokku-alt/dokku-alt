@@ -44,7 +44,9 @@ case "$1" in
                       -c "mkdir -p /app && tar -xC /app" | commit_image "$IMAGE_GENERIC:build"
     [[ -d "$CACHE_DIR" ]] || mkdir "$CACHE_DIR"
     pluginhook pre-build "$APP"
+    DOCKER_ARGS="$(: | pluginhook docker-args "$APP" build)"
     docker run -i -a stdin -v "$CACHE_DIR":/cache \
+                $DOCKER_ARGS \
                 "$IMAGE_GENERIC:build" \
                 /build/builder | attach_and_commit_image "$IMAGE_GENERIC:build"
     pluginhook post-build "$APP"
