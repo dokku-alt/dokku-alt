@@ -126,7 +126,7 @@ function commit_image() {
 	read ID
 	wait_for_container "$ID"
 	test $(docker wait "$ID") -eq 0
-	docker commit "$ID" "$@" 1>/dev/null 2>/dev/null 
+	docker commit "$ID" "$@" 1>/dev/null 2>/dev/null
 	docker rm -f "$ID" 1>/dev/null 2>/dev/null || true
 	return 0
 }
@@ -134,8 +134,12 @@ function commit_image() {
 function attach_and_commit_image() {
 	read ID
 	wait_for_container "$ID"
-	docker attach "$ID"
-	docker commit "$ID" "$@" 1>/dev/null 2>/dev/null 
+	for i in 1 2 3; do
+		if docker attach "$ID"; then
+			sleep 0.3s
+		fi
+	done
+	docker commit "$ID" "$@" 1>/dev/null 2>/dev/null
 	docker rm -f "$ID" 1>/dev/null 2>/dev/null || true
 	return 0
 }
