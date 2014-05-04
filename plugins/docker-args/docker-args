@@ -6,4 +6,27 @@ verify_app_name "$1"
 
 cat
 
-[[ ! -f "$APP_DIR/DOCKER_ARGS" ]] || cat "$APP_DIR/DOCKER_ARGS"
+print_args() {
+	if [[ -f "$APP_DIR/$1" ]]; then
+		cat "$APP_DIR/$1"
+	fi
+}
+
+case "$2" in
+	web)
+		print_args "DOCKER_ARGS"
+		print_args "DOCKER_ARGS_WEB"
+		;;
+
+	worker)
+		print_args "DOCKER_ARGS"
+		print_args "DOCKER_ARGS_WORKER"
+		;;
+
+	build)
+		print_args "DOCKER_ARGS_BUILD"
+		;;
+
+	*)
+		;;
+esac
