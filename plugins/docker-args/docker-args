@@ -23,6 +23,10 @@ case "$2" in
 		print_args "DOCKER_ARGS_WORKER"
 		;;
 
+	run)
+		print_args "DOCKER_ARGS"
+		;;
+
 	build)
 		print_args "DOCKER_ARGS_BUILD"
 		;;
