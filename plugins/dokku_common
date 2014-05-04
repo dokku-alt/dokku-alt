@@ -133,7 +133,7 @@ function commit_image() {
 
 function attach_and_commit_image() {
 	read ID
-	wait_for_container "$1"
+	wait_for_container "$ID"
 	docker attach "$ID"
 	docker commit "$ID" "$@" 1>/dev/null 2>/dev/null 
 	docker rm -f "$ID" 1>/dev/null 2>/dev/null || true
