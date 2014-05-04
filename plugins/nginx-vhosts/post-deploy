@@ -49,7 +49,7 @@ server {
 server {
   listen      [::]:443;
   listen      443;
-  server_name $hostname;
+  server_name ${hostnames[@]};
 
   ssl on;
   ssl_certificate     $SSL_INUSE/server.crt;
