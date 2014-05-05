@@ -16,7 +16,6 @@ if [[ ! -f "$DB_ADMIN_PASSWORD" ]]; then
 	generate_random_password > "$DB_ADMIN_PASSWORD"
 fi
 
-stop_and_remove_container "$DB_CONTAINER"
-ensure_database_container_is_running
+restart_database_container
 
 cat

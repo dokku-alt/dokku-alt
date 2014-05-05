@@ -7,8 +7,7 @@ case "$1" in
     redis_for_app "$2"
     verify_max_args 2 "$@"
 
-    remove_container "$DB_CONTAINER"
-    ensure_database_container_is_running
+    restart_database_container
 
     info "Redis database created: $DB_CONTAINER"
 

@@ -12,6 +12,7 @@ mongo_shell() {
     local DB_PASSWORD="$2"
     local DB_NAME="$3"
     shift 3
+    ensure_database_container_is_running
     docker run -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
             -e DB_USER="$DB_USER" \

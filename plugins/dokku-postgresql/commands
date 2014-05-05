@@ -11,6 +11,7 @@ pgsql_shell() {
     DB_USER="$1"
     DB_PASSWORD="$2"
     shift 2
+    ensure_database_container_is_running
     docker run -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
             -e PGUSER="$DB_USER" \
