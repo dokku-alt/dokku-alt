@@ -9,5 +9,5 @@ if [[ -d "$DB_VOLUME" ]]; then
 	docker run -i -a stdin "$IMAGE" /bin/bash -c "cat > /app/.profile.d/redis_env" <<EOF | commit_image "$IMAGE"
 [ "\$REDIS_NAME" != "" ] && export REDIS_URL=redis://\$REDIS_PORT_6379_TCP_ADDR:\$REDIS_PORT_6379_TCP_PORT
 EOF
-	verbose "Linking Redis container $DB_CONTAINER to application" 1>&2
+	verbose "Linking Redis container $DB_CONTAINER to application"
 fi

@@ -77,10 +77,6 @@ case "$1" in
     port=$(docker port $id 5000 | sed 's/0.0.0.0://')
     echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$port" > "$DOKKU_ROOT/$APP/URL"
 
-    # start the worker
-    DOCKER_ARGS="$(: | pluginhook docker-args "$APP" worker)"
-    docker run -d --name="$APP_WORKER_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /bin/bash -c "/start worker" > /dev/null
-
     # finish deployment
     pluginhook post-deploy "$APP" "$port"
 
@@ -115,7 +111,9 @@ case "$1" in
   deploy:all)
     for app in $(ls -d $DOKKU_ROOT/*/); do
       APP="$(basename $app)"
-      dokku deploy "$APP"
+      if [[ -f "$app/refs/heads/master" ]]; then
+        dokku deploy "$APP"
+      fi
     done
     ;;
 

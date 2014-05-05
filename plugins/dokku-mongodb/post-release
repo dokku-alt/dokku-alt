@@ -13,6 +13,6 @@ if [[ -d "$DB_LINKS" ]] && [[ -f "$DB_APP_PASSWORD" ]] && [[ $(ls -1 "$DB_LINKS"
 		docker run -i -a stdin "$IMAGE" /bin/bash -c "cat > /app/.profile.d/mongodb_env" <<EOF | commit_image "$IMAGE"
 [ "\$MONGODB_NAME" != "" ] && export MONGODB_URL=mongodb://$APP:$(cat "$DB_APP_PASSWORD")@\$MONGODB_PORT_${DB_PORT}_TCP_ADDR:\$MONGODB_PORT_${DB_PORT}_TCP_PORT/$DB_NAME
 EOF
-		verbose "Linking MongoDB database $DB_NAME to application" 1>&2
+		verbose "Linking MongoDB database $DB_NAME to application"
 	done
 fi

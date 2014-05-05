@@ -8,12 +8,7 @@ case "$1" in
     verify_max_args 2 "$@"
 
     remove_container "$DB_CONTAINER"
-
-    docker run --detach "--publish=$DB_PORT" \
-           --volume="$DB_VOLUME":"$DB_CONTAINER_VOLUME" \
-           --name="$DB_CONTAINER" \
-           "$DB_IMAGE" \
-           /usr/bin/start_redis.sh >/dev/null
+    ensure_database_container_is_running
 
     info "Redis database created: $DB_CONTAINER"
 

@@ -13,3 +13,15 @@ function redis_for_app() {
 	DB_VOLUME="$DB_ROOT/$APP"
 	DB_CONTAINER="redis_$APP"
 }
+
+function ensure_database_container_is_running() {
+	# remove it silently
+	remove_container "$DB_CONTAINER"
+
+	# and start detached
+	docker run --detach "--publish=$DB_PORT" \
+	           --volume="$DB_VOLUME":"$DB_CONTAINER_VOLUME" \
+	           --name="$DB_CONTAINER" \
+	           "$DB_IMAGE" \
+	           /usr/bin/start_redis.sh >/dev/null
+}

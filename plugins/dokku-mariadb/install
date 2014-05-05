@@ -17,12 +17,6 @@ if [[ ! -f "$DB_ADMIN_PASSWORD" ]]; then
 fi
 
 stop_and_remove_container "$DB_CONTAINER"
-
-docker run --detach "--publish=$DB_PORT" \
-           --volume="$DB_VOLUME":"$DB_CONTAINER_VOLUME" \
-           --volume="$DB_ADMIN_PASSWORD":"$DB_CONTAINER_PASSWORD" \
-           --name="$DB_CONTAINER" \
-           "$DB_IMAGE" \
-           /usr/bin/start_mariadb.sh >/dev/null
+ensure_database_container_is_running
 
 cat

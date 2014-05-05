@@ -136,9 +136,11 @@ function attach_and_commit_image() {
 	wait_for_container "$ID"
 	for i in 1 2 3; do
 		if docker attach "$ID"; then
-			sleep 0.3s
+			break
 		fi
+		sleep 0.3s
 	done
+	test $(docker wait "$ID") -eq 0
 	docker commit "$ID" "$@" 1>/dev/null 2>/dev/null
 	docker rm -f "$ID" 1>/dev/null 2>/dev/null || true
 	return 0
