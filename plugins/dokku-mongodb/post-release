@@ -7,6 +7,8 @@ verify_app_name "$1"
 DB_LINKS="$DB_APP_DATABASES$APP/"
 DB_APP_PASSWORD="$DB_APP_PASSWORDS$APP"
 
+cat
+
 # inject MONGODB_URL
 if [[ -d "$DB_LINKS" ]] && [[ -f "$DB_APP_PASSWORD" ]] && [[ $(ls -1 "$DB_LINKS" | wc -l) -gt 0 ]]; then
 	ls -1 "$DB_LINKS" | while read DB_NAME; do

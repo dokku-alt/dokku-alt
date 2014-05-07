@@ -43,3 +43,7 @@ socat
 sqlite3
 telnet
 zlib1g-dev
+libicu-dev
+sudo
+supervisor
+redis-server

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cat
+
 read -d '' runner <<'EOF'
 #!/bin/bash
 
@@ -22,7 +24,7 @@ do
     command=\${line#*: }
     cat << CONF >> supervisord.conf
 [program:\${name}]
-command=/exec sh -c "\${command}"
+command=/exec \${command}
 autostart=true
 autorestart=true
 stopsignal=QUIT
