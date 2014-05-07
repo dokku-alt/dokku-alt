@@ -24,6 +24,7 @@ dokku_build_app_from_git() {
     # Build using either Dockerfile
     if [[ -f "Dockerfile" ]]; then
       info "Building $APP using Dockerfile..."
+      find . -exec touch -t 197001010101 "{}" \+
       docker build -t "$IMAGE_GENERIC:build" .
       pluginhook pre-build "$APP"
       pluginhook post-build "$APP"
