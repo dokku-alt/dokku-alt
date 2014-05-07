@@ -2,13 +2,70 @@
 
 source "$(dirname $0)/../dokku_common"
 
+dokku_build_app_from_git() {
+    verify_app_name "$1"
+    verify_max_args "2" "$@"
+    REV="$2"
+
+    flock -n "$DOKKU_ROOT/cleanup.lock" dokku cleanup || true &
+
+    # delete directory on return
+    TMP_WORK_DIR="$(mktemp -d)"
+    trap "rm -rf \"$TMP_WORK_DIR\"" RETURN
+
+    # clone git repository
+    chmod 755 "$TMP_WORK_DIR"
+    unset GIT_DIR GIT_WORK_TREE
+    git clone "$DOKKU_ROOT/$APP" "$TMP_WORK_DIR" > /dev/null
+    pushd "$TMP_WORK_DIR" > /dev/null
+    git config advice.detachedHead false
+    git checkout "$REV" > /dev/null
+    git submodule update --init --recursive > /dev/null
+    find -name .git -prune -exec rm -rf {} \; > /dev/null
+
+    # wait for cleanup
+    wait
+
+    if [[ -f "Dockerfile" ]]; then
+      info "Building $APP using Dockerfile..."
+      docker build -t "$IMAGE_GENERIC:build" .
+      pluginhook pre-build "$APP"
+      pluginhook post-build "$APP"
+    else
+      info "Building $APP using buildstep..."
+
+      tar c . | docker run -i -a stdin "progrium/buildstep" /bin/bash \
+                        -c "mkdir -p /app && tar -xC /app" | commit_image "$IMAGE_GENERIC:build"
+      [[ -d "$CACHE_DIR" ]] || mkdir "$CACHE_DIR"
+
+      pluginhook pre-build "$APP"
+      DOCKER_ARGS="$(: | pluginhook docker-args "$APP" build)"
+      docker run -i -a stdin -v "$CACHE_DIR":/cache \
+                  $DOCKER_ARGS \
+                  "$IMAGE_GENERIC:build" \
+                  /build/builder | attach_and_commit_image "$IMAGE_GENERIC:build"
+
+      pluginhook post-build "$APP"
+    fi
+
+    dokku release "$APP"
+    dokku deploy "$APP"
+}
+
 case "$1" in
   rebuild)
     verify_app_name "$2"
-    verify_max_args 2 "$@"
+    verify_max_args 3 "$@"
 
-    REF=$(cat "$APP_DIR/refs/heads/master")
-    cd "$APP_DIR" && git archive "$REF" | dokku receive "$APP" | sed -u "s/^/"$'\e[1G'"/"
+    if [[ $# -ge 3 ]]; then
+      REF="$3"
+    elif [[ -f "$APP_DIR/refs/heads/master" ]]; then
+      REF="$(cat "$APP_DIR/refs/heads/master")"
+    else
+      fail "$APP: No refs/heads/master found"
+    fi
+    
+    dokku_build_app_from_git "$APP" "$REF" | sed -u "s/^/"$'\e[1G'"/"
     ;;
 
   rebuild:all)

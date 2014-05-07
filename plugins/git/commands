@@ -2,22 +2,6 @@
 
 source "$(dirname $0)/../dokku_common"
 
-git_archive_all() {
-    APP=$1; REV=$2
-    TMP_WORK_DIR=$(mktemp -d)
-    chmod 755 $TMP_WORK_DIR
-    unset GIT_DIR GIT_WORK_TREE
-    git clone $DOKKU_ROOT/$APP $TMP_WORK_DIR > /dev/null
-    pushd $TMP_WORK_DIR > /dev/null
-    git config advice.detachedHead false
-    git checkout $REV > /dev/null
-    git submodule update --init --recursive > /dev/null
-    find -name .git -prune -exec rm -rf {} \; > /dev/null
-    tar c .
-    popd > /dev/null
-    rm -rf $TMP_WORK_DIR > /dev/null
-}
-
 case "$1" in
   git-hook)
     verify_app_name "$2"
@@ -27,7 +11,7 @@ case "$1" in
       # Only run this script for the master branch. You can remove this
       # if block if you wish to run it for others as well.
       if [[ $refname = "refs/heads/master" ]] ; then
-        git_archive_all "$APP" "$newrev" | dokku receive "$APP" | sed -u "s/^/"$'\e[1G'"/"
+        dokku rebuild "$APP" "$newrev"
       else
         echo $'\e[1G\e[K'"-----> WARNING: deploy did not complete, you must push to master."
         echo $'\e[1G\e[K'"-----> for example, try 'git push <dokku> ${refname/refs\/heads\/}:master'"
@@ -46,9 +30,9 @@ case "$1" in
         cat > "$PRERECEIVE_HOOK" <<EOF
 #!/usr/bin/env bash
 set -e; set -o pipefail;
-cat | DOKKU_ROOT="$DOKKU_ROOT" dokku git-hook $APP
+cat | DOKKU_ROOT="$DOKKU_ROOT" dokku git-hook "$APP"
 EOF
-        chmod +x $PRERECEIVE_HOOK
+        chmod +x "$PRERECEIVE_HOOK"
     fi
 
     verify_app_name "$APP"

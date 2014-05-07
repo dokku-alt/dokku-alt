@@ -51,7 +51,14 @@ case "$1" in
     docker rm -f "$APP_RUN_NAME" 1>/dev/null 2>/dev/null || true
 
     DOCKER_ARGS=$(: | pluginhook docker-args $APP run)
-    docker run --rm --name="$APP_RUN_NAME" -i -t $DOCKER_ARGS "$IMAGE" /exec "$@"
+
+    if docker run --rm "$IMAGE" test -f /exec; then
+      # buildstep
+      docker run --rm --name="$APP_RUN_NAME" -i -t $DOCKER_ARGS "$IMAGE" /exec "$@"
+    else
+      # Dockerfile
+      docker run --rm --name="$APP_RUN_NAME" -i -t $DOCKER_ARGS "$IMAGE" --entrypoint="/bin/bash"
+    fi
     ;;
 
   url)
