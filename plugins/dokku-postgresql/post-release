@@ -12,7 +12,7 @@ cat
 # inject MARIADB_URL
 if [[ -d "$DB_LINKS" ]] && [[ -f "$DB_APP_PASSWORD" ]] && [[ $(ls -1 "$DB_LINKS" | wc -l) -gt 0 ]]; then
 	ls -1 "$DB_LINKS" | while read DB_NAME; do
-		docker run -i -a stdin "$IMAGE" /bin/bash -c "cat > /app/.profile.d/pgsql_env" <<EOF | commit_image "$IMAGE"
+		docker run --entrypoint="/bin/bash" -i -a stdin "$IMAGE" -c "mkdir -p /app/.profile.d && cat > /app/.profile.d/pgsql_env" <<EOF | commit_image "$IMAGE"
 [ "\$POSTGRESQL_NAME" != "" ] && export DATABASE_URL=mysql2://$APP:$(cat "$DB_APP_PASSWORD")@\$POSTGRESQL_PORT_${DB_PORT}_TCP_ADDR:\$POSTGRESQL_PORT_${DB_PORT}_TCP_PORT/$DB_NAME
 EOF
 		verbose "Linking PostgreSQL database $DB_NAME to application" 1>&2

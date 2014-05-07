@@ -6,7 +6,7 @@ redis_for_app "$1"
 
 # inject REDIS_URL
 if [[ -d "$DB_VOLUME" ]]; then
-	docker run -i -a stdin "$IMAGE" /bin/bash -c "cat >> /app/.env" <<EOF | commit_image "$IMAGE"
+	docker run --entrypoint="/bin/bash" -i -a stdin "$IMAGE" -c "mkdir -p /app/.profile.d && cat >> /app/.env" <<EOF | commit_image "$IMAGE"
 [ "\$REDIS_NAME" != "" ] && export REDIS_URL=redis://\$REDIS_PORT_6379_TCP_ADDR:\$REDIS_PORT_6379_TCP_PORT
 EOF
 	verbose "Linking Redis container $DB_CONTAINER to application"

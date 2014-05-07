@@ -7,8 +7,6 @@ dokku_build_app_from_git() {
     verify_max_args "2" "$@"
     REV="$2"
 
-    flock -n "$DOKKU_ROOT/cleanup.lock" dokku cleanup || true &
-
     # delete directory on return
     TMP_WORK_DIR="$(mktemp -d)"
     trap "rm -rf \"$TMP_WORK_DIR\"" RETURN
@@ -23,15 +21,14 @@ dokku_build_app_from_git() {
     git submodule update --init --recursive > /dev/null
     find -name .git -prune -exec rm -rf {} \; > /dev/null
 
-    # wait for cleanup
-    wait
-
+    # Build using either Dockerfile
     if [[ -f "Dockerfile" ]]; then
       info "Building $APP using Dockerfile..."
       docker build -t "$IMAGE_GENERIC:build" .
       pluginhook pre-build "$APP"
       pluginhook post-build "$APP"
     else
+      # or buildstep (heroku-style)
       info "Building $APP using buildstep..."
 
       tar c . | docker run -i -a stdin "progrium/buildstep" /bin/bash \
@@ -50,6 +47,9 @@ dokku_build_app_from_git() {
 
     dokku release "$APP"
     dokku deploy "$APP"
+
+    # Do cleanup only if everything finished!
+    flock -n "$DOKKU_ROOT/cleanup.lock" dokku cleanup
 }
 
 case "$1" in

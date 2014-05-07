@@ -8,5 +8,5 @@ SOURCE_ENV_PATH="$APP_DIR/ENV"
 
 if [[ -f "$SOURCE_ENV_PATH" ]]; then
   info "Installing ENV in build environment ..." 1>&2
-  cat "$SOURCE_ENV_PATH" | docker run -i -a stdin "$IMAGE" /bin/bash -c "cat >> /app/.env" | commit_image "$IMAGE"
+  cat "$SOURCE_ENV_PATH" | docker run --entrypoint="/bin/bash" -i -a stdin "$IMAGE" -c "mkdir -p /app && cat >> /app/.env" | commit_image "$IMAGE"
 fi
