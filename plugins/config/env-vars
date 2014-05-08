@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+source "$(dirname $0)/../dokku_common"
+
+verify_app_name "$1"
+
+cat
+
+if [[ -f "$APP_DIR/ENV" ]]; then
+    cat "$APP_DIR/ENV" | grep -Eo "export ([a-zA-Z_][a-zA-Z0-9_]*=.*)" | cut -d" " -f2
+fi
