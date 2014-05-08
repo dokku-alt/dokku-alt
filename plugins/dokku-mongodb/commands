@@ -15,11 +15,8 @@ mongo_shell() {
     ensure_database_container_is_running
     docker run -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
-            -e DB_USER="$DB_USER" \
-            -e DB_PASSWORD="$(cat "$DB_PASSWORD")" \
-            -e DB_NAME="$DB_NAME" \
             "$DB_IMAGE" \
-        bash -c "mongo --quiet -u \"\$DB_USER\" -p \"\$DB_PASSWORD\" \"\$MONGODB_PORT_27017_TCP_ADDR:\$MONGODB_PORT_27017_TCP_PORT/\$DB_NAME\" $@"
+        bash -c "mongo --quiet -u \"$DB_USER\" -p \"$(cat "$DB_PASSWORD")\" \"$DB_HOST:$DB_PORT/$DB_NAME\" $@"
 }
 
 mongo_admin() {
@@ -63,24 +60,19 @@ EOF
     verify_db_name "$3"
     verify_max_args 3 "$@"
 
-    DB_PASSWORD="$DB_APP_PASSWORDS$APP"
-    DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
-    [[ ! -f "$DB_LINK" ]] && fail "$DB_NAME: database is not linked to $APP"
+    if ! db_info "$APP" "$DB_NAME"; then
+        fail "$DB_NAME: database is not linked to $APP"
+    fi
+
     echo
-    DB_USER="$APP"
-    DB_PASSWORD="$(cat "$DB_PASSWORD")"
-    DB_DATABASE="$DB_NAME"
-    docker run -i --rm \
-                --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
-                "$DB_IMAGE" \
-                bash - <<EOF
-echo "       Host: \$MONGODB_PORT_${DB_PORT}_TCP_ADDR"
-echo "       Port: \$MONGODB_PORT_${DB_PORT}_TCP_PORT"
+    cat <<EOF
+echo "       Host: $DB_HOST"
+echo "       Port: $DB_PORT"
 echo "       User: $DB_USER"
 echo "       Password: $DB_PASSWORD"
 echo "       Database: $DB_DATABASE"
 echo
-echo "       MONGODB_URL=mongodb://$DB_USER:$DB_PASSWORD@\$MONGODB_PORT_${DB_PORT}_TCP_ADDR:\$MONGODB_PORT_${DB_PORT}_TCP_PORT/$DB_DATABASE"
+echo "       MONGODB_URL=$DB_URL"
 EOF
     echo
     ;;
@@ -95,13 +87,14 @@ EOF
         DB_NEW_PASSWORD="$(generate_random_password)"
         echo "$DB_NEW_PASSWORD" > "$DB_APP_PASSWORD"
     fi
+
     mongo_admin <<EOF
 use $3
 db.addUser("$2", "$(cat "$DB_APP_PASSWORD")")
 EOF
     mkdir -p "$DB_APP_DATABASES$APP"
     touch "$DB_APP_DATABASES$APP/$DB_NAME"
-    redeploy_app "$APP"
+    dokku config:set "$APP" "MONGODB_URL=$DB_URL"
     ;;
 
   mongodb:unlink)
@@ -113,8 +106,9 @@ EOF
 use $3
 db.removeUser("$2")
 EOF
+
     rm "$DB_APP_DATABASES$APP/$DB_NAME"
-    redeploy_app "$APP"
+    dokku config:unset "$APP" MONGODB_URL
     ;;
 
   mongodb:console)
@@ -122,16 +116,14 @@ EOF
     verify_db_name "$3"
     verify_max_args 3 "$@"
 
-    DB_PASSWORD="$DB_APP_PASSWORDS$APP"
-    DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
-    [[ ! -f "$DB_LINK" ]] && fail "$DB_NAME: database is not linked to $APP"
+    if ! db_info "$APP" "$DB_NAME"; then
+        fail "$DB_NAME: database is not linked to $APP"
+    fi
+
     docker run -t -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
-            -e DB_USER="$APP" \
-            -e DB_PASSWORD="$(cat "$DB_PASSWORD")" \
-            -e DB_NAME="$3" \
             "$DB_IMAGE" \
-        bash -c 'mongo -u "$DB_USER" -p "$DB_PASSWORD" "$MONGODB_PORT_27017_TCP_ADDR:$MONGODB_PORT_27017_TCP_PORT/$DB_NAME"'
+        bash -c "mongo -u \"$DB_USER\" -p \"$DB_PASSWORD\" \"$DB_HOST:$DB_PORT/$DB_NAME\""
     ;;
 
   help)

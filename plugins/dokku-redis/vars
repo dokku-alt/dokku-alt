@@ -12,6 +12,8 @@ function redis_for_app() {
 	verify_app_name "$1"
 	DB_VOLUME="$DB_ROOT/$APP"
 	DB_CONTAINER="redis_$APP"
+    DB_HOST="$DB_CONTAINER_LINK"
+    DB_URL="redis://$DB_CONTAINER_LINK:$DB_PORT"
 }
 
 function start_database_container() {

@@ -122,6 +122,10 @@ function wait_for_container() {
 	return 0
 }
 
+function is_image_buildstep_based() {
+	docker run --entrypoint="/bin/bash" --rm "$@" -c "[[ -f /exec ]]"
+}
+
 function commit_image() {
 	read ID
 	wait_for_container "$ID"

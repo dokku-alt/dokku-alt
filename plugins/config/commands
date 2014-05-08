@@ -50,13 +50,8 @@ config_styled_hash () {
 
 config_restart_app() {
   APP="$1";
-
-  echo "-----> Releasing $APP ..."
-  dokku release $APP
-  echo "-----> Release complete!"
-  echo "-----> Deploying $APP ..."
-  dokku deploy $APP
-  echo "-----> Deploy complete!"
+  dokku release "$APP"
+  dokku deploy "$APP"
 }
 
 case "$1" in

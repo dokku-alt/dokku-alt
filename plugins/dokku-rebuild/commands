@@ -40,8 +40,8 @@ dokku_build_app_from_git() {
     # clone git repository
     chmod 755 "$TMP_WORK_DIR"
     unset GIT_DIR GIT_WORK_TREE
-    git clone "$DOKKU_ROOT/$APP" "$TMP_WORK_DIR" > /dev/null
     pushd "$TMP_WORK_DIR" > /dev/null
+    git clone "$DOKKU_ROOT/$APP" "$TMP_WORK_DIR" > /dev/null
     git config advice.detachedHead false
     git checkout "$REV" > /dev/null
     git submodule update --init --recursive > /dev/null

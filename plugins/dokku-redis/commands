@@ -7,27 +7,19 @@ case "$1" in
     redis_for_app "$2"
     verify_max_args 2 "$@"
 
-    restart_database_container
-
+    mkdir -p "$DB_VOLUME"
     info "Redis database created: $DB_CONTAINER"
-
-    redeploy_app "$APP"
+    dokku config:set "$APP" "REDIS_URL=$DB_URL"
     ;;
 
   redis:delete)
     redis_for_app "$2"
     verify_max_args 2 "$@"
 
-    remove_container "$DB_CONTAINER"
-
-    if [[ -d "$DB_VOLUME" ]]; then
-        docker run --rm \
-                --volume "$DB_VOLUME:$DB_CONTAINER_VOLUME"
-                "$DB_IMAGE" \
-                bash -c 'rm -rf /var/lib/redis'
-    fi
-
-    info "Redis database deleted: $DB_NAME"
+    stop_and_remove_container "$DB_CONTAINER"
+    rm -rf "$DB_VOLUME"
+    info "Redis database deleted: $DB_CONTAINER"
+    dokku config:unset "$APP" REDIS_URL
     ;;
 
   redis:info)
@@ -36,14 +28,12 @@ case "$1" in
 
     [[ ! -d "$DB_VOLUME" ]] && fail "$DB_CONTAINER: database is not linked to $APP"
 
-    docker run -i --rm \
-                --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
-                "$DB_IMAGE" \
-                bash - <<EOF
-echo "       Host: \$REDIS_PORT_6379_TCP_ADDR"
-echo "       Port: \$REDIS_PORT_6379_TCP_PORT"
+    echo
+    cat <<EOF
+echo "       Host: $DB_HOST"
+echo "       Port: $DB_PORT"
 echo
-echo "       REDIS_URL=redis://\$REDIS_PORT_6379_TCP_ADDR:\$REDIS_PORT_6379_TCP_PORT"
+echo "       REDIS_URL=$DB_URL"
 EOF
     echo
     ;;

@@ -17,7 +17,7 @@ pgsql_shell() {
             -e PGUSER="$DB_USER" \
             -e PGPASSWORD="$(cat "$DB_PASSWORD")" \
             "$DB_IMAGE" \
-        bash -c "psql -v ON_ERROR_STOP=1 --host=\"\$POSTGRESQL_PORT_${DB_PORT}_TCP_ADDR\" --port=\"\$POSTGRESQL_PORT_${DB_PORT}_TCP_PORT\" $@"
+        bash -c "psql -v ON_ERROR_STOP=1 --host=\"$DB_HOST\" --port=\"$DB_PORT\" $@"
 }
 
 pgsql_admin() {
@@ -60,24 +60,19 @@ EOF
     verify_db_name "$3"
     verify_max_args 3 "$@"
 
-    DB_PASSWORD="$DB_APP_PASSWORDS$APP"
-    DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
-    [[ ! -f "$DB_LINK" ]] && fail "$DB_NAME: database is not linked to $APP"
+    if ! db_info "$APP" "$DB_NAME"; then
+        fail "$DB_NAME: database is not linked to $APP"
+    fi
+
     echo
-    DB_USER="$APP"
-    DB_PASSWORD="$(cat "$DB_PASSWORD")"
-    DB_DATABASE="$DB_NAME"
-    docker run -i --rm \
-                --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
-                "$DB_IMAGE" \
-                bash - <<EOF
-echo "       Host: \$POSTGRESQL_PORT_${DB_PORT}_TCP_ADDR"
-echo "       Port: \$POSTGRESQL_PORT_${DB_PORT}_TCP_PORT"
+    cat <<EOF
+echo "       Host: $DB_HOST"
+echo "       Port: $DB_PORT"
 echo "       User: $DB_USER"
 echo "       Password: $DB_PASSWORD"
 echo "       Database: $DB_DATABASE"
 echo
-echo "       DATABASE_URL=postgresql://$DB_USER:$DB_PASSWORD@\$POSTGRESQL_PORT_${DB_PORT}_TCP_ADDR:\$POSTGRESQL_PORT_${DB_PORT}_TCP_PORT/$DB_DATABASE"
+echo "       DATABASE_URL=$DB_URL"
 EOF
     echo
     ;;
@@ -95,12 +90,13 @@ CREATE USER "$APP" WITH PASSWORD '$DB_NEW_PASSWORD';
 EOF
         echo "$DB_NEW_PASSWORD" > "$DB_APP_PASSWORD"
     fi
+
     pgsql_admin <<EOF
 GRANT ALL PRIVILEGES ON DATABASE "$DB_NAME" TO "$APP";
 EOF
     mkdir -p "$DB_APP_DATABASES$APP"
     touch "$DB_APP_DATABASES$APP/$DB_NAME"
-    redeploy_app "$APP"
+    dokku config:set "$APP" "DATABASE_URL=$DB_URL"
     ;;
 
   postgresql:unlink)
@@ -112,7 +108,7 @@ EOF
 REVOKE ALL PRIVILEGES ON DATABASE "$DB_NAME" FROM "$APP";
 EOF
     rm "$DB_APP_DATABASES$APP/$DB_NAME"
-    redeploy_app "$APP"
+    dokku config:unset "$APP" DATABASE_URL
     ;;
 
   postgresql:console)
@@ -120,18 +116,19 @@ EOF
     verify_db_name "$3"
     verify_max_args 3 "$@"
 
-    DB_PASSWORD="$DB_APP_PASSWORDS$APP"
-    DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
-    [[ ! -f "$DB_LINK" ]] && fail "$DB_NAME: database is not linked to $APP"
+    if ! db_info "$APP" "$DB_NAME"; then
+        fail "$DB_NAME: database is not linked to $APP"
+    fi
+
     shift 2
     docker run -t -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
             -e PGDATABASE="$DB_NAME" \
-            -e PGUSER="$APP" \
-            -e PGPASSWORD="$(cat "$DB_PASSWORD")" \
+            -e PGUSER="$DB_USER" \
+            -e PGPASSWORD="$DB_PASSWORD" \
             -e DB_PORT="$DB_PORT" \
             "$DB_IMAGE" \
-        bash -c 'psql --host="$POSTGRESQL_PORT_5432_TCP_ADDR" --port="$POSTGRESQL_PORT_5432_TCP_PORT"'
+        bash -c "psql --host=\"$DB_HOST\" --port=\"$DB_PORT\""
     ;;
 
   help)

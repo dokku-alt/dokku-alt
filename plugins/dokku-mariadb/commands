@@ -16,7 +16,7 @@ mysql_shell() {
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
             -e MYSQL_PWD="$(cat "$DB_PASSWORD")" \
             "$DB_IMAGE" \
-        bash -c "mysql --user=\"$DB_USER\" --host=\"\$MARIADB_PORT_3306_TCP_ADDR\" --port=\"\$MARIADB_PORT_3306_TCP_PORT\" $@"
+        bash -c "mysql --user=\"$DB_USER\" --host=\"$DB_HOST\" $@"
 }
 
 mysql_admin() {
@@ -59,24 +59,19 @@ EOF
     verify_db_name "$3"
     verify_max_args 3 "$@"
 
-    DB_PASSWORD="$DB_APP_PASSWORDS$APP"
-    DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
-    [[ ! -f "$DB_LINK" ]] && fail "$DB_NAME: database is not linked to $APP"
+    if ! db_info "$APP" "$DB_NAME"; then
+        fail "$DB_NAME: database is not linked to $APP"
+    fi
+
     echo
-    DB_USER="$APP"
-    DB_PASSWORD="$(cat "$DB_PASSWORD")"
-    DB_DATABASE="$DB_NAME"
-    docker run -i --rm \
-                --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
-                "$DB_IMAGE" \
-                bash - <<EOF
-echo "       Host: \$MARIADB_PORT_3306_TCP_ADDR"
-echo "       Port: \$MARIADB_PORT_3306_TCP_PORT"
+    cat <<EOF
+echo "       Host: $DB_HOST"
+echo "       Port: $DB_PORT"
 echo "       User: $DB_USER"
 echo "       Password: $DB_PASSWORD"
 echo "       Database: $DB_DATABASE"
 echo
-echo "       MARIADB_URL=mysql2://$DB_USER:$DB_PASSWORD@\$MARIADB_PORT_3306_TCP_ADDR:\$MARIADB_PORT_3306_TCP_PORT/$DB_DATABASE"
+echo "       MARIADB_URL=$DB_URL"
 EOF
     echo
     ;;
@@ -99,7 +94,9 @@ GRANT ALL ON \`$DB_NAME\`.* TO '$APP'@'%';
 EOF
     mkdir -p "$DB_APP_DATABASES$APP"
     touch "$DB_APP_DATABASES$APP/$DB_NAME"
-    redeploy_app "$APP"
+    db_info "$APP" "$DB_NAME"
+    dokku config:set "$APP" \
+        "DATABASE_URL=$DB_URL"
     ;;
 
   mariadb:unlink)
@@ -111,7 +108,7 @@ EOF
 REVOKE ALL ON \`$DB_NAME\`.* FROM '$APP'@'%';
 EOF
     rm "$DB_APP_DATABASES$APP/$DB_NAME"
-    redeploy_app "$APP"
+    dokku config:unset "$APP" DATABASE_URL
     ;;
 
   mariadb:console)
@@ -119,17 +116,15 @@ EOF
     verify_db_name "$3"
     verify_max_args 3 "$@"
 
-    DB_PASSWORD="$DB_APP_PASSWORDS$APP"
-    DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
-    [[ ! -f "$DB_LINK" ]] && fail "$DB_NAME: database is not linked to $APP"
+    if ! db_info "$APP" "$DB_NAME"; then
+        fail "$DB_NAME: database is not linked to $APP"
+    fi
     shift 2
     docker run -t -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
-            -e DB_DATABASE="$DB_NAME" \
-            -e DB_USER="$APP" \
-            -e MYSQL_PWD="$(cat "$DB_PASSWORD")" \
+            -e MYSQL_PWD="$DB_PASSWORD" \
             "$DB_IMAGE" \
-        bash -c 'mysql -u "$DB_USER" -h "$MARIADB_PORT_3306_TCP_ADDR" -P "$MARIADB_PORT_3306_TCP_PORT" "$DB_DATABASE"'
+        bash -c "mysql -u \"$DB_USER\" -h \"$DB_HOST\" -P \"$DB_PORT\" \"$DB_DATABASE\""
     ;;
 
   help)
