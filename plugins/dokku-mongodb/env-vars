@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+source "$(dirname $0)/../dokku_common"
+
+verify_app_name "$1"
+
+DB_LINKS="$DB_APP_DATABASES$APP/"
+
+cat
+
+[[ ! -d "$DB_LINKS" ]] || ls -1 "$DB_LINKS" | while read DB_NAME; do
+	if db_info "$APP" "$DB_NAME"; then
+		echo "DATABASE_URL=$DB_URL"
+	fi
+done

@@ -9,7 +9,7 @@ case "$1" in
 
     mkdir -p "$DB_VOLUME"
     info "Redis database created: $DB_CONTAINER"
-    dokku config:set "$APP" "REDIS_URL=$DB_URL"
+    redeploy_app "$APP"
     ;;
 
   redis:delete)
@@ -19,7 +19,7 @@ case "$1" in
     stop_and_remove_container "$DB_CONTAINER"
     rm -rf "$DB_VOLUME"
     info "Redis database deleted: $DB_CONTAINER"
-    dokku config:unset "$APP" REDIS_URL
+    redeploy_app "$APP"
     ;;
 
   redis:info)

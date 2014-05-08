@@ -96,7 +96,7 @@ GRANT ALL PRIVILEGES ON DATABASE "$DB_NAME" TO "$APP";
 EOF
     mkdir -p "$DB_APP_DATABASES$APP"
     touch "$DB_APP_DATABASES$APP/$DB_NAME"
-    dokku config:set "$APP" "DATABASE_URL=$DB_URL"
+    redeploy_app "$APP"
     ;;
 
   postgresql:unlink)
@@ -108,7 +108,7 @@ EOF
 REVOKE ALL PRIVILEGES ON DATABASE "$DB_NAME" FROM "$APP";
 EOF
     rm "$DB_APP_DATABASES$APP/$DB_NAME"
-    dokku config:unset "$APP" DATABASE_URL
+    redeploy_app "$APP"
     ;;
 
   postgresql:console)

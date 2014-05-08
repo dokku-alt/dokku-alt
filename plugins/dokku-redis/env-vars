@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+source "$(dirname $0)/../dokku_common"
+
+redis_for_app "$1"
+
+cat
+
+if [[ -d "$DB_VOLUME" ]]; then
+	if db_info "$APP" "$DB_NAME"; then
+		echo "REDIS_URL=redis://$DB_HOST:$DB_PORT"
+	fi
+done

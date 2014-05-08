@@ -94,9 +94,7 @@ GRANT ALL ON \`$DB_NAME\`.* TO '$APP'@'%';
 EOF
     mkdir -p "$DB_APP_DATABASES$APP"
     touch "$DB_APP_DATABASES$APP/$DB_NAME"
-    db_info "$APP" "$DB_NAME"
-    dokku config:set "$APP" \
-        "DATABASE_URL=$DB_URL"
+    redeploy_app "$APP"
     ;;
 
   mariadb:unlink)
@@ -108,7 +106,7 @@ EOF
 REVOKE ALL ON \`$DB_NAME\`.* FROM '$APP'@'%';
 EOF
     rm "$DB_APP_DATABASES$APP/$DB_NAME"
-    dokku config:unset "$APP" DATABASE_URL
+    redeploy_app "$APP"
     ;;
 
   mariadb:console)

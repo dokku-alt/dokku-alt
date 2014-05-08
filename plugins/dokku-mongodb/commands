@@ -94,7 +94,7 @@ db.addUser("$2", "$(cat "$DB_APP_PASSWORD")")
 EOF
     mkdir -p "$DB_APP_DATABASES$APP"
     touch "$DB_APP_DATABASES$APP/$DB_NAME"
-    dokku config:set "$APP" "MONGODB_URL=$DB_URL"
+    redeploy_app "$APP"
     ;;
 
   mongodb:unlink)
@@ -108,7 +108,7 @@ db.removeUser("$2")
 EOF
 
     rm "$DB_APP_DATABASES$APP/$DB_NAME"
-    dokku config:unset "$APP" MONGODB_URL
+    redeploy_app "$APP"
     ;;
 
   mongodb:console)
