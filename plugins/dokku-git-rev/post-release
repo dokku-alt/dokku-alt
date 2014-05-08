@@ -7,6 +7,6 @@ verify_app_name "$1"
 
 cat
 
-# docker run -i --entrypoint="/bin/bash" -a stdin "$IMAGE" -c "mkdir -p /app/.profile.d && cat > /app/.profile.d/git_rev.sh" <<EOF | commit_image "$IMAGE"
+# docker run -i -a stdin "$IMAGE" /bin/bash -c "mkdir -p /app/.profile.d && cat > /app/.profile.d/git_rev.sh" <<EOF | commit_image "$IMAGE"
 # export GIT_REV="$(GIT_DIR="$APP_DIR" git rev-parse HEAD)"
 # EOF

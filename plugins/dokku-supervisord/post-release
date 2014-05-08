@@ -24,7 +24,7 @@ do
     command=\${line#*: }
     cat << CONF >> supervisord.conf
 [program:\${name}]
-command=/exec \${command}
+command=/exec sh -c '\${command}'
 autostart=true
 autorestart=true
 stopsignal=QUIT
@@ -43,7 +43,7 @@ source "$(dirname $0)/../dokku_common"
 verify_app_name "$1"
 
 # Check for Procfile
-if ! docker run --entrypoint="/bin/bash" --rm "$IMAGE" -c "[[ ! -f /app/Dockerfile ]] && [[ -f /app/Procfile ]]"; then
+if ! docker run --rm "$IMAGE" /bin/bash -c "[[ ! -f /app/Dockerfile ]] && [[ -f /app/Procfile ]]"; then
   exit 0
 fi
 
@@ -53,4 +53,4 @@ CMD="cat > /start && \
   dpkg -s supervisor > /dev/null 2>&1 || \
   (apt-get update && apt-get install -y supervisor && apt-get clean)"
 
-echo "$runner" | docker run --entrypoint="/bin/bash" -i -a stdin $IMAGE -c "$CMD" | attach_and_commit_image "$IMAGE"
+echo "$runner" | docker run -i -a stdin $IMAGE /bin/bash -c "$CMD" | attach_and_commit_image "$IMAGE"

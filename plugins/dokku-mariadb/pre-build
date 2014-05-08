@@ -10,7 +10,7 @@ DB_APP_PASSWORD="$DB_APP_PASSWORDS$APP"
 # inject MARIADB_URL
 if [[ -d "$DB_LINKS" ]] && [[ -f "$DB_APP_PASSWORD" ]] && [[ $(ls -1 "$DB_LINKS" | wc -l) -gt 0 ]]; then
 	ls -1 "$DB_LINKS" | while read DB_NAME; do
-		docker run --entrypoint="/bin/bash" -i -a stdin "$IMAGE" -c "mkdir -p /app && cat >> /app/.env" <<EOF | commit_image "$IMAGE"
+		docker run -i -a stdin "$IMAGE" /bin/bash -c "mkdir -p /app && cat >> /app/.env" <<EOF | commit_image "$IMAGE"
 [ "\$MARIADB_NAME" != "" ] && export DATABASE_URL=mysql2://$APP:$(cat "$DB_APP_PASSWORD")@\$MARIADB_PORT_3306_TCP_ADDR:\$MARIADB_PORT_3306_TCP_PORT/$DB_NAME
 EOF
 		verbose "Linking MariaDB database $DB_NAME to application"

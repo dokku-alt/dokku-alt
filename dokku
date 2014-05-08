@@ -31,8 +31,8 @@ case "$1" in
     tag_image "$IMAGE_GENERIC:build" "$IMAGE_GENERIC:release"
     pluginhook pre-release "$APP"
     if [[ -f "$DOKKU_ROOT/$APP/ENV" ]]; then
-      cat "$DOKKU_ROOT/$APP/ENV" | docker run -i --entrypoint="/bin/bash" -a stdin "$IMAGE_GENERIC:release" \
-        -c "mkdir -p /app/.profile.d && cat > /app/.profile.d/app-env.sh" | commit_image "$IMAGE_GENERIC:release"
+      cat "$DOKKU_ROOT/$APP/ENV" | docker run -i -a stdin "$IMAGE_GENERIC:release" \
+        /bin/bash -c "mkdir -p /app/.profile.d && cat > /app/.profile.d/app-env.sh" | commit_image "$IMAGE_GENERIC:release"
     fi
     pluginhook post-release "$APP"
     ;;
@@ -51,23 +51,33 @@ case "$1" in
     # start the app
     DOCKER_ARGS="$(: | pluginhook docker-args "$APP" web)"
 
-    if docker run --entrypoint="/bin/bash" --rm "$IMAGE" -c "[[ -f /exec ]]"; then
+    if docker run --rm "$IMAGE" test -f /exec; then
       # buildstep
       INT_PORT="$APP_PORT"
-      id=$(docker run -d -p "$INT_PORT" -e PORT="$INT_PORT" --name="$APP_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /bin/bash -c "/start web")
+      id=$(docker run -d -p "$INT_PORT" -e PORT="$INT_PORT" --name="$APP_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /start web)
       addr=$(docker port $id "$INT_PORT")
-      port=${addr#*:}
+      EXT_PORT=${addr#*:}
       echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$port" > "$DOKKU_ROOT/$APP/URL"
       pluginhook post-deploy "$APP" "$port" "$INT_PORT"
     else
       # Dockerfile
-      INT_PORT="80"
-      id=$(docker run -d -p "$INT_PORT" --name="$APP_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest")
-      addr=$(docker port $id "$INT_PORT")
-      port=${addr#*:}
-      echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$port" > "$DOKKU_ROOT/$APP/URL"
-      pluginhook post-deploy "$APP" "$port" "$INT_PORT"
+      EXT_PORT=""
+      INT_PORT=""
+      id=$(docker run -d -P --name="$APP_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /start web)
+      for test_port in 80 8080 "$APP_PORT"; do
+        if addr=$(docker port $id "$test_port" 2>/dev/null); then
+          INT_PORT="$test_port"
+          EXT_PORT=${addr#*:}
+        fi
+      done
     fi
+
+    if [[ "$EXT_PORT" == "" ]] || [[ "$INT_PORT" == "" ]]; then
+      fail "$APP: No external port published"
+    fi
+
+    echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$EXT_PORT" > "$DOKKU_ROOT/$APP/URL"
+    pluginhook post-deploy "$APP" "$EXT_PORT" "$INT_PORT"
 
     info2 "Application deployed:"
     verbose "$(dokku url $APP)"
@@ -75,8 +85,8 @@ case "$1" in
 
   cleanup)
     info "Cleaning up ..."
-    docker ps -a | grep 'Exit' | grep -v "seconds ago" | awk '{print $1}' | xargs docker rm &> /dev/null || true
-    docker images | grep '<none>' |  awk '{print $3}'  | xargs docker rmi &> /dev/null || true
+    docker ps -a | grep -v " Up " | grep -v "seconds ago" | awk '{print $1}' | xargs docker rm &> /dev/null || true
+    docker images -a | grep '<none>' |  awk '{print $3}'  | xargs docker rmi &> /dev/null || true
     ;;
 
   plugins)

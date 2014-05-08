@@ -52,12 +52,12 @@ case "$1" in
 
     DOCKER_ARGS=$(: | pluginhook docker-args $APP run)
 
-    if docker run --entrypoint="/bin/bash" --rm "$IMAGE" -c "[[ -f /exec ]]"; then
+    if docker run --rm "$IMAGE" /bin/bash -c "[[ -f /exec ]]"; then
       # buildstep
       docker run --rm --name="$APP_RUN_NAME" -i -t $DOCKER_ARGS "$IMAGE" /exec "$@"
     else
       # Dockerfile
-      docker run --rm --name="$APP_RUN_NAME" --entrypoint="/bin/bash" -i -t $DOCKER_ARGS "$IMAGE" -c "$@"
+      docker run --rm --name="$APP_RUN_NAME" -i -t $DOCKER_ARGS "$IMAGE" "$@"
     fi
     ;;
 
