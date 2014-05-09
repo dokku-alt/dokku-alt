@@ -59,11 +59,6 @@ case "$1" in
   config)
     APP="$2"
 
-    if [ ! -f $ENV_FILE ] || [ ! -s $ENV_FILE ] ; then
-      echo "$APP has no config vars"
-      exit 1
-    fi
-
     for var in "$@"; do
       if [[ "$var" == "--shell" ]]; then
         : | pluginhook env-vars "$APP"

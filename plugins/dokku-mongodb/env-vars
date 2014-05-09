@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "$(dirname $0)/../dokku_common"
+source "$(dirname $0)/vars"
 
 verify_app_name "$1"
 
