@@ -33,10 +33,31 @@ case "$1" in
     docker stop "$APP_NAME"
 	;;
 
+  apps:disable)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    if [[ ! -f "$APP_DIR/DISABLED" ]]; then
+      touch "$APP_DIR/DISABLED"
+      deploy_app "$APP"
+    else
+      echo "$APP: Application is already disabled"
+    fi
+  ;;
+
+  apps:enable)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    if [[ -f "$APP_DIR/DISABLED" ]]; then
+      rm -f "$APP_DIR/DISABLED"
+      deploy_app "$APP"
+    else
+      echo "$APP: Application is already enabled"
+    fi
+  ;;
+
   apps:restart)
     verify_app_name "$2"
     verify_max_args 2 "$@"
-    
     docker restart "$APP_NAME"
     ;;
 
@@ -50,11 +71,13 @@ case "$1" in
 
   help)
     cat && cat<<EOF
-    apps:list                 List apps
-    apps:status <app>         Status of specific apps
-    apps:start <app>	        Stop specific apps
-    apps:stop <app>		        Stop specific apps
-    apps:restart <app>        Restart specific apps
+    apps:list                 List app
+    apps:status <app>         Status of specific app
+    apps:start <app>	        Stop specific app
+    apps:stop <app>		        Stop specific app
+    apps:restart <app>        Restart specific app (not-redeploy)
+    apps:enable <app>         Re-enable specific app
+    apps:disable <app>        Disable specific app
     apps:top <app> [args...]  Show running processes
 EOF
     ;;

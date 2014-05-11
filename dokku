@@ -53,36 +53,42 @@ case "$1" in
     # start the app
     DOCKER_ARGS="$(: | pluginhook docker-args "$APP" web)"
 
-    if is_image_buildstep_based "$IMAGE"; then
-      # buildstep
-      INT_PORT="$APP_PORT"
-      id=$(docker run -d -p "$INT_PORT" -e PORT="$INT_PORT" --name="$APP_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /start web)
-      addr=$(docker port $id "$INT_PORT")
-      EXT_PORT=${addr#*:}
-      echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$port" > "$DOKKU_ROOT/$APP/URL"
-      pluginhook post-deploy "$APP" "$port" "$INT_PORT"
+    if [[ ! -f "$DOKKU_ROOT/$APP/DISABLED" ]]; then
+      if is_image_buildstep_based "$IMAGE"; then
+        # buildstep
+        INT_PORT="$APP_PORT"
+        id=$(docker run -d -p "$INT_PORT" -e PORT="$INT_PORT" --name="$APP_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /start web)
+        addr=$(docker port $id "$INT_PORT")
+        EXT_PORT=${addr#*:}
+        echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$port" > "$DOKKU_ROOT/$APP/URL"
+        pluginhook post-deploy "$APP" "$port" "$INT_PORT"
+      else
+        # Dockerfile
+        EXT_PORT=""
+        INT_PORT=""
+        id=$(docker run -d -P --env-file=<(: | pluginhook env-vars "$APP") --name="$APP_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest")
+        for test_port in 80 8080 "$APP_PORT"; do
+          if addr=$(docker port $id "$test_port" 2>/dev/null); then
+            INT_PORT="$test_port"
+            EXT_PORT=${addr#*:}
+          fi
+        done
+      fi
+
+      if [[ "$EXT_PORT" == "" ]] || [[ "$INT_PORT" == "" ]]; then
+        verbose "No external HTTP port published"
+        pluginhook post-deploy "$APP" ""
+        info2 "Application deployed"
+      else
+        echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$EXT_PORT" > "$DOKKU_ROOT/$APP/URL"
+        pluginhook post-deploy "$APP" "$EXT_PORT" "$INT_PORT"
+        info2 "Application deployed:"
+        verbose "$(dokku url $APP)"
+      fi
     else
-      # Dockerfile
-      EXT_PORT=""
-      INT_PORT=""
-      id=$(docker run -d -P --env-file=<(: | pluginhook env-vars "$APP") --name="$APP_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest")
-      for test_port in 80 8080 "$APP_PORT"; do
-        if addr=$(docker port $id "$test_port" 2>/dev/null); then
-          INT_PORT="$test_port"
-          EXT_PORT=${addr#*:}
-        fi
-      done
+      verbose "Application disabled - will not be run"
+      pluginhook post-deploy "$APP" ""
     fi
-
-    if [[ "$EXT_PORT" == "" ]] || [[ "$INT_PORT" == "" ]]; then
-      fail "$APP: No external port published"
-    fi
-
-    echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$EXT_PORT" > "$DOKKU_ROOT/$APP/URL"
-    pluginhook post-deploy "$APP" "$EXT_PORT" "$INT_PORT"
-
-    info2 "Application deployed:"
-    verbose "$(dokku url $APP)"
     ;;
 
   cleanup)
