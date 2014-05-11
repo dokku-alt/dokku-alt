@@ -60,13 +60,12 @@ function check_app_name() {
 	sanitize_name "$1" "app name"
 	APP="$1"
     IMAGE_GENERIC="dokku/$APP"
-    if [[ "$(basename $0)" == "pre-build" ]] || [[ "$(basename $0)" == "post-build" ]]; then
-    	IMAGE="$IMAGE_GENERIC:build"
-    elif [[ "$(basename $0)" == "pre-release" ]] || [[ "$(basename $0)" == "post-release" ]]; then
-    	IMAGE="$IMAGE_GENERIC:release"
-    else
-    	IMAGE="$IMAGE_GENERIC:latest"
-    fi
+    local CMD_TYPE="$(basename $0)"
+    case "$CMD_TYPE" in
+		"pre-build"|"post-build")		IMAGE="$IMAGE_GENERIC:build" ;;
+		"pre-release"|"post-release")	IMAGE="$IMAGE_GENERIC:release" ;;
+		*)								IMAGE="$IMAGE_GENERIC:latest" ;;
+    esac
     CACHE_DIR="$DOKKU_ROOT/$APP/cache"
     APP_NAME="dokku_$APP"
     APP_DIR="$DOKKU_ROOT/$APP"
@@ -90,17 +89,11 @@ function require_image() {
 }
 
 function release_app() {
-  APP="$1"
-  info "Releasing $APP ..."
-  dokku release $APP
-  info "Release complete!"
+  dokku release "$@"
 }
 
 function deploy_app() {
-  APP="$1"
-  info "Deploying $APP ..."
-  dokku deploy $APP
-  info "Deploy complete!"
+  dokku deploy "$@"
 }
 
 function redeploy_app() {

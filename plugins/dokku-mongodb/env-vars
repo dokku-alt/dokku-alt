@@ -10,6 +10,6 @@ cat
 
 [[ ! -d "$DB_LINKS" ]] || ls -1 "$DB_LINKS" | while read DB_NAME; do
 	if db_info "$APP" "$DB_NAME"; then
-		echo "DATABASE_URL=$DB_URL"
+		echo "MONGODB_URL=$DB_URL"
 	fi
 done
