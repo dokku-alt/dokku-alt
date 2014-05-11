@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "$(dirname $0)/../dokku_common"
+source "$(dirname $0)/vars"
 
 APP="$1"; PORT="$2"; INT_PORT="$3"
 [[ "$INT_PORT" != "" ]] || INT_PORT="$APP_PORT"
@@ -15,20 +15,7 @@ if [[ "$PORT" == "" ]] || [[ -f "$DOKKU_ROOT/$APP/NO_VHOST" ]]; then
 fi
 
 if [[ -f "$DOKKU_ROOT/VHOST" ]]; then
-  VHOST=$(< "$DOKKU_ROOT/VHOST")
-  SUBDOMAIN=${APP/%\.${VHOST}/}
-  if [[ "$APP" == *.* ]] && [[ "$SUBDOMAIN" == "$APP" ]]; then
-    hostname="${APP/\//-}"
-  else
-    hostname="${APP/\//-}.$VHOST"
-  fi
-
-  hostnames="$hostname"
-
-  if [[ -f "$DOKKU_ROOT/$APP/HOSTNAME" ]]; then
-    hostnames=($(<"$DOKKU_ROOT/$APP/HOSTNAME"))
-    hostname="${hostnames[0]}"
-  fi
+  hostnames_for_app "$APP"
 
   if [[ -f "$SSL/server.crt" ]] && [[ -f "$SSL/server.key" ]]; then
     SSL_INUSE="$SSL"
