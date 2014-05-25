@@ -51,25 +51,27 @@ devinstall:
 	ln -sf "$(PWD)/plugins" /var/lib/dokku-alt/plugins
 
 dpkg:
-	rm -rf deb/dokku-alt/var/lib/dokku-alt
-	mkdir -p deb/dokku-alt/usr/local/bin
-	mkdir -p deb/dokku-alt/var/lib/dokku-alt
-	mkdir -p deb/dokku-alt/usr/local/share/man/man1
-	cp sshcommand/sshcommand deb/dokku-alt/usr/local/bin/sshcommand
-	cp gitreceive/gitreceive deb/dokku-alt/usr/local/bin/gitreceive
-	cp pluginhook/pluginhook deb/dokku-alt/usr/local/bin/pluginhook
-	cp dokku deb/dokku-alt/usr/local/bin
-	cp -r plugins deb/dokku-alt/var/lib/dokku-alt
-	cp dokku.1 deb/dokku-alt/usr/local/share/man/man1/dokku.1
-	git describe --tags > deb/dokku-alt/var/lib/dokku-alt/VERSION
-	sed -i "s/^Version: .*/Version: $(shell git describe --tags)/g" deb/dokku-alt/DEBIAN/control
-	dpkg-deb --build deb/dokku-alt deb/dokku-alt-$(shell git describe --tags)-amd64.deb
+	rm -rf deb-tmp/
+	cp -r deb deb-tmp/
+	mkdir -p deb-tmp/dokku-alt/usr/local/bin
+	mkdir -p deb-tmp/dokku-alt/var/lib/dokku-alt
+	mkdir -p deb-tmp/dokku-alt/usr/local/share/man/man1
+	cp sshcommand/sshcommand deb-tmp/dokku-alt/usr/local/bin/sshcommand
+	cp gitreceive/gitreceive deb-tmp/dokku-alt/usr/local/bin/gitreceive
+	cp pluginhook/pluginhook deb-tmp/dokku-alt/usr/local/bin/pluginhook
+	cp dokku deb-tmp/dokku-alt/usr/local/bin
+	cp -r plugins deb-tmp/dokku-alt/var/lib/dokku-alt
+	cp dokku.1 deb-tmp/dokku-alt/usr/local/share/man/man1/dokku.1
+	git describe --tags > deb-tmp/dokku-alt/var/lib/dokku-alt/VERSION
+	sed -i "s/^Version: .*/Version: $(shell git describe --tags)/g" deb-tmp/dokku-alt/DEBIAN/control
+	dpkg-deb --build deb-tmp/dokku-alt dokku-alt-$(shell git describe --tags)-amd64.deb
+	rm -rf deb-tmp/
 
 dpkg_commit: dpkg
 	git checkout gh-pages
-	mv deb/*.deb .
 	dpkg-scanpackages . > Packages
-	git add *.deb Packages
+	gzip -c Packages > Packages.gz
+	git add *.deb Packages Packages.gz
 	git commit -m "New release"
 	git checkout master
 
