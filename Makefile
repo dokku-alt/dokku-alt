@@ -69,9 +69,13 @@ dpkg:
 
 dpkg_commit: dpkg
 	git checkout gh-pages
+	mkdir -p dists/dokku-alt/main/binary-i386
 	mkdir -p dists/dokku-alt/main/binary-amd64
-	mv *-amd64.deb dists/dokku-alt/main/binary-amd64/
-	cd dists/dokku-alt/main/binary-amd64/ && dpkg-scanpackages . > Packages
+	mv *-i386.deb dists/dokku-alt/main/binary-i386/ || true
+	mv *-amd64.deb dists/dokku-alt/main/binary-amd64/ || true
+	dpkg-scanpackages dists/dokku-alt/main/binary-i386 > dists/dokku-alt/main/binary-i386/Packages
+	dpkg-scanpackages dists/dokku-alt/main/binary-amd64 > dists/dokku-alt/main/binary-amd64/Packages
+	git add dists/dokku-alt/main/binary-i386/*
 	git add dists/dokku-alt/main/binary-amd64/*
 	git commit -m "New release"
 	git checkout master
