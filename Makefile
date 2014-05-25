@@ -69,9 +69,10 @@ dpkg:
 
 dpkg_commit: dpkg
 	git checkout gh-pages
-	dpkg-scanpackages . > Packages
-	gzip -c Packages > Packages.gz
-	git add *.deb Packages Packages.gz
+	mkdir -p dists/dokku-alt/main/binary-amd64
+	mv *-amd64.deb dists/dokku-alt/main/binary-amd64/
+	cd dists/dokku-alt/main/binary-amd64/ && dpkg-scanpackages . > Packages
+	git add dists/dokku-alt/main/binary-amd64/*
 	git commit -m "New release"
 	git checkout master
 
