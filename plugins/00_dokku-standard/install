@@ -5,9 +5,9 @@ source "$(dirname $0)/../dokku_common"
 cat
 
 # Build docker image
-docker pull "ayufan/progrium-buildstep" || true
-reset_timestamps "$CWD/buildstep"
-docker build -t ayufan/progrium-buildstep "$CWD/buildstep"
+docker pull "ayufan/progrium-buildstep"
+# reset_timestamps "$CWD/buildstep"
+# docker build -t ayufan/progrium-buildstep "$CWD/buildstep"
 
 if [[ ! -f  "$DOKKU_ROOT/HOSTNAME" ]]; then
     echo $(hostname -f) > $DOKKU_ROOT/HOSTNAME
