@@ -1,4 +1,4 @@
-DOKKU_VERSION = master
+DOKKU_VERSION ?= 0.3.0
 DOKKU_ROOT ?= /home/dokku
 PLUGINHOOK_URL ?= https://s3.amazonaws.com/progrium-pluginhook/pluginhook_0.1.0_amd64.deb
 
@@ -61,13 +61,15 @@ dpkg:
 	cp dokku deb/dokku-alt/usr/local/bin
 	cp -r plugins deb/dokku-alt/var/lib/dokku-alt
 	cp dokku.1 deb/dokku-alt/usr/local/share/man/man1/dokku.1
-	git describe --tags > deb/dokku-alt/var/lib/dokku-alt/VERSION  2> /dev/null || echo '~${DOKKU_VERSION} ($(shell date -uIminutes))' > deb/dokku-alt/var/lib/dokku-alt/VERSION
-	dpkg-deb --build deb/dokku-alt
+	git describe --tags > deb/dokku-alt/var/lib/dokku-alt/VERSION
+	sed -i "s/^Version: .*/Version: $(shell git describe --tags)/g" deb/dokku-alt/DEBIAN/control
+	dpkg-deb --build deb/dokku-alt deb/dokku-alt-$(shell git describe --tags)-amd64.deb
 
 dpkg_commit: dpkg
 	git checkout gh-pages
-	cp deb/dokku-alt.deb .
-	git add dokku-alt.deb
+	mv deb/*.deb .
+	dpkg-scanpackages .
+	git add *.deb Packages
 	git commit -m "New release"
 	git checkout master
 
