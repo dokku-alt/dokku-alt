@@ -68,7 +68,7 @@ dpkg:
 dpkg_commit: dpkg
 	git checkout gh-pages
 	mv deb/*.deb .
-	dpkg-scanpackages .
+	dpkg-scanpackages . > Packages
 	git add *.deb Packages
 	git commit -m "New release"
 	git checkout master
