@@ -143,6 +143,10 @@ function attach_and_commit_image() {
 	return 0
 }
 
+function reset_timestamps() {
+	find "$@" -exec touch -t 201401010000 "{}" \;
+}
+
 [[ -z "$DOKKU_ROOT" ]] && fail "DOKKU_ROOT not set"
 
 CWD="$(cd "$(dirname "$0")" && pwd)"

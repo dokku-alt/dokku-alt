@@ -4,6 +4,7 @@ source "$(dirname $0)/vars"
 
 # Build docker image
 docker pull "$DB_IMAGE" || true
+reset_timestamps "$CWD/dockerfiles"
 docker build -t "$DB_IMAGE" "$CWD/dockerfiles"
 
 # Create .redis directory if does not exist
