@@ -3,7 +3,7 @@
 source "$(dirname $0)/../dokku_common"
 
 DB_ROOT="$DOKKU_ROOT/.redis"
-DB_IMAGE="luxifer/redis"
+DB_IMAGE="ayufan/luxifer-redis"
 DB_CONTAINER_LINK="redis"
 DB_CONTAINER_VOLUME="/var/lib/redis"
 DB_PORT=6379

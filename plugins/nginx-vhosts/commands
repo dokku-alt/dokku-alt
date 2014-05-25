@@ -17,10 +17,26 @@ case "$1" in
     redeploy_app "$APP"
     ;;
 
+  domains:redirect:get)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    hostnames_for_app "$APP"
+    echo "${redirect_hostnames[@]}"
+    ;;
+
+  domains:redirect:set)
+    verify_app_name "$2"
+    shift 2
+    echo "$@" > "$DOKKU_ROOT/$APP/REDIRECT_HOSTNAME"
+    redeploy_app "$APP"
+    ;;
+
   help)
     cat && cat <<EOF
     domains:get <app>                 Get domains for an app
     domains:set <app> <domains...>    Set app domains
+    domains:redirect:get <app>                 Get redirect domains for an app
+    domains:redirect:set <app> <domains...>    Set redirect app domains
 EOF
     ;;
 esac

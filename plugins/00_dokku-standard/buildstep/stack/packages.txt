@@ -47,3 +47,6 @@ libicu-dev
 sudo
 supervisor
 redis-server
+libicu-dev
+sudo
+supervisor

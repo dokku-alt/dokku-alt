@@ -70,7 +70,7 @@ upstream $APP { server 127.0.0.1:$PORT; }
 server {
   listen      [::]:80;
   listen      80;
-  server_name $hostname;
+  server_name ${hostnames[@]};
   location    / {
     proxy_pass  http://$APP;
     proxy_redirect http://$hostname:$INT_PORT/ http://$hostname/;
@@ -86,12 +86,12 @@ server {
 }
 EOF
 
-  if [[ ${#hostnames[@]} -gt 1 ]]; then
+  if [[ "$redirect_hostnames" != "" ]]; then
     cat<<EOF >> $DOKKU_ROOT/$APP/nginx.conf
 server {
   listen      [::]:80;
   listen      80;
-  server_name ${hostnames[@]:1};
+  server_name ${redirect_hostnames[@]};
   return 302 http://$hostname\$request_uri;
 }
 EOF

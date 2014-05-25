@@ -7,7 +7,9 @@ cron_job() {
 
   DOCKER_ARGS="$(: | pluginhook docker-args "$1")"
   remove_container "$APP_CRON_NAME"
-  docker run --rm --name="$APP_CRON_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /bin/bash -c "/start $2" &
+  if is_image_buildstep_based "$IMAGE_GENERIC:latest"; then
+    docker run --rm --name="$APP_CRON_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /bin/bash -c "/start $2" &
+  fi
 }
 
 cron_job_all_apps() {
