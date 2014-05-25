@@ -22,21 +22,9 @@
 	url = https://github.com/Kloadut/dokku-pg-plugin.git
 	path = plugins/dokku-postgresql
 	branch = master
-[subtree "plugins/dokku-rabbitmq"]
-	url = https://github.com/jlachowski/dokku-rabbitmq-plugin.git
-	path = plugins/dokku-rabbitmq
-	branch = master
-[subtree "plugins/dokku-redis"]
-	url = https://github.com/luxifer/dokku-redis-plugin
-	path = plugins/dokku-redis
-	branch = master
 [subtree "plugins/dokku-user-env-compile"]
 	url = https://github.com/musicglue/dokku-user-env-compile.git
 	path = plugins/dokku-user-env-compile
-	branch = master
-[subtree "plugins/00_dokku-standard/buildstep"]
-	url = https://github.com/progrium/buildstep.git
-	path = plugins/00_dokku-standard/buildstep
 	branch = master
 [subtree "pluginhook"]
 	url = https://github.com/progrium/pluginhook.git
@@ -49,21 +37,4 @@
 [subtree "sshcommand"]
 	url = https://github.com/progrium/sshcommand.git
 	path = sshcommand
-	branch = master
-
-[subtree "plugins/dokku-postgresql/dockerfiles"]
-	url = https://github.com/Kloadut/dokku-pg-dockerfiles.git
-	path = plugins/dokku-postgresql/dockerfiles
-	branch = master
-[subtree "plugins/dokku-rabbitmq/dockerfiles"]
-	url = https://github.com/jlachowski/dokku-rabbitmq-dockerfiles.git
-	path = plugins/dokku-rabbitmq/dockerfiles
-	branch = master
-[subtree "plugins/dokku-mariadb/dockerfiles"]
-	url = https://github.com/Kloadut/dokku-md-dockerfiles
-	path = plugins/dokku-mariadb/dockerfiles
-	branch = master
-[subtree "plugins/dokku-redis/dockerfiles"]
-	url = https://github.com/luxifer/dokku-redis-dockerfiles
-	path = plugins/dokku-redis/dockerfiles
 	branch = master

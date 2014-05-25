@@ -3,7 +3,7 @@
 source "$(dirname $0)/../dokku_common"
 
 DB_ROOT="$DOKKU_ROOT/.mongodb"
-DB_IMAGE="ayufan/mongodb"
+DB_IMAGE="ayufan/dokku-alt-mongodb"
 DB_VOLUME="$DB_ROOT/mongodb"
 DB_ADMIN_PASSWORD="$DB_ROOT/mongodb_password"
 DB_CONTAINER="mongodb_single_container"

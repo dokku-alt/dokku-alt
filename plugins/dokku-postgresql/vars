@@ -3,7 +3,7 @@
 source "$(dirname $0)/../dokku_common"
 
 DB_ROOT="$DOKKU_ROOT/.pgsql"
-DB_IMAGE="ayufan/kloadut-postgresql"
+DB_IMAGE="ayufan/dokku-alt-postgresql"
 DB_VOLUME="$DB_ROOT/postgresql"
 DB_ADMIN_PASSWORD="$DB_ROOT/postgresql_password"
 DB_CONTAINER="postgresql_single_container"
