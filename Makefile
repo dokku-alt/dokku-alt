@@ -51,6 +51,7 @@ devinstall:
 	ln -sf "$(PWD)/plugins" /var/lib/dokku-alt/plugins
 
 dpkg:
+	rm -rf deb/dokku-alt/var/lib/dokku-alt
 	mkdir -p deb/dokku-alt/usr/local/bin
 	mkdir -p deb/dokku-alt/var/lib/dokku-alt
 	mkdir -p deb/dokku-alt/usr/local/share/man/man1
