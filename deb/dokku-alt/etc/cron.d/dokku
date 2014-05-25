@@ -1,0 +1,4 @@
+20 * * * * dokku dokku cron:hourly
+15 4 * * * dokku dokku cron:daily
+10 4 * * 1 dokku dokku cron:weakly
+ 5 4 1 * * dokku dokku cron:monthly

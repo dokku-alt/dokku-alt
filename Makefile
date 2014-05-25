@@ -50,6 +50,26 @@ devinstall:
 	ln -sf "$(PWD)/gitreceive/gitreceive" /usr/local/bin/gitreceive
 	ln -sf "$(PWD)/plugins" /var/lib/dokku-alt/plugins
 
+dpkg:
+	mkdir -p deb/dokku-alt/usr/local/bin
+	mkdir -p deb/dokku-alt/var/lib/dokku-alt
+	mkdir -p deb/dokku-alt/usr/local/share/man/man1
+	cp sshcommand/sshcommand deb/dokku-alt/usr/local/bin/sshcommand
+	cp gitreceive/gitreceive deb/dokku-alt/usr/local/bin/gitreceive
+	cp pluginhook/pluginhook deb/dokku-alt/usr/local/bin/pluginhook
+	cp dokku deb/dokku-alt/usr/local/bin
+	cp -r plugins deb/dokku-alt/var/lib/dokku-alt
+	cp dokku.1 deb/dokku-alt/usr/local/share/man/man1/dokku.1
+	git describe --tags > deb/dokku-alt/var/lib/dokku-alt/VERSION  2> /dev/null || echo '~${DOKKU_VERSION} ($(shell date -uIminutes))' > deb/dokku-alt/var/lib/dokku-alt/VERSION
+	dpkg-deb --build deb/dokku-alt
+
+dpkg_commit: dpkg
+	git checkout gh-pages
+	cp deb/dokku-alt.deb .
+	git add dokku-alt.deb
+	git commit -m "New release"
+	git checkout master
+
 pull:
 	rsync -av dokku.home:/srv/dokku-alt/ dokku
 	rsync -av dokku.home:/srv/dokku-alt/plugins plugins

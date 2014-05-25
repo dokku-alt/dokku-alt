@@ -1,0 +1,2 @@
+# dokku-nginx-reload
+%dokku ALL=(ALL)NOPASSWD:/etc/init.d/nginx reload 

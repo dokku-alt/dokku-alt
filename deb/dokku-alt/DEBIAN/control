@@ -1,0 +1,9 @@
+Package: dokku-alt
+Version: 0.3
+Section: base
+Priority: optional
+Architecture: amd64
+Depends: locales, git, make, curl, software-properties-common, ruby, ruby-sinatra, lxc-docker (>= 0.11.0), nginx, dnsutils
+Conflicts: pluginhook
+Maintainer: Kamil Trzciński <ayufan@ayufan.eu>
+Description: Docker powered mini-Heroku an fork of Dokku the Dokku Alternative.

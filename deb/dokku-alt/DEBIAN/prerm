@@ -1,0 +1,22 @@
+#!/bin/sh
+
+set -e
+set -u
+
+case "$1" in
+  remove|remove-in-favour|deconfigure|deconfigure-in-favour)
+    ;;
+
+  upgrade|failed-upgrade)
+    rm -f /usr/local/bin/docker
+    ;;
+
+  *)
+    echo "prerm called with unknown argument \`$1'" >&2
+    exit 1
+    ;;
+esac
+
+#DEBHELPER#
+
+exit 0

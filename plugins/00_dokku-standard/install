@@ -12,16 +12,3 @@ docker build -t ayufan/progrium-buildstep "$CWD/buildstep"
 if [[ ! -f  "$DOKKU_ROOT/HOSTNAME" ]]; then
     echo $(hostname -f) > $DOKKU_ROOT/HOSTNAME
 fi
-
-# temporary hack for https://github.com/progrium/dokku/issues/82
-# redeploys all apps after a reboot
-cat<<EOF > /etc/init/dokku-redeploy.conf
-description "Dokku app redeploy service"
-
-start on (started docker)
-
-script
-  sleep 2 # give docker some time
-  sudo -i -u dokku /usr/local/bin/dokku deploy:all
-end script
-EOF

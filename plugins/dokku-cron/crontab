@@ -1,4 +1,0 @@
-20 * * * * dokku cron:hourly
-15 4 * * * dokku cron:daily
-10 4 * * 1 dokku cron:weakly
- 5 4 1 * * dokku cron:monthly
