@@ -109,6 +109,7 @@ case "$1" in
       echo "Installing $plugin..."
       : | $script "$@"
     done
+    dokku deploy:all
     ;;
 
   # temporary hack for https://github.com/progrium/dokku/issues/82
