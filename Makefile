@@ -65,6 +65,7 @@ dpkg:
 	git describe --tags > deb-tmp/dokku-alt/var/lib/dokku-alt/VERSION
 	sed -i "s/^Version: .*/Version: $(shell git describe --tags)/g" deb-tmp/dokku-alt/DEBIAN/control
 	dpkg-deb --build deb-tmp/dokku-alt dokku-alt-$(shell git describe --tags)-amd64.deb
+	dpkg-sig -k EAD883AF --sign builder dokku-alt-$(shell git describe --tags)-amd64.deb
 	rm -rf deb-tmp/
 
 dpkg_commit: dpkg

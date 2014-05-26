@@ -6,26 +6,11 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen.
 
 ## Requirements
 
-Assumes Ubuntu 13 or 12.04 x64 right now. Ideally have a domain ready to point to your host. It's designed for and is probably
-best to use a fresh VM. The bootstrapper will install everything it needs.
-
-**Note: There are known issues with docker and Ubuntu 13.10 ([1](https://github.com/dotcloud/docker/issues/1300), [2](https://github.com/dotcloud/docker/issues/1906)) - use of 12.04 is recommended until these issues are resolved.**
+Assumes that you use Ubuntu 14.04 LTS right now. Ideally have a domain ready to point to your host. It's designed for and is probably best to use a fresh VM. The debian package will install everything it needs.
 
 ## Installing
 
-### Stable
-
-    $ wget -qO- https://raw.github.com/progrium/dokku/v0.2.2/bootstrap.sh | sudo DOKKU_TAG=v0.2.2 bash
-
-**Note**: Users on 12.04 will need to run `apt-get install -y python-software-properties` before bootstrapping stable.
-
-### Development
-
-    $ wget -qO- https://raw.github.com/progrium/dokku/master/bootstrap.sh | sudo bash
-
-This may take around 5 minutes. Certainly better than the several hours it takes to bootstrap Cloud Foundry.
-
-You may also wish to take a look at the [advanced installation](http://progrium.viewdocs.io/dokku/advanced-installation) document for additional installation options.
+    $ curl -s https://raw.githubusercontent.com/dokku-alt/dokku-alt/master/bootstrap2.sh | sudo sh
 
 ## Configuring
 
@@ -33,7 +18,7 @@ Set up a domain and a wildcard domain pointing to that host. Make sure `/home/do
 
 You'll have to add a public key associated with a username by doing something like this from your local machine:
 
-    $ cat ~/.ssh/id_rsa.pub | ssh progriumapp.com "sudo sshcommand acl-add dokku progrium"
+    $ cat ~/.ssh/id_rsa.pub | ssh progriumapp.com "sudo sshcommand acl-add dokku dokku"
 
 That's it!
 
@@ -81,11 +66,6 @@ It's possible to run commands in the environment of the deployed application:
 
 ## Plugins
 
-Dokku itself is built out of plugins. Checkout the wiki for information about
-creating your own and a list of existing plugins:
-
-https://github.com/progrium/dokku/wiki/Plugins
-
 ## Removing a deployed app
 
 SSH onto the server, then execute:
@@ -110,46 +90,19 @@ Dokku provides easy TLS support from the box. To enable TLS connection to your a
 
 ## Upgrading
 
-Dokku is in active development. You can update the deployment step and the build step separately.
-
-**Note**: If you are upgrading from a revision prior to [27d4bc8c3c](https://github.com/progrium/dokku/commit/27d4bc8c3c19fe580ef3e65f2f85b85101cd83e4), follow the instructions in [this wiki entry](https://github.com/progrium/dokku/wiki/Migrating-to-Dokku-0.2.0).
-
-To update the deploy step (this is updated less frequently):
-
-    $ cd ~/dokku
-    $ git pull origin master
-    $ sudo make install
-
-Nothing needs to be restarted. Changes will take effect on the next push / deployment.
-
-To update the build step:
-
-    $ git clone https://github.com/progrium/buildstep.git
-    $ cd buildstep
-    $ git pull origin master
-    $ sudo make build
-
-This will build a fresh Ubuntu Quantal image, install a number of packages, and
-eventually replace the Docker image for buildstep.
+    $ sudo apt-get install dokku-alt
 
 ## Support
 
-You can use [Github Issues](https://github.com/progrium/dokku/issues), check [Troubleshooting](https://github.com/progrium/dokku/wiki/Troubleshooting) on the wiki, or join us on [freenode in #dokku](https://webchat.freenode.net/?channels=%23dokku)
+You can use [Github Issues](https://github.com/dokku-alt/dokku-alt/issues), check [Troubleshooting](https://github.com/progrium/dokku/wiki/Troubleshooting) on the wiki, or join us on [freenode in #dokku](https://webchat.freenode.net/?channels=%23dokku)
 
 ## Components
 
  * [Docker](https://github.com/dotcloud/docker) - Container runtime and manager
+ * [Dokku](https://github.com/progrium/dokku) - Orginal Dokku instance
  * [Buildstep](https://github.com/progrium/buildstep) - Buildpack builder
  * [pluginhook](https://github.com/progrium/pluginhook) - Shell based plugins and hooks
  * [sshcommand](https://github.com/progrium/sshcommand) - Fixed commands over SSH
-
-Looking to keep codebase as simple and hackable as possible, so try to keep your line count down.
-
-## Things this project won't do
-
- * **Multi-host.** Not a huge leap, but this isn't the project for it. Have a look at [Flynn](https://flynn.io/).
- * **Multitenancy.** It's ready for it, but again, have a look at [Flynn](https://flynn.io/).
- * **Client app.** Given the constraints, running commands remotely via SSH is fine.
 
 ## License
 
