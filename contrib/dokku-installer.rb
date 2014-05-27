@@ -21,7 +21,7 @@ if ARGV[0] == "onboot"
 	exit
 end
 
-version 	= "v0.2.1"
+version 	= `cat /var/lib/dokku-alt/VERSION`.split("\n").first
 dokku_root	= ENV["DOKKU_ROOT"] || "/home/dokku"
 admin_key 	= `cat /root/.ssh/authorized_keys`.split("\n").first
 hostname 	= `bash -c '[[ $(dig +short $HOSTNAME) ]] && echo $HOSTNAME || curl icanhazip.com'`.strip
@@ -96,7 +96,7 @@ __END__
 			$.post('/setup', data)
 				.done(function() {
 					$("#result").html("Success!")
-					window.location.href = "https://github.com/progrium/dokku#deploy-an-app";
+					window.location.href = "https://github.com/dokku-alt/dokku-alt#deploy-an-app";
 				})
 				.fail(function(data) {
 					$("#result").html("Something went wrong...")
