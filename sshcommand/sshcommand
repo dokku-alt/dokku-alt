@@ -18,7 +18,7 @@ case "$1" in
     if [ -z $USERHOME ]; then
         USERHOME=$(bash <<< "echo ~$USER")
     else
-        useradd -d $USERHOME $USER || true
+        useradd -m -d $USERHOME $USER || true
     fi
 
     mkdir -p "$USERHOME/.ssh"
