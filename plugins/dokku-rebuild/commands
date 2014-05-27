@@ -99,9 +99,10 @@ case "$1" in
   rebuild:all)
     verify_max_args 1 "$@"
 
-    for app in $(ls -d $DOKKU_ROOT/*/); do
-      APP="$(basename "$app")"
-      dokku rebuild $APP
+    for app in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
+      if [[ -f "$app/refs/heads/master" ]]; then
+        dokku rebuild "$(basename "$app")"
+      fi
     done
     ;;
 

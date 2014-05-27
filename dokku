@@ -93,7 +93,7 @@ case "$1" in
 
   cleanup)
     info "Cleaning up ..."
-    docker ps -a | grep -v " Up " | grep -v "seconds ago" | awk '{print $1}' | xargs docker rm &> /dev/null || true
+    docker ps -a | grep -v " Up " | grep -v "seconds ago" | grep -v "_data" | awk '{print $1}' | xargs docker rm &> /dev/null || true
     docker images -a | grep '<none>' |  awk '{print $3}'  | xargs docker rmi &> /dev/null || true
     ;;
 
@@ -114,10 +114,9 @@ case "$1" in
 
   # temporary hack for https://github.com/progrium/dokku/issues/82
   deploy:all)
-    for app in $(ls -d $DOKKU_ROOT/*/); do
-      APP="$(basename $app)"
+    for app in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
       if [[ -f "$app/refs/heads/master" ]]; then
-        dokku deploy "$APP"
+        dokku deploy "$(basename $app)"
       fi
     done
     ;;
@@ -136,7 +135,7 @@ EOF
     ;;
 
   *)
-    for script in $(ls -d $PLUGIN_PATH/*/commands); do
+    for script in $(ls -d $PLUGIN_PATH/*/commands 2>/dev/null); do
       $script "$@"
     done
     ;;

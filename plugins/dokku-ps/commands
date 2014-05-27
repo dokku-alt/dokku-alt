@@ -4,7 +4,12 @@ source "$(dirname $0)/../dokku_common"
 
 case "$1" in
   apps:list)
-    ls -1 -d $DOKKU_ROOT/*/ | xargs -L1 basename
+    verify_max_args 1 "$@"
+    for app in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
+      if [[ -f "$app/refs/heads/master" ]]; then
+        basename "$app"
+      fi
+    done
     ;;
 
   apps:status)
