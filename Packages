@@ -1,0 +1,17 @@
+Package: dokku-alt
+Priority: optional
+Section: base
+Maintainer: Kamil Trzciński <ayufan@ayufan.eu>
+Architecture: amd64
+Version: 0.3.0-9-g516e53a
+Provides: dokku-alt
+Depends: locales, git, make, curl, software-properties-common, lxc-docker (>= 0.11.0), nginx, dnsutils
+Conflicts: pluginhook
+Filename: ./dokku-alt-0.3.0-9-g516e53a-amd64.deb
+Size: 435198
+MD5sum: 142dc9cc19edfe8ef825f54f07acf724
+SHA1: 9d6b83b243b13b0552d8604f6b0f997ce27c5c2c
+SHA256: e1d3b1cf45bb04aba971bcad76bfb3b7c5ef9cee9a0a58c19ef25c6eed27b23a
+SHA512: e29ca9bc0faa8880642312ea2d6dc221d4d56d7e562b45a0b22fb15eb2edd303c51cb884cdfc0bcff00043a286cae549f7d55b9ff23c7a3cb134f100f90338bd
+Description: Docker powered mini-Heroku an fork of Dokku the Dokku Alternative.
+
