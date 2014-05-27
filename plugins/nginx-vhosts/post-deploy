@@ -14,9 +14,9 @@ if [[ "$PORT" == "" ]] || [[ -f "$DOKKU_ROOT/$APP/NO_VHOST" ]]; then
   exit 0
 fi
 
-if [[ -f "$DOKKU_ROOT/VHOST" ]]; then
-  hostnames_for_app "$APP"
+hostnames_for_app "$APP"
 
+if [[ "$hostname" != "" ]]; then
   if [[ -f "$SSL/server.crt" ]] && [[ -f "$SSL/server.key" ]]; then
     SSL_INUSE="$SSL"
   elif  [[ -f "$WILDCARD_SSL/server.crt" ]] && [[ -f "$WILDCARD_SSL/server.key" ]] && [[ $hostname = `openssl x509 -in $WILDCARD_SSL/server.crt -noout -subject | tr '/' '\n' | grep CN= | cut -c4-` ]]; then

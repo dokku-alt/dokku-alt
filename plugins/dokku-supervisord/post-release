@@ -1,7 +1,5 @@
 #!/bin/bash
 
-cat
-
 read -d '' runner <<'EOF'
 #!/bin/bash
 
