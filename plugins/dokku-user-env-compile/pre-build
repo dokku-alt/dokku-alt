@@ -4,9 +4,7 @@ source "$(dirname $0)/../dokku_common"
 
 verify_app_name "$1"
 
-SOURCE_ENV_PATH="$APP_DIR/ENV"
-
-if is_image_buildstep_based "$IMAGE"; then
+if [[ "$3" == "buildstep" ]]; then
   info "Installing ENV in build environment ..."
   pluginhook env-vars "$APP" | docker run -i -a stdin "$IMAGE" /bin/bash -c "mkdir -p /app && cat >> /app/.env" | commit_image "$IMAGE"
 fi

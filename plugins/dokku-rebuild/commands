@@ -52,8 +52,8 @@ dokku_build_app_from_git() {
       dokku_restore_timestamps "$REV"
       find -name .git -prune -exec rm -rf {} \; > /dev/null
       docker build -t "$IMAGE_GENERIC:build" .
-      pluginhook pre-build "$APP" "$REV"
-      pluginhook post-build "$APP" "$REV"
+      pluginhook pre-build "$APP" "$REV" "dockerfile"
+      pluginhook post-build "$APP" "$REV" "dockerfile"
     else
       # or buildstep (heroku-style)
       info "Building $APP using buildstep..."
@@ -63,14 +63,14 @@ dokku_build_app_from_git() {
                         -c "mkdir -p /app && tar -xC /app" | commit_image "$IMAGE_GENERIC:build"
       [[ -d "$CACHE_DIR" ]] || mkdir "$CACHE_DIR"
 
-      pluginhook pre-build "$APP" "$REV"
+      pluginhook pre-build "$APP" "$REV" "buildstep"
       DOCKER_ARGS="$(: | pluginhook docker-args "$APP" build)"
       docker run -i -a stdin -v "$CACHE_DIR":/cache \
                   $DOCKER_ARGS \
                   "$IMAGE_GENERIC:build" \
                   /build/builder | attach_and_commit_image "$IMAGE_GENERIC:build"
 
-      pluginhook post-build "$APP" "$REV"
+      pluginhook post-build "$APP" "$REV" "buildstep"
     fi
 
     dokku release "$APP"
