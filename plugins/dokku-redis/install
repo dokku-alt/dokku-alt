@@ -2,13 +2,8 @@
 
 source "$(dirname $0)/vars"
 
-# Build docker image
-docker pull "$DB_IMAGE"
-
 # Create .redis directory if does not exist
 if [[ ! -d "$DB_ROOT" ]]; then
     mkdir -p "$DB_ROOT"
     chown -R dokku: "$DB_ROOT"
 fi
-
-cat

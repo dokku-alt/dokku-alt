@@ -107,7 +107,7 @@ case "$1" in
     for script in $(ls -d $PLUGIN_PATH/*/install); do
       plugin="$(basename "$(dirname $script)")"
       echo "Installing $plugin..."
-      : | $script "$@"
+      $script "$@"
     done
     dokku deploy:all
     ;;

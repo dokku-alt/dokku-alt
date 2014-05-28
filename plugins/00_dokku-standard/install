@@ -2,11 +2,6 @@
 
 source "$(dirname $0)/../dokku_common"
 
-cat
-
-# Build docker image
-docker pull "ayufan/progrium-buildstep"
-
 if [[ ! -f  "$DOKKU_ROOT/HOSTNAME" ]]; then
     echo $(hostname -f) > $DOKKU_ROOT/HOSTNAME
 fi
