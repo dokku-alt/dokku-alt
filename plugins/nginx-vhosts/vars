@@ -9,16 +9,16 @@ function hostnames_for_app() {
 	hostnames=""
 	redirect_hostnames=""
 
+	if [[ -f "$DOKKU_ROOT/$APP/REDIRECT_HOSTNAME" ]]; then
+		redirect_hostnames=($(<"$DOKKU_ROOT/$APP/REDIRECT_HOSTNAME"))
+	fi
+
 	if [[ -f "$DOKKU_ROOT/$APP/HOSTNAME" ]]; then
 		hostnames=($(<"$DOKKU_ROOT/$APP/HOSTNAME"))
 		if [[ "${hostnames[0]}" != "" ]]; then
 			hostname="${hostnames[0]}"
 			return
 		fi
-	fi
-
-	if [[ -f "$DOKKU_ROOT/$APP/REDIRECT_HOSTNAME" ]]; then
-		redirect_hostnames=($(<"$DOKKU_ROOT/$APP/REDIRECT_HOSTNAME"))
 	fi
 
 	if [[ -f "$DOKKU_ROOT/VHOST" ]]; then

@@ -30,7 +30,7 @@ upstream $APP { server 127.0.0.1:$PORT; }
 server {
   listen      [::]:80;
   listen      80;
-  server_name ${hostnames[@]};
+  server_name ${hostnames[@]} ${redirect_hostnames[@]};
   return 301 https://$hostname\$request_uri;
 }
 

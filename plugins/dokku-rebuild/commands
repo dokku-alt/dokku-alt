@@ -61,11 +61,14 @@ dokku_build_app_from_git() {
       find -name .git -prune -exec rm -rf {} \; > /dev/null
       tar c . | docker run -i -a stdin "ayufan/progrium-buildstep" /bin/bash \
                         -c "mkdir -p /app && tar -xC /app" | commit_image "$IMAGE_GENERIC:build"
-      [[ -d "$CACHE_DIR" ]] || mkdir "$CACHE_DIR"
 
       pluginhook pre-build "$APP" "$REV" "buildstep"
       DOCKER_ARGS="$(: | pluginhook docker-args "$APP" build)"
-      docker run -i -a stdin -v "$CACHE_DIR":/cache \
+      # start data container for cache
+      docker run -d -v "/cache" --name="$APP_CACHE_NAME" \
+                busybox "exit 0" 1>/dev/null 2>/dev/null || true
+      # link volumes from data container
+      docker run -i -a stdin --volumes-from="$APP_CACHE_NAME" \
                   $DOCKER_ARGS \
                   "$IMAGE_GENERIC:build" \
                   /build/builder | attach_and_commit_image "$IMAGE_GENERIC:build"

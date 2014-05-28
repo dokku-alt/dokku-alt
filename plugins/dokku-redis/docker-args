@@ -4,7 +4,7 @@ source "$(dirname $0)/vars"
 
 redis_for_app "$1"
 
-if [[ -d "$DB_VOLUME" ]]; then
+if [[ -f "$DB_VOLUME" ]]; then
 	echo "--link $DB_CONTAINER:$DB_CONTAINER_LINK "
 fi
 

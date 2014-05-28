@@ -7,7 +7,7 @@ case "$1" in
     redis_for_app "$2"
     verify_max_args 2 "$@"
 
-    mkdir -p "$DB_VOLUME"
+    touch "$DB_VOLUME"
     info "Redis database created: $DB_CONTAINER"
     redeploy_app "$APP"
     ;;
@@ -16,8 +16,8 @@ case "$1" in
     redis_for_app "$2"
     verify_max_args 2 "$@"
 
-    stop_and_remove_container "$DB_CONTAINER"
-    rm -rf "$DB_VOLUME"
+    stop_and_remove_container "$DB_CONTAINER" "$DB_DATA_CONTAINER"
+    rm -f "$DB_VOLUME"
     info "Redis database deleted: $DB_CONTAINER"
     redeploy_app "$APP"
     ;;
@@ -26,7 +26,7 @@ case "$1" in
     redis_for_app "$2"
     verify_max_args 2 "$@"
 
-    [[ ! -d "$DB_VOLUME" ]] && fail "$DB_CONTAINER: database is not linked to $APP"
+    [[ ! -f "$DB_VOLUME" ]] && fail "$DB_CONTAINER: database is not linked to $APP"
 
     echo
     cat <<EOF

@@ -11,3 +11,8 @@ for file in */ssl/server.*; do
     mkdir -p $(dirname $TARGET_DIR$file)
     cp $file $TARGET_DIR$file
 done
+
+for file in */HOSTNAME */REDIRECT_HOSTNAME; do
+    mkdir -p $(dirname $TARGET_DIR$file)
+    cp $file $TARGET_DIR$file
+done

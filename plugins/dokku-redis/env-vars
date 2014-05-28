@@ -6,6 +6,6 @@ redis_for_app "$1"
 
 cat
 
-if [[ -d "$DB_VOLUME" ]]; then
+if [[ -f "$DB_VOLUME" ]]; then
 	echo "REDIS_URL=redis://$DB_HOST:$DB_PORT"
 fi
