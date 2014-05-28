@@ -8,6 +8,7 @@ case "$1" in
   configure)
     mandb
     [ ! -x /usr/bin/docker.io ] || ln -sf /usr/bin/docker.io /usr/local/bin/docker
+    modprobe aufs || echo "WARNING: Restart server to finish installing dokku!"
     sshcommand create dokku /usr/local/bin/dokku
     usermod -aG docker dokku
     dokku plugins-install

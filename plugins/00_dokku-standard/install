@@ -2,6 +2,10 @@
 
 source "$(dirname $0)/../dokku_common"
 
+if docker inspect "ayufan/progrium-buildstep" >/dev/null 2>/dev/null; then
+	script -c "docker pull 'ayufan/progrium-buildstep'"
+fi
+
 if [[ ! -f  "$DOKKU_ROOT/HOSTNAME" ]]; then
     echo $(hostname -f) > $DOKKU_ROOT/HOSTNAME
 fi

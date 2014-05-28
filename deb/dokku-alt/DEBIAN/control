@@ -3,7 +3,7 @@ Version: 0.3.0
 Section: base
 Priority: optional
 Architecture: amd64
-Depends: locales, git, make, curl, software-properties-common, lxc-docker (>= 0.11.0), nginx, dnsutils
+Depends: locales, git, make, curl, software-properties-common, lxc-docker (>= 0.11.0), nginx, dnsutils, linux-image-extra-virtual, aufs-tools
 Conflicts: pluginhook
 Provides: dokku-alt
 Maintainer: Kamil Trzciński <ayufan@ayufan.eu>
