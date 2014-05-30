@@ -13,6 +13,7 @@ all:
 	# Type "make devinstall" to switch to development version.
 
 dpkg:
+	rm -f dokku-alt-*.deb
 	rm -rf deb-tmp/
 	cp -r deb deb-tmp/
 	mkdir -p deb-tmp/dokku-alt/usr/local/bin
