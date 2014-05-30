@@ -3,7 +3,7 @@
 source "$(dirname $0)/vars"
 
 if docker inspect "$DB_IMAGE" >/dev/null 2>/dev/null; then
-	script -c "docker pull '$DB_IMAGE'"
+	script -q -c "docker pull '$DB_IMAGE'" /dev/null
 fi
 
 # Create .mariadb directory if does not exist

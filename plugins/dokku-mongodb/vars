@@ -23,6 +23,8 @@ function start_database_container() {
 	           --name="$DB_CONTAINER" \
 	           "$DB_IMAGE" \
 	           /usr/bin/start_mongodb.sh >/dev/null
+  	echo "Waiting for $DB_HOST to boot..." 1>&2
+	sleep 8s
 }
 
 function restart_database_container() {

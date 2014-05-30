@@ -59,7 +59,7 @@ dokku_build_app_from_git() {
       info "Building $APP using buildstep..."
 
       find -name .git -prune -exec rm -rf {} \; > /dev/null
-      tar c . | docker run -i -a stdin "ayufan/progrium-buildstep" /bin/bash \
+      tar c . | docker run -i -a stdin "$BUILDSTEP_IMAGE" /bin/bash \
                         -c "mkdir -p /app && tar -xC /app" | commit_image "$IMAGE_GENERIC:build"
 
       pluginhook pre-build "$APP" "$REV" "buildstep"
