@@ -31,7 +31,7 @@ case "$1" in
     tag_image "$IMAGE_GENERIC:build" "$IMAGE_GENERIC:release"
     pluginhook pre-release "$APP"
     if is_image_buildstep_based "$IMAGE_GENERIC:release"; then
-      : | pluginhook env-vars "$APP" | \
+      : | pluginhook env-vars "$APP" | sed 's/^/export /g' | \
         docker run -i -a stdin "$IMAGE_GENERIC:release" \
         /bin/bash -c "mkdir -p /app/.profile.d && cat > /app/.profile.d/app-env.sh" | \
         commit_image "$IMAGE_GENERIC:release"
