@@ -24,6 +24,7 @@ case "$1" in
     mkdir -p "$USERHOME/.ssh"
     touch $USERHOME/.ssh/authorized_keys
     echo "$COMMAND" > "$USERHOME/.sshcommand"
+    chown $USER "$USERHOME"
     chown -R $USER "$USERHOME/.ssh"
     ;;
 

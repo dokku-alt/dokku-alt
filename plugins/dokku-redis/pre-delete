@@ -4,4 +4,4 @@ source "$(dirname $0)/vars"
 
 redis_for_app "$1"
 remove_container "$DB_CONTAINER" "$DB_DATA_CONTAINER"
-rm -r "$DB_VOLUME"
+rm -rf "$DB_VOLUME"

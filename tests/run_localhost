@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -e
+pushd $(dirname $0)
+echo "Starting services..."
+service nginx start
+service docker start
+service ssh start
+
+echo "Configuring dokku..."
+export HOME=/root
+ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa
+cat <<EOF > ~/.ssh/config
+Host *
+    StrictHostKeyChecking no
+EOF
+sshcommand create dokku /usr/local/bin/dokku
+cat ~/.ssh/id_rsa.pub | sshcommand acl-add dokku testkey
+dokku plugins-install
+ssh dokku@localhost version
+
+for app_path in apps/*; do
+  app=$(basename $app_path)
+  echo "-----> Running test deploy of $app..."
+  ./test_deploy $app_path localhost
+done
+
+echo Done

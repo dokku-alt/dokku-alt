@@ -7,6 +7,8 @@ DEB_PKG := dokku-alt-$(shell git describe --tags)-amd64.deb
 
 .PHONY: all dpkg install devinstall pull push sync
 
+FORCE:
+
 all:
 	# Type "make dpkg" to create deb package.
 	# Type "make install" to install.
@@ -34,7 +36,7 @@ dpkg:
 
 install: dpkg
 	dpkg -i $(DEB_PKG)
-	apt-get -f install
+	apt-get -f -y install
 
 devinstall:
 	[ -e /usr/local/bin/dokku ] || # Please install dokku-alt first
@@ -57,6 +59,13 @@ dpkg_commit: dpkg
 	# commit current release
 	git commit -m "New release"
 	git checkout master
+
+tests: FORCE
+	docker build -t ayufan/dokku-alt .
+	docker run --privileged --rm -t \
+		-v /home/dokku -v /var/lib/docker \
+		ayufan/dokku-alt \
+		bash
 
 pull:
 	rsync -av dokku.home:/srv/dokku-alt/ dokku
