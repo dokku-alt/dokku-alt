@@ -64,8 +64,9 @@ tests: FORCE
 	docker build -t ayufan/dokku-alt .
 	docker run --privileged --rm -t \
 		-v /home/dokku -v /var/lib/docker \
+		--hostname="dokku.me" \
 		ayufan/dokku-alt \
-		bash
+		/srv/dokku-alt/tests/run_localhost
 
 pull:
 	rsync -av dokku.home:/srv/dokku-alt/ dokku

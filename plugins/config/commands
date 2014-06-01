@@ -17,7 +17,7 @@ if [[ $1 == config ]] || [[ $1 == config:* ]]; then
     fi
 
     [ -f $ENV_FILE ] || {
-      echo "-----> Creating $ENV_FILE"
+      # echo "-----> Creating $ENV_FILE"
       touch $ENV_FILE
     }
   fi
