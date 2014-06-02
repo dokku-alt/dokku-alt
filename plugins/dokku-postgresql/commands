@@ -35,7 +35,7 @@ EOF
     info "PostgreSQL database created: $DB_NAME"
     ;;
 
-  postgresql:delete)
+  postgresql:delete|postgresql:destroy)
     verify_db_name "$2"
     verify_max_args 2 "$@"
 

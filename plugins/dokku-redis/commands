@@ -12,7 +12,7 @@ case "$1" in
     redeploy_app "$APP"
     ;;
 
-  redis:delete)
+  redis:delete|redis:destroy)
     redis_for_app "$2"
     verify_max_args 2 "$@"
 
