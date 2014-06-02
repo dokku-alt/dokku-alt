@@ -1,0 +1,25 @@
+#!/bin/bash
+set -ex;
+
+REMOTE=$1
+REPO=$2
+
+# get current MONGODB_URL
+MONGODB_URL=$(ssh $REMOTE config:get $REPO MONGODB_URL || true)
+echo $MONGODB_URL
+[[ "$MONGODB_URL" == "" ]]
+
+# try link to non-existing database
+ssh $REMOTE mongodb:link $REPO $REPO || true
+
+# create and destroy
+ssh $REMOTE mongodb:create $REPO
+ssh $REMOTE mongodb:destroy $REPO
+
+# create and link database
+ssh $REMOTE mongodb:create $REPO
+ssh $REMOTE mongodb:link $REPO $REPO
+ssh $REMOTE config $REPO
+TEST_DB_URL=$(ssh $REMOTE config:get $REPO MONGODB_URL)
+echo $TEST_DB_URL
+[[ "$TEST_DB_URL" != "" ]]

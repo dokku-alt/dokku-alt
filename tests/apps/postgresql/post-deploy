@@ -10,15 +10,16 @@ echo $DATABASE_URL
 [[ "$DATABASE_URL" == "" ]]
 
 # try link to non-existing database
-ssh $REMOTE mariadb:link $REPO $REPO-test-db || true
+ssh $REMOTE postgresql:link $REPO $REPO || true
 
 # create and destroy
-ssh $REMOTE mariadb:create $REPO-test-db
-ssh $REMOTE mariadb:destroy $REPO-test-db
+ssh $REMOTE postgresql:create $REPO
+ssh $REMOTE postgresql:destroy $REPO
 
 # create and link database
-ssh $REMOTE mariadb:create $REPO-test-db
-ssh $REMOTE mariadb:link $REPO $REPO-test-db
+ssh $REMOTE postgresql:create $REPO
+ssh $REMOTE postgresql:link $REPO $REPO
+ssh $REMOTE config $REPO
 TEST_DB_URL=$(ssh $REMOTE config:get $REPO DATABASE_URL)
 echo $TEST_DB_URL
 [[ "$TEST_DB_URL" != "" ]]

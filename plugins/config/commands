@@ -77,10 +77,6 @@ case "$1" in
       exit 1
     fi
 
-    if [ ! -f $ENV_FILE ] || [ ! -s $ENV_FILE ] ; then
-      exit 1
-    fi
-
     KEY="$3"
 
     : | pluginhook env-vars "$APP" | grep "^$KEY=" | cut -d"=" -f2-

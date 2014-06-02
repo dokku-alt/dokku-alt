@@ -60,8 +60,17 @@ dpkg_commit: dpkg
 	git commit -m "New release"
 	git checkout master
 
-tests: FORCE
+docker_build: FORCE
 	docker build -t ayufan/dokku-alt .
+
+docker_run: docker_build
+	docker run --privileged --rm -i -t \
+		-v /home/dokku -v /var/lib/docker \
+		--hostname="dokku.me" \
+		ayufan/dokku-alt \
+		/bin/bash
+
+docker_tests: docker_build
 	docker run --privileged --rm -t \
 		-v /home/dokku -v /var/lib/docker \
 		--hostname="dokku.me" \

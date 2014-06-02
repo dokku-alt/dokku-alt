@@ -19,17 +19,16 @@ cat ~/.ssh/id_rsa.pub | sshcommand acl-add dokku testkey
 dokku plugins-install
 ssh dokku@localhost version
 
-echo "=====> Running test deploy with VHOST"
-echo "dokku.me" > /home/dokku/VHOST
-for app_path in apps2/*; do
+echo "=====> Running test deploy without VHOST"
+for app_path in apps/*; do
   app=$(basename $app_path)
   echo "-----> Running test deploy of $app..."
   ./test_deploy $app_path localhost
 done
 
-echo "=====> Running test deploy without VHOST"
-rm /home/dokku/VHOST
-for app_path in apps2/*; do
+echo "=====> Running test deploy with VHOST"
+echo "dokku.me" > /home/dokku/VHOST
+for app_path in apps/*; do
   app=$(basename $app_path)
   echo "-----> Running test deploy of $app..."
   ./test_deploy $app_path localhost
