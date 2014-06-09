@@ -48,8 +48,17 @@ server {
 
   location    / {
     proxy_pass  http://$APP;
-    proxy_redirect http://$hostname:$INT_PORT/ https://$hostname/;
-    proxy_redirect https://$hostname:$INT_PORT/ https://$hostname/;
+EOF
+
+    for host in "${hostnames[@]}";
+    do
+      cat <<EOF >> $DOKKU_ROOT/$APP/nginx.conf
+    proxy_redirect http://$host:$INT_PORT/ https://$host/;
+    proxy_redirect https://$host:$INT_PORT/ https://$host/;
+EOF
+    done
+
+cat<<EOF >> $DOKKU_ROOT/$APP/nginx.conf
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection "upgrade";
@@ -73,7 +82,16 @@ server {
   server_name ${hostnames[@]};
   location    / {
     proxy_pass  http://$APP;
-    proxy_redirect http://$hostname:$INT_PORT/ http://$hostname/;
+EOF
+
+    for host in "${hostnames[@]}";
+    do
+      cat <<EOF >> $DOKKU_ROOT/$APP/nginx.conf
+    proxy_redirect http://$host:$INT_PORT/ http://$host/;
+EOF
+    done
+
+cat<<EOF >> $DOKKU_ROOT/$APP/nginx.conf
     proxy_http_version 1.1;
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection "upgrade";
