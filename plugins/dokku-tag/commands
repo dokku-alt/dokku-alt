@@ -1,0 +1,41 @@
+#!/bin/bash
+
+source "$(dirname $0)/../dokku_common"
+
+case "$1" in
+  tag:add)
+    verify_app_name "$2"
+    verify_max_args 3 "$@"
+    TAG="$3"
+    tag_image "$IMAGE_GENERIC:latest" "$IMAGE_GENERIC:$TAG"
+    info2 "Tagged latest image of $IMAGE_GENERIC as $TAG"
+    ;;
+
+  tag:rm)
+    verify_app_name "$2"
+    verify_max_args 3 "$@"
+    TAG="$3"
+    case "$TAG" in
+        build|latest|release)
+            fail "You can't remove internal dokku tag ($TAG) for $IMAGE_GENERIC"
+            ;;
+
+        *)
+            docker rmi "$IMAGE_GENERIC:$TAG"
+            ;;
+    esac
+    ;;
+
+  tag:list)
+    verify_app_name "$2"
+    docker images "$IMAGE_GENERIC"
+    ;;
+
+  help)
+    cat && cat<<EOF
+    tag:add <app> <tag>         Tag latest running image using specified name
+    tag:rm <app> <tag>         Tag latest running image using specified name
+    tag:list <app>              List all image tags
+EOF
+    ;;
+esac

@@ -41,27 +41,26 @@ case "$1" in
 
   deploy)
     verify_app_name "$2"
-    verify_max_args "2" "$@"
+    verify_max_args "3" "$@"
 
+    # prepare for deployment
     info "Deploying $APP ..."
-    tag_image "$IMAGE_GENERIC:release" "$IMAGE_GENERIC:latest"
     pluginhook pre-deploy "$APP"
+
+    if [[ ! -f "$DOKKU_ROOT/$APP/DISABLED" ]]; then
+      TAG="${3:-release}"
+      DOCKER_ARGS="$(: | pluginhook docker-args "$APP" web)"
 
     # kill the app when running
     stop_and_remove_container $APP_ALL_NAMES
 
     # start the app
-    DOCKER_ARGS="$(: | pluginhook docker-args "$APP" web)"
-
-    if [[ ! -f "$DOKKU_ROOT/$APP/DISABLED" ]]; then
       if is_image_buildstep_based "$IMAGE"; then
         # buildstep
         INT_PORT="$APP_PORT"
         id=$(docker run -d -p "$INT_PORT" -e PORT="$INT_PORT" --name="$APP_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /start web)
         addr=$(docker port $id "$INT_PORT")
-        EXT_PORT=${addr#*:}
-        echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$port" > "$DOKKU_ROOT/$APP/URL"
-        pluginhook post-deploy "$APP" "$port" "$INT_PORT"
+        EXT_PORT="${addr#*:}"
       else
         # Dockerfile
         EXT_PORT=""
@@ -70,12 +69,13 @@ case "$1" in
         for test_port in 80 8080 "$APP_PORT"; do
           if addr=$(docker port $id "$test_port" 2>/dev/null); then
             INT_PORT="$test_port"
-            EXT_PORT=${addr#*:}
+            EXT_PORT="${addr#*:}"
           fi
         done
       fi
 
       if [[ "$EXT_PORT" == "" ]] || [[ "$INT_PORT" == "" ]]; then
+        echo -n > "$DOKKU_ROOT/$APP/URL"
         verbose "No external HTTP port published"
         pluginhook post-deploy "$APP" ""
         info2 "Application deployed"
@@ -85,9 +85,16 @@ case "$1" in
         info2 "Application deployed:"
         verbose "$(dokku url $APP)"
       fi
+
+      if [[ "$TAG" != "latest" ]]; then
+        tag_image "$IMAGE_GENERIC:$TAG" "$IMAGE_GENERIC:latest"
+      fi
     else
+      stop_and_remove_container $APP_ALL_NAMES
       verbose "Application disabled - will not be run"
       pluginhook post-deploy "$APP" ""
+      # TODO: should we tag release as latest when application is disabled and we can't test?
+      # tag_image "$IMAGE_GENERIC:release" "$IMAGE_GENERIC:latest"
     fi
     ;;
 
@@ -116,7 +123,7 @@ case "$1" in
   deploy:all)
     for app in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
       if [[ -f "$app/refs/heads/master" ]]; then
-        dokku deploy "$(basename $app)"
+        dokku deploy "$(basename $app)" "latest"
       fi
     done
     ;;
