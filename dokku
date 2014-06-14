@@ -50,22 +50,26 @@ case "$1" in
     if [[ ! -f "$DOKKU_ROOT/$APP/DISABLED" ]]; then
       TAG="${3:-release}"
       DOCKER_ARGS="$(: | pluginhook docker-args "$APP" web)"
+      ZERO_DOWNTIME="$(config_get DOKKU_ZERO_DOWNTIME || true)"
+      WAIT_TO_RETIRE="$(config_get DOKKU_WAIT_TO_RETIRE || true)"
+      [[ "$WAIT_TO_RETIRE" != "" ]] && ZERO_DOWNTIME=1
 
-    # kill the app when running
-    stop_and_remove_container $APP_ALL_NAMES
+      if [[ "$ZERO_DOWNTIME" == "" ]]; then
+        stop_and_remove_app_containers
+      fi
 
-    # start the app
+      # start the app
       if is_image_buildstep_based "$IMAGE"; then
         # buildstep
         INT_PORT="$APP_PORT"
-        id=$(docker run -d -p "$INT_PORT" -e PORT="$INT_PORT" --name="$APP_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest" /start web)
+        id=$(docker run --cidfile="$(get_cid_file_name app)" -d -p "$INT_PORT" -e PORT="$INT_PORT" --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG" /start web)
         addr=$(docker port $id "$INT_PORT")
         EXT_PORT="${addr#*:}"
       else
         # Dockerfile
         EXT_PORT=""
         INT_PORT=""
-        id=$(docker run -d -P --env-file=<(: | pluginhook env-vars "$APP") --name="$APP_NAME" $DOCKER_ARGS "$IMAGE_GENERIC:latest")
+        id=$(docker run --cidfile="$(get_cid_file_name app)" -d -P --env-file=<(: | pluginhook env-vars "$APP") --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG")
         for test_port in 80 8080 "$APP_PORT"; do
           if addr=$(docker port $id "$test_port" 2>/dev/null); then
             INT_PORT="$test_port"
@@ -81,16 +85,36 @@ case "$1" in
         info2 "Application deployed"
       else
         echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$EXT_PORT" > "$DOKKU_ROOT/$APP/URL"
+
+        if [[ "$ZERO_DOWNTIME" != "" ]]; then
+          info "Running pre-flight checks"
+          if ! pluginhook check-deploy "$id" "$APP" "$EXT_PORT"
+          then
+            stop_and_remove_container "$id"
+            fail "Application failed to deploy!"
+          fi
+        fi
+
         pluginhook post-deploy "$APP" "$EXT_PORT" "$INT_PORT"
         info2 "Application deployed:"
         verbose "$(dokku url $APP)"
       fi
 
+      # save container ID
+      echo "$id" > "$APP_NAME_FILE"
+
       if [[ "$TAG" != "latest" ]]; then
         tag_image "$IMAGE_GENERIC:$TAG" "$IMAGE_GENERIC:latest"
       fi
+
+      if [[ "$ZERO_DOWNTIME" != "" ]]; then
+        WAIT_TO_RETIRE="${WAIT_TO_RETIRE:-5}"
+        info "Waiting $WAIT_TO_RETIRE seconds"
+        sleep "$WAIT_TO_RETIRE"
+        stop_and_remove_app_containers "" "$id"
+      fi
     else
-      stop_and_remove_container $APP_ALL_NAMES
+      stop_and_remove_app_containers
       verbose "Application disabled - will not be run"
       pluginhook post-deploy "$APP" ""
       # TODO: should we tag release as latest when application is disabled and we can't test?
@@ -123,9 +147,10 @@ case "$1" in
   deploy:all)
     for app in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
       if [[ -f "$app/refs/heads/master" ]]; then
-        dokku deploy "$(basename $app)" "latest"
+        dokku deploy "$(basename $app)" "latest" || true
       fi
     done
+    wait
     ;;
 
   help)

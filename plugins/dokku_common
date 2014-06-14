@@ -28,11 +28,11 @@ function generate_random_password() {
 }
 
 function stop_container() {
-    docker stop "$@" 1>/dev/null 2>/dev/null || true
+	docker stop "$@" 1>/dev/null 2>/dev/null || true
 }
 
 function remove_container() {
-    docker rm "$@" 1>/dev/null 2>/dev/null || true
+	docker rm "$@" 1>/dev/null 2>/dev/null || true
 }
 
 function stop_and_remove_container() {
@@ -52,7 +52,7 @@ function verify_max_args() {
 function sanitize_name() {
 	local NAME="$1"
 	[[ "$NAME" == "" ]] && fail "You must specify an $2"
-    local NAME2="${NAME//[^a-zA-Z0-9_-]//}"
+	local NAME2="${NAME//[^a-zA-Z0-9_-]//}"
 	[[ "$NAME" != "$NAME2" ]] && fail "Invalid $2"
 	return 0
 }
@@ -60,21 +60,66 @@ function sanitize_name() {
 function check_app_name() {
 	sanitize_name "$1" "app name"
 	APP="$1"
-    IMAGE_GENERIC="dokku/$APP"
-    local CMD_TYPE="$(basename $0)"
-    case "$CMD_TYPE" in
+	IMAGE_GENERIC="dokku/$APP"
+	local CMD_TYPE="$(basename $0)"
+	case "$CMD_TYPE" in
 		"pre-build"|"post-build")		IMAGE="$IMAGE_GENERIC:build" ;;
 		"pre-release"|"post-release")	IMAGE="$IMAGE_GENERIC:release" ;;
 		*)								IMAGE="$IMAGE_GENERIC:latest" ;;
-    esac
-    APP_NAME="dokku_$APP"
-    APP_DIR="$DOKKU_ROOT/$APP"
-    APP_WORKER_NAME="dokku_worker_$APP"
-    APP_RUN_NAME="run_$APP"
-    APP_CRON_NAME="cron_$APP"
-    APP_CACHE_NAME="cache_data_$APP"
-    APP_ALL_NAMES="$APP_NAME $APP_WORKER_NAME $APP_RUN_NAME $APP_CRON_NAME $APP_CACHE_NAME"
-    return 0
+	esac
+	APP_DIR="$DOKKU_ROOT/$APP"
+	APP_NAME_FILE="$APP_DIR/CONTAINER"
+	APP_NAME=""
+	[[ -f "$APP_NAME_FILE" ]] && APP_NAME="$(< "$APP_NAME_FILE")"
+	APP_CID_DIR="$APP_DIR/CONTAINERS"
+	APP_CACHE_NAME="cache_data_$APP"
+	APP_PERSISTENT_NAMES="$APP_CACHE_NAME"
+	return 0
+}
+
+function get_app_container_name() {
+	echo "${1}_${APP}_$(date +%s)_$RANDOM"
+}
+
+function get_cid_file_name() {
+	[[ "$APP_CID_DIR" == "" ]] && fail "$APP: app not specified"
+	mkdir -p "$APP_CID_DIR"
+	echo "$APP_CID_DIR/${1}_$(date +%s)_$RANDOM.cid"
+}
+
+function config_get() {
+	[[ "$APP" == "" ]] && fail "$APP: app not specified"
+	[[ "$1" == "" ]] && fail "$APP: config key not specified"
+	: | pluginhook env-vars "$APP" | grep "^$1=" | cut -d"=" -f2-
+}
+
+function stop_and_remove_app_containers() {
+	[[ "$APP_CID_DIR" == "" ]] && fail "$APP: app not specified"
+
+	if [[ "$1" != "" ]]; then
+		info "Shutting down old containers ($1)"
+		stop_and_remove_container "$1_$APP" &
+		FILTER="$1_*.cid"
+	else
+		info "Shutting down old containers"
+		stop_and_remove_container "dokku_$APP" &
+		stop_and_remove_container "run_$APP" &
+		FILTER="*.cid"
+	fi
+
+	if [[ -d "$APP_CID_DIR" ]]; then
+		for CID_FILE in $APP_CID_DIR/$FILTER; do
+			(
+				CID="$(< "$CID_FILE")"
+				if [[ "$CID" != "$2" ]]; then
+					stop_and_remove_container "$(< "$CID_FILE")";
+					rm -f "$CID_FILE"
+				fi
+			) &
+		done
+	fi
+
+	wait
 }
 
 function verify_app_name() {

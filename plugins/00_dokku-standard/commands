@@ -13,7 +13,8 @@ case "$1" in
 
     pluginhook pre-delete $APP
 
-    stop_and_remove_container $APP_ALL_NAMES
+    stop_and_remove_app_containers
+    stop_and_remove_container $APP_PERSISTENT_NAMES
     remove_image "$IMAGE"
 
     pluginhook post-delete $APP
@@ -29,16 +30,6 @@ case "$1" in
     fi
     ;;
 
-  logs:worker)
-    verify_app_name "$2"
-
-    if [[ $3 == "-t" ]]; then
-      docker logs --follow "$APP_WORKER_NAME"
-    else
-      docker logs "$APP_WORKER_NAME" | tail -n 100
-    fi
-    ;;
-
   run)
     verify_app_name "$2"
 
@@ -48,16 +39,16 @@ case "$1" in
     fi
     shift 2
 
-    docker rm -f "$APP_RUN_NAME" 1>/dev/null 2>/dev/null || true
+    stop_and_remove_app_containers "run" >/dev/null
 
     DOCKER_ARGS=$(: | pluginhook docker-args $APP run)
 
     if is_image_buildstep_based "$IMAGE"; then
       # buildstep
-      docker run --rm --name="$APP_RUN_NAME" -i -t $DOCKER_ARGS "$IMAGE" /exec "$@"
+      docker run --cidfile="$(get_cid_file_name run)" --rm --name="$(get_app_container_name run)" -i -t $DOCKER_ARGS "$IMAGE" /exec "$@"
     else
       # Dockerfile
-      docker run --rm --name="$APP_RUN_NAME" --env-file=<(: | pluginhook env-vars "$APP") --entrypoint="/bin/bash" -i -t $DOCKER_ARGS "$IMAGE" -c "$@"
+      docker run --cidfile="$(get_cid_file_name run)" --rm --name="$(get_app_container_name run)" --env-file=<(: | pluginhook env-vars "$APP") --entrypoint="/bin/bash" -i -t $DOCKER_ARGS "$IMAGE" -c "$@"
     fi
     ;;
 

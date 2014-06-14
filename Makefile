@@ -39,7 +39,7 @@ install: dpkg
 	apt-get -f -y install
 
 devinstall:
-	[ -e /usr/local/bin/dokku ] || # Please install dokku-alt first
+	[ -e /usr/local/bin/dokku ] || echo Please install dokku-alt first
 	ln -sf "$(PWD)/dokku" /usr/local/bin/dokku
 	ln -sf "$(PWD)/sshcommand/sshcommand" /usr/local/bin/sshcommand
 	ln -sf "$(PWD)/gitreceive/gitreceive" /usr/local/bin/gitreceive
