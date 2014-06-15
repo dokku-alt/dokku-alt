@@ -3,16 +3,23 @@ DOKKU_ROOT ?= /home/dokku
 PLUGINHOOK_URL ?= https://s3.amazonaws.com/progrium-pluginhook/pluginhook_0.1.0_amd64.deb
 SIGN_KEY ?= EAD883AF
 
-DEB_PKG := dokku-alt-$(shell git describe --tags)-amd64.deb
+DEB_VERSION := $(shell git describe --tags)
+DEB_ARCH := amd64
+DEB_NAME ?= dokku-alt
+DEB_PKG := $(DEB_NAME)-$(DEB_VERSION)-$(DEB_ARCH).deb
 
-.PHONY: all dpkg install devinstall pull push sync
+.PHONY: all help dpkg install devinstall pull push sync
 
 FORCE:
 
-all:
+all: help
+
+help:
 	# Type "make dpkg" to create deb package.
 	# Type "make install" to install.
 	# Type "make devinstall" to switch to development version.
+	# Type "make dpkg_stable" to build and commit stable version.
+	# Type "make dpkg_beta" to build and commit beta version.
 
 dpkg:
 	rm -f dokku-alt-*.deb
@@ -30,7 +37,18 @@ dpkg:
 	cp dokku.1 deb-tmp/dokku-alt/usr/local/share/man/man1/dokku.1
 	cp contrib/dokku-installer.rb deb-tmp/dokku-alt/usr/local/share/dokku-alt/contrib
 	git describe --tags > deb-tmp/dokku-alt/var/lib/dokku-alt/VERSION
+	git rev-parse HEAD > deb-tmp/dokku-alt/var/lib/dokku-alt/GIT_REV
 	sed -i "s/^Version: .*/Version: $(shell git describe --tags)/g" deb-tmp/dokku-alt/DEBIAN/control
+	sed -i "s/^Package: .*/Package: $(DEB_NAME)/g" deb-tmp/dokku-alt/DEBIAN/control
+ifeq ($(DEB_NAME), dokku-alt)
+	echo "Conflicts: pluginhook, dokku-alt-beta" >> deb-tmp/dokku-alt/DEBIAN/control
+else
+ifeq ($(DEB_NAME), dokku-alt-beta)
+	echo "Conflicts: pluginhook, dokku-alt" >> deb-tmp/dokku-alt/DEBIAN/control
+else
+	echo "Conflicts: pluginhook, dokku-alt, dokku-alt-beta" >> deb-tmp/dokku-alt/DEBIAN/control
+endif
+endif
 	dpkg-deb --build deb-tmp/dokku-alt $(DEB_PKG)
 	rm -rf deb-tmp/
 
@@ -49,6 +67,7 @@ dpkg_commit: dpkg
 	# sign current release
 	dpkg-sig -k $(SIGN_KEY) --sign builder $(DEB_PKG)
 	git checkout gh-pages
+	rm -f InRelease Release.gpg
 	# binary
 	apt-ftparchive packages . > Packages
 	apt-ftparchive release . > Release
@@ -59,6 +78,12 @@ dpkg_commit: dpkg
 	# commit current release
 	git commit -m "New release"
 	git checkout master
+
+dpkg_stable:
+	make dpkg_commit DEB_NAME=dokku-alt
+
+dpkg_beta:
+	make dpkg_commit DEB_NAME=dokku-alt-beta
 
 docker_build: FORCE
 	docker build -t ayufan/dokku-alt .
