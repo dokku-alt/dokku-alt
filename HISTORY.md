@@ -1,30 +1,23 @@
-# History
+# History of Dokku-alt
 
-## 0.3.0 (in progress)
+## 0.3.3
 
-* Added git submodules support
+* Added image tagging: `dokku tags:add <app> <tag_name>; dokku deploy <app> <tag_name>`
+* Added zero-downtime deployment: `dokku config:set <app> DOKKU_ZERO_DOWNTIME=1 DOKKU_WAIT_TO_RETIRE=seconds`
+* Added stable and beta releases
 
-## 0.2.0 (2013-11-24)
+## 0.3.2
 
-* Added DOKKU_TRACE variable for verbose trace information
-* Added an installer (for pre-built images)
-* Application config (environment variable management)
-* Backup/import plugin
-* Basic hooks/plugin system
-* Cache dir is preserved across builds
-* Command to delete an application
-* Exposed commands over SSH using sshcommand
-* Git handling is moved to a plugin
-* Integration test coverage
-* Pulled nginx vhosts out into plugin
-* Run command
-* Separated dokku and buildstep more cleanly
-* Uses latest version of Docker again
+* Added nginx `proxy_redirect` for all hostnames
 
-## 0.1.0 (2013-06-15)
+## 0.3.1
 
- * First release
-   * Bootstrap script for Ubuntu system
-   * Basic push / deploy with git
-   * Hostname support with Nginx
-   * Support for Java, Ruby, Node.js buildpacks
+* Added signed .deb
+* Fixed nginx `proxy_redirect`
+* Pull database images on use, not on install
+* Wait for databases to boot
+* Added Dockerfile to build dokku-alt based image (and run tests)
+
+## 0.3.0
+
+* Initial release of dokku-alt - rework of Dokku 0.3.0
