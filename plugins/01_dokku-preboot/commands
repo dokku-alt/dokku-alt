@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+source "$(dirname $0)/vars"
+
+case "$1" in
+  preboot:status)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    if [[ -f "$APP_DIR/$PREBOOT_STATUS" ]]; then
+      echo "$APP: preboot is enabled"
+    else
+      echo "$APP: preboot is disabled"
+    fi
+    ;;
+
+  preboot:enable)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    touch "$APP_DIR/$PREBOOT_STATUS"
+    info "Preboot enabled for $APP"
+    ;;
+
+  preboot:disable)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    rm -f "$APP_DIR/$PREBOOT_STATUS"
+    info "Preboot disabled for $APP"
+    ;;
+
+  preboot:wait:time)
+    verify_app_name "$2"
+    verify_max_args 3 "$@"
+    dokku config:set "$APP" PREBOOT_WAIT_TIME="$3"
+    ;;
+
+  preboot:cooldown:time)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    dokku config:set "$APP" PREBOOT_COOLDOWN_TIME="$3"
+    ;;
+
+  help)
+    cat && cat<<EOF
+    preboot:status <app>                Status of specific app
+    preboot:enable <app>                Stop specific app
+    preboot:disable <app>               Stop specific app
+    preboot:wait:time <app> <secs>      Restart specific app (not-redeploy)
+    preboot:cooldown:time <app> <secs>  Re-enable specific app
+EOF
+    ;;
+esac

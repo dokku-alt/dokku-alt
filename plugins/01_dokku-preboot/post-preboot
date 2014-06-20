@@ -1,0 +1,15 @@
+#!/bin/bash
+
+source "$(dirname $0)/vars"
+
+verify_app_name "$1"
+
+cat
+
+PREBOOT_COOLDOWN_TIME="$(config_get PREBOOT_COOLDOWN_TIME || true)"
+PREBOOT_COOLDOWN_TIME="${PREBOOT_COOLDOWN_TIME:-30}"
+
+if [[ "$PREBOOT_COOLDOWN_TIME" != "" ]]; then
+    info "Waiting $PREBOOT_COOLDOWN_TIME seconds for cooldown..."
+    sleep "$PREBOOT_COOLDOWN_TIME"
+fi

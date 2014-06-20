@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source "$(dirname $0)/../dokku_common"
+
+PREBOOT_STATUS="PREBOOT"

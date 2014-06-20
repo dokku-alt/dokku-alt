@@ -52,11 +52,11 @@ case "$1" in
 
     if [[ ! -f "$DOKKU_ROOT/$APP/DISABLED" ]]; then
       DOCKER_ARGS="$(: | pluginhook docker-args "$APP" web)"
-      ZERO_DOWNTIME="$(config_get DOKKU_ZERO_DOWNTIME || true)"
-      WAIT_TO_RETIRE="$(config_get DOKKU_WAIT_TO_RETIRE || true)"
-      [[ "$WAIT_TO_RETIRE" != "" ]] && ZERO_DOWNTIME=1
 
-      if [[ "$ZERO_DOWNTIME" == "" ]]; then
+      # verify preboot
+      PREBOOT="$(pluginhook use-preboot "$APP" "$IMAGE")"
+
+      if [[ "$PREBOOT" == "" ]]; then
         stop_and_remove_app_containers
       fi
 
@@ -86,17 +86,16 @@ case "$1" in
         pluginhook post-deploy "$APP" ""
         info2 "Application deployed"
       else
-        echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$EXT_PORT" > "$DOKKU_ROOT/$APP/URL"
-
-        if [[ "$ZERO_DOWNTIME" != "" ]]; then
-          info "Running pre-flight checks"
-          if ! pluginhook check-deploy "$id" "$APP" "$EXT_PORT"
+        if [[ "$PREBOOT" != "" ]]; then
+          verbose "Running pre-flight checks..."
+          if ! pluginhook check-preboot "$APP" "$id" "$EXT_PORT"
           then
             stop_and_remove_container "$id"
             fail "Application failed to deploy!"
           fi
         fi
 
+        echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$EXT_PORT" > "$DOKKU_ROOT/$APP/URL"
         pluginhook post-deploy "$APP" "$EXT_PORT" "$INT_PORT"
         info2 "Application deployed:"
         verbose "$(dokku url $APP)"
@@ -109,18 +108,15 @@ case "$1" in
         tag_image "$IMAGE_GENERIC:$TAG" "$IMAGE_GENERIC:latest"
       fi
 
-      if [[ "$ZERO_DOWNTIME" != "" ]]; then
-        WAIT_TO_RETIRE="${WAIT_TO_RETIRE:-5}"
-        info "Waiting $WAIT_TO_RETIRE seconds"
-        sleep "$WAIT_TO_RETIRE"
+      if [[ "$PREBOOT" != "" ]]; then
+        pluginhook post-preboot "$APP" "$id" || true
         stop_and_remove_app_containers "" "$id"
       fi
     else
       stop_and_remove_app_containers
       verbose "Application disabled - will not be run"
       pluginhook post-deploy "$APP" ""
-      # TODO: should we tag release as latest when application is disabled and we can't test?
-      # tag_image "$IMAGE_GENERIC:release" "$IMAGE_GENERIC:latest"
+      tag_image "$IMAGE_GENERIC:release" "$IMAGE_GENERIC:latest"
     fi
     ;;
 

@@ -1,0 +1,41 @@
+#!/bin/bash
+
+source "$(dirname $0)/../dokku_common"
+source "$(dirname $0)/../nginx-vhosts/vars"
+
+verify_app_name "$1"
+hostnames_for_app "$1"
+
+cat
+
+if config_get DOKKU_CHECKS_WAIT >/dev/null || 
+    config_get DOKKU_CHECKS_TIMEOUT >/dev/null || 
+    config_get DOKKU_CHECKS_RETRY >/dev/null
+then
+    CONTAINERID="$2"
+    PORT="$3"
+    HOSTNAME="${4:-localhost}"
+
+    # Wait this many seconds (default 5) for server before retries.
+    DOKKU_CHECKS_WAIT="$(config_get DOKKU_CHECKS_WAIT || true)"
+    WAIT="${DOKKU_CHECKS_WAIT:-10}"
+
+    # Wait this many seconds (default 30) for each response.
+    DOKKU_CHECKS_TIMEOUT="$(config_get DOKKU_CHECKS_TIMEOUT || true)"
+    TIMEOUT="${DOKKU_CHECKS_TIMEOUT:-20}"
+
+    # Retry this many times (default 3) for each response.
+    DOKKU_CHECKS_RETRY="$(config_get DOKKU_CHECKS_RETRY || true)"
+    RETRY="${DOKKU_CHECKS_RETRY:-3}"
+
+    # TODO: add support for CHECKS file
+    verbose "Testing $hostname using http://$HOSTNAME:$PORT/"
+    if curl -o /dev/null -q --compressed --fail -H "Host: $hostname" --retry "$RETRY" --retry-delay "$WAIT" --location --max-time "$TIMEOUT" "http://$HOSTNAME:$PORT/"; then
+        info "Server responded in timely manner"
+    else
+        info "Server didn't respond in timely manner"
+        exit 1
+    fi
+fi
+
+exit 0
