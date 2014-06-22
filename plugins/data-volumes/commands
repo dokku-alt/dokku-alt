@@ -1,0 +1,115 @@
+#!/bin/bash
+
+source "$(dirname $0)/vars"
+
+case "$1" in
+  volume:create)
+    volume_info "$2"
+    shift 2
+
+    DOCKER_ARGS=()
+
+    # Verify paths
+    for path in "$@"; do
+        ipath="${path//:/}"
+        [[ "$path" != "$ipath" ]] && fail "$path: Path is forbidden"
+        DOCKER_ARGS+=("-v" "$path")
+    done
+
+    # Create data container
+    docker run --name "$VOLUME_CONTAINER" "${DOCKER_ARGS[@]}" "$VOLUME_IMAGE" /bin/sh -c "exit 0"
+
+    # Create data links
+    mkdir -p "$VOLUME_CONFIG_DIR"
+
+    # Mark as created
+    for path in "$@"; do
+        echo "$path"
+    done > "$VOLUME_PATHS"
+
+    info "Volume created: $VOLUME_CONTAINER"
+    ;;
+
+  volume:delete|volume:destroy)
+    volume_info "$2"
+    verify_max_args 2 "$@"
+
+    # Remove data container and config dir
+    docker rm -f "$VOLUME_CONTAINER" >/dev/null
+    rm -rf "$VOLUME_CONFIG_DIR"
+    
+    info "Volume deleted: $VOLUME_NAME"
+    ;;
+
+  volume:list)
+    verify_max_args 1 "$@"
+
+    # List volumes
+    mkdir -p "$VOLUME_ROOT"
+    ls -1 "$VOLUME_ROOT"
+    ;;
+
+  volume:list:apps)
+    volume_info "$2"
+    verify_max_args 2 "$@"
+
+    # List apps linked to volume
+    if [[ -d "$VOLUME_CONFIG_DIR" ]]; then
+        ls -1 "$VOLUME_CONFIG_DIR"
+    else
+        fail "$VOLUME_NAME: volume doesn't exist"
+    fi
+    ;;
+
+  volume:info)
+    volume_info "$2"
+    verify_max_args 2 "$@"
+
+    if [[ -f "$VOLUME_PATHS" ]]; then
+        cat "$VOLUME_PATHS"
+    else
+        fail "$VOLUME_NAME: volume doesn't exist"
+    fi
+    ;;
+
+  volume:link)
+    verify_max_args 3 "$@"
+
+    if app_volume_info "$2" "$3"; then
+        info "Volume $VOLUME_NAME is already linked to an aplication: $APP"
+    elif [[ -d "$VOLUME_CONFIG_DIR" ]]; then
+        touch "$VOLUME_APP_LINK"
+        info "Volume $VOLUME_NAME linked to an aplication: $APP"
+        redeploy_app "$APP"
+    else
+        fail "$VOLUME_NAME: volume doesn't exist"
+    fi
+    ;;
+
+  volume:unlink)
+    verify_max_args 3 "$@"
+
+    if app_volume_info "$2" "$3"; then
+        rm -f "$VOLUME_APP_LINK"
+        redeploy_app "$APP"
+        info "Volume $VOLUME_NAME linked from an aplication: $APP"
+    elif [[ -d "$VOLUME_CONFIG_DIR" ]]; then
+        info "Volume $VOLUME_NAME is not linked to an aplication: $APP"
+    else
+        fail "$VOLUME_NAME: volume doesn't exist"
+    fi
+    ;;
+
+  help)
+    cat && cat<<EOF
+    volume:create <name> <paths...>    Create a data volume for specified paths
+    volume:delete <name>               Delete a data volume
+    volume:list                        List volumes
+    volume:list:apps <name>            Display apps linked to volume
+    volume:info <name>                 Display volume information
+    volume:link <app> <name>           Link volume to app
+    volume:unlink <app> <name>         Unlink volume from app
+EOF
+    ;;
+
+esac

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+source "$(dirname $0)/../dokku_common"
+
+VOLUME_ROOT="$DOKKU_ROOT/.volumes"
+VOLUME_IMAGE="busybox:latest"
+VOLUME_CONTAINER_PREFIX="volume_data_"
+
+function volume_info() {
+    sanitize_name "$1" "volume name"
+    VOLUME_NAME="$1"
+    VOLUME_CONFIG_DIR="$VOLUME_ROOT/$VOLUME_NAME"
+    VOLUME_PATHS="$VOLUME_CONFIG_DIR/.paths"
+    VOLUME_CONTAINER="$VOLUME_CONTAINER_PREFIX$VOLUME_NAME"
+}
+
+function app_volume_info() {
+    verify_app_name "$1"
+    volume_info "$2"
+    VOLUME_APP_LINK="$VOLUME_CONFIG_DIR/$APP"
+    [[ ! -f "$VOLUME_APP_LINK" ]] && return 1
+    return 0
+}

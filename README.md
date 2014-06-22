@@ -22,7 +22,6 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. I
 * Full, partial and incremental backup
 * Access-control: deploy only keys, non-admin users
 * Application migration
-* Data volumes
 
 ## Requirements
 
@@ -173,7 +172,7 @@ Verify application env variables:
 
 To use different database engine simple replace `mariadb` with `postgresql` or `mongodb`.
 
-## Preboot / zero-downtime boot
+## Preboot / zero-downtime boot (BETA)
 
 Similar to functionality provided by https://devcenter.heroku.com/articles/labs-preboot `dokku-alt` supports zero-downtime. To enable zero-downtime deployment execute command: `dokku preboot:enable APP`. Alongside with preboot there's `checks` plugin based on https://labnotes.org/zero-downtime-deploy-with-dokku/. For now it simply checks if application started serving requests. If checks module fails it will not replace the application.
 
@@ -184,6 +183,27 @@ Preboot and checks can be configured using a few env variables:
 * DOKKU_CHECKS_WAIT - number of seconds to wait before request retries (default 10s)
 * DOKKU_CHECKS_TIMEOUT - number of seconds to wait for each response (default 20s)
 * DOKKU_CHECKS_RETRY - number of retries (default 3)
+
+## Data volumes (BETA)
+
+Docker allows you to have persistent data storage. Dokku-alt exposes this feature as Data Volumes. You can create unlimited number of data volumes, any data volume can be attached to unlimited number of apps. Simply create data volume and specify container paths which you want to be persistant.
+
+First data volume:
+
+    $ dokku volume:create shared-test-volume /app/logs /app/tmp /app/uploads
+    -----> Volume created: volume_data_shared-test-volume
+
+Second link volume to an app:
+
+    $ dokku volume:link node-js-sample shared-test-volume
+    -----> Volume shared-test-volume linked to an aplication: node-js-sample
+    -----> Releasing node-js-sample ...
+    -----> Deploying node-js-sample ...
+    -----> Shutting down old containers
+    =====> Application deployed:
+        http://node-js-sample.ayufan.eu
+
+It is just simple as this.
 
 ## TLS support
 
