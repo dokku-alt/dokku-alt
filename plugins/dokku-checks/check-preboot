@@ -30,7 +30,7 @@ then
 
     # TODO: add support for CHECKS file
     verbose "Testing $hostname using http://$HOSTNAME:$PORT/"
-    if curl -o /dev/null -q --compressed --fail -H "Host: $hostname" --retry "$RETRY" --retry-delay "$WAIT" --location --max-time "$TIMEOUT" "http://$HOSTNAME:$PORT/"; then
+    if curl -s -o /dev/null -q --compressed --fail -H "Host: $hostname" --retry "$RETRY" --retry-delay "$WAIT" --location --max-time "$TIMEOUT" "http://$HOSTNAME:$PORT/"; then
         info "Server responded in timely manner"
     else
         info "Server didn't respond in timely manner"
