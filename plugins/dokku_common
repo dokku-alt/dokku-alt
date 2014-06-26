@@ -1,7 +1,7 @@
 #!/bin/bash
 
 APP_PORT="${APP_PORT:=5000}"
-BUILDSTEP_IMAGE="${BUILDSTEP_IMAGE:=ayufan/progrium-buildstep}"
+BUILDSTEP_IMAGE="${BUILDSTEP_IMAGE:=ayufan/dokku-alt-buildstep:foreman}"
 
 set -eo pipefail
 [[ $DOKKU_TRACE ]] && set -x

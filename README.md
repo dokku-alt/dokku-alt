@@ -15,7 +15,9 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen.
 * Built-in support for TLS and wildcard certificates
 * Built-in support for Docker-args and container persistent volumes
 * Built-in support for container's TOP
-* Built-in support for supervisor-based Procfile
+* Built-in support for foreman-based Procfile
+* Preboot / zero-downtime deploy (in beta)
+* Data volumes (in beta)
 
 ### Planned features:
 
