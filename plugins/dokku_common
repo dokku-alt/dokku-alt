@@ -113,15 +113,17 @@ function stop_and_remove_app_containers() {
 		FILTER="*.cid"
 	fi
 
-	while read CID_FILE; do
-		(
-			CID="$(< "$CID_FILE")"
-			if [[ "$CID" != "$2" ]]; then
-				stop_and_remove_container "$(< "$CID_FILE")";
-				rm -f "$CID_FILE"
-			fi
-		) &
-	done < <(find "$APP_CID_DIR" -name "$FILTER")
+	if [[ -d "$APP_CID_DIR" ]]; then
+		while read CID_FILE; do
+			(
+				CID="$(< "$CID_FILE")"
+				if [[ "$CID" != "$2" ]]; then
+					stop_and_remove_container "$(< "$CID_FILE")";
+					rm -f "$CID_FILE"
+				fi
+			) &
+		done < <(find "$APP_CID_DIR" -name "$FILTER")
+	fi
 
 	wait
 }
