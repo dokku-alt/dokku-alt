@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source "$(dirname $0)/vars"
+
+mkdir -p "$VOLUME_ROOT"
