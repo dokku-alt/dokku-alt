@@ -3,7 +3,7 @@ DOKKU_ROOT ?= /home/dokku
 PLUGINHOOK_URL ?= https://s3.amazonaws.com/progrium-pluginhook/pluginhook_0.1.0_amd64.deb
 SIGN_KEY ?= EAD883AF
 
-DEB_BRANCH := $(git rev-parse --abbrev-ref HEAD)
+DEB_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 DEB_VERSION := $(shell git describe --tags)
 DEB_ARCH := amd64
 DEB_NAME ?= dokku-alt
