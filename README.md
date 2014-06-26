@@ -33,7 +33,7 @@ Assumes that you use Ubuntu 14.04 LTS right now. Ideally have a domain ready to 
 
 ## Configuring
 
-If you use bootstrap script from above at the end it will fireup ruby installation script. Point your browser to http://<ip>:2000/ and finish configuration.
+If you use bootstrap script from above at the end it will fireup ruby installation script. Point your browser to `http://<ip>:2000/` and finish configuration.
 
 That's it!
 
