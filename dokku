@@ -64,7 +64,7 @@ case "$1" in
       if is_image_buildstep_based "$IMAGE_GENERIC:$TAG"; then
         # buildstep
         INT_PORT="$APP_PORT"
-        id=$(docker run --cidfile="$(get_cid_file_name app)" -d -p "$INT_PORT" -e PORT="$INT_PORT" --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG" /start web)
+        id=$(docker run --cidfile="$(get_cid_file_name app)" -d -p "$INT_PORT" -e PORT="$INT_PORT" --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG" /start)
         addr=$(docker port $id "$INT_PORT")
         EXT_PORT="${addr#*:}"
       else
