@@ -61,12 +61,18 @@ function check_app_name() {
 	sanitize_name "$1" "app name"
 	APP="$1"
 	IMAGE_GENERIC="dokku/$APP"
-	local CMD_TYPE="$(basename $0)"
-	case "$CMD_TYPE" in
-		"pre-build"|"post-build")		IMAGE="$IMAGE_GENERIC:build" ;;
-		"pre-release"|"post-release")	IMAGE="$IMAGE_GENERIC:release" ;;
-		*)								IMAGE="$IMAGE_GENERIC:latest" ;;
-	esac
+
+	if [[ "$IMAGE_TAG" != "" ]]; then
+		IMAGE="$IMAGE_GENERIC:$IMAGE_TAG"
+	else
+		local CMD_TYPE="$(basename $0)"
+		case "$CMD_TYPE" in
+			"pre-build"|"post-build")		IMAGE="$IMAGE_GENERIC:build" ;;
+			"pre-release"|"post-release")	IMAGE="$IMAGE_GENERIC:release" ;;
+			*)								IMAGE="$IMAGE_GENERIC:latest" ;;
+		esac
+	fi
+
 	APP_DIR="$DOKKU_ROOT/$APP"
 	APP_NAME_FILE="$APP_DIR/CONTAINER"
 	APP_NAME=""
