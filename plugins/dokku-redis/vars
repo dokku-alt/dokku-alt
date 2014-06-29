@@ -18,9 +18,9 @@ function redis_for_app() {
 }
 
 function start_database_container() {
-	docker run -d --name="$DB_DATA_CONTAINER"
-		-v "$DB_CONTAINER_VOLUME"
-		busybox "exit 0" || true
+	docker run --name="$DB_DATA_CONTAINER" \
+		-v "$DB_CONTAINER_VOLUME" \
+		busybox:latest true 1>/dev/null 2>/dev/null || true
 	docker run --detach "--publish=$DB_PORT" \
 		--volumes-from="$DB_DATA_CONTAINER" \
 		--name="$DB_CONTAINER" \
