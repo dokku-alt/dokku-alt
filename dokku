@@ -4,7 +4,7 @@ export DOKKU_ROOT=${DOKKU_ROOT:="/home/dokku"}
 export PLUGIN_PATH=${PLUGIN_PATH:="/var/lib/dokku-alt/plugins"}
 
 if [[ $(id -un) != "dokku" && $1 != "plugins-install" ]]; then
-  sudo -u dokku -H $0 "$@"
+  sudo -u dokku -H NAME="$(id -un)" FINGERPRINT="shell" $0 "$@"
   exit
 fi
 

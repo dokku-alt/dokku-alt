@@ -11,8 +11,10 @@ case "$1" in
 
     # Verify paths
     for path in "$@"; do
-        ipath="${path//:/}"
-        [[ "$path" != "$ipath" ]] && fail "$path: Path is forbidden"
+        if [[ "$NAME" != "root" ]]; then
+            ipath="${path//:/}"
+            [[ "$path" != "$ipath" ]] && fail "$path: Path is forbidden"
+        fi
         DOCKER_ARGS+=("-v" "$path")
     done
 
