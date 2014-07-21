@@ -14,12 +14,19 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. I
 * Built-in support for Docker-args and container persistent volumes
 * Built-in support for container's TOP
 * Built-in support for foreman-based Procfile
-* Preboot / zero-downtime deploy (in beta)
-* Data volumes (in beta)
+* Data volumes with host-based volumes
+* Preboot / zero-downtime deploy
+* Enter and exec commands in already running containers (BETA)
 
 ### Planned features:
 
-* Full, partial and incremental backup
+* Support better image tagging
+* Support for RabbitMQ and Memcached
+* Support for custom nginx templates
+* Support for application scaling
+* Support for running buildstep-based applications as non-root user
+* Support for `CHECKS` as described in https://labnotes.org/zero-downtime-deploy-with-dokku/
+* Full and incremental backup
 * Access-control: deploy only keys, non-admin users
 * Application migration
 
@@ -47,7 +54,7 @@ You'll have to add a public key associated with a username by doing something li
 
 ## Upgrade and beta releases
 
-Unlinke `dokku` this script uses debian packaging system (deb). To upgrade to latest version simply execute: `sudo apt-get update && sudo apt-get install dokku-alt`.
+Unlike `dokku` this script uses debian packaging system (deb). To upgrade to latest version simply execute: `sudo apt-get update && sudo apt-get install dokku-alt`.
 
 Alongside the normal (stable) releases we distribute as well beta (bleeding edge). To switch to beta simply execute: `sudo apt-get update && sudo apt-get install dokku-alt-beta`. It will replace the stable dokku-alt and switch to beta.
 
@@ -172,7 +179,7 @@ Verify application env variables:
 
 To use different database engine simple replace `mariadb` with `postgresql` or `mongodb`.
 
-## Preboot / zero-downtime boot (BETA)
+## Preboot / zero-downtime boot
 
 Similar to functionality provided by https://devcenter.heroku.com/articles/labs-preboot `dokku-alt` supports zero-downtime. To enable zero-downtime deployment execute command: `dokku preboot:enable APP`. Alongside with preboot there's `checks` plugin based on https://labnotes.org/zero-downtime-deploy-with-dokku/. For now it simply checks if application started serving requests. If checks module fails it will not replace the application.
 
@@ -184,7 +191,7 @@ Preboot and checks can be configured using a few env variables:
 * DOKKU_CHECKS_TIMEOUT - number of seconds to wait for each response (default 20s)
 * DOKKU_CHECKS_RETRY - number of retries (default 3)
 
-## Data volumes (BETA)
+## Data volumes
 
 Docker allows you to have persistent data storage. Dokku-alt exposes this feature as Data Volumes. You can create unlimited number of data volumes, any data volume can be attached to unlimited number of apps. Simply create data volume and specify container paths which you want to be persistant.
 
@@ -204,6 +211,12 @@ Second link volume to an app:
         http://node-js-sample.ayufan.eu
 
 It is just simple as this.
+
+### Host-based volumes
+
+Dokku-alt allows you to bind host-based volumes in very simple manner. To use this feature you have to be logged as `root` and than simply type:
+
+    dokku volume:create host-based-volume /path/to/host/volume:/path/to/volume/in/container
 
 ## TLS support
 
