@@ -2,12 +2,21 @@
 
 set -e
 pushd $(dirname $0)
-echo "Starting services..."
+
+echo "========================================"
+echo "=====> Starting services..."
+echo "========================================"
+echo ""
+
 service nginx start
 service docker start
 service ssh start
 
-echo "Configuring dokku..."
+echo "========================================"
+echo "=====> Configuring dokku..."
+echo "========================================"
+echo ""
+
 export HOME=/root
 [[ -f ~/.ssh/id_rsa ]] || ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa
 cat <<EOF > ~/.ssh/config
@@ -19,18 +28,32 @@ cat ~/.ssh/id_rsa.pub | sshcommand acl-add dokku testkey
 dokku plugins-install
 ssh dokku@localhost version
 
+echo "========================================"
 echo "=====> Running test deploy without VHOST"
+echo "========================================"
+echo ""
+
 for app_path in apps/*; do
   app=$(basename $app_path)
+  echo "----------------------------------------"
   echo "-----> Running test deploy of $app..."
+  echo "----------------------------------------"
+  echo ""
   ./test_deploy $app_path localhost
 done
 
+echo "========================================"
 echo "=====> Running test deploy with VHOST"
+echo "========================================"
+echo ""
+
 echo "dokku.me" > /home/dokku/VHOST
 for app_path in apps/*; do
   app=$(basename $app_path)
+  echo "----------------------------------------"
   echo "-----> Running test deploy of $app..."
+  echo "----------------------------------------"
+  echo ""
   ./test_deploy $app_path localhost
 done
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -exo pipefail
+set -eo pipefail
 SELF=`which $0`; APP="$1"; TARGET="$2"; FORWARDED_PORT="$3"
 REMOTE="dokku@$TARGET"
 REPO="t-$(basename $APP)-$RANDOM"
@@ -8,7 +8,7 @@ TMP=$(mktemp -d -t "$TARGET.XXXXX")
 trap "rm -rf $TMP" EXIT
 rmdir $TMP && cp -r $(dirname $SELF)/$APP $TMP
 cd $TMP
-git init
+git init -q
 git config user.email "robot@example.com"
 git config user.name "Test Robot"
 git remote add target $REMOTE:$REPO
@@ -19,13 +19,33 @@ git add .
 [[ -x pre-commit ]] && ./pre-commit $REMOTE $REPO
 git commit -m 'initial commit'
 git push target master
+
+cleanup() {
+	ssh $REMOTE delete $REPO || true
+}
+
+trap cleanup EXIT
+
 [[ -x post-deploy ]] && ./post-deploy $REMOTE $REPO
 
 URL=$(ssh $REMOTE url $REPO)$FORWARDED_PORT
-sleep 2
-./check_deploy $URL && echo "-----> Deploy success!" || {
-  sleep 4
-  ./check_deploy $URL && echo "-----> Deploy success!"
-}
 
-ssh $REMOTE delete $REPO
+for i in 2 4 8
+do
+	sleep $i
+
+	if ./check_deploy $URL
+	then
+	    echo "----------------------------------------"
+		echo "-----> Deploy SUCCESS ($APP)!" 
+	    echo "----------------------------------------"
+	    exit 0
+	fi
+done
+
+echo "----------------------------------------"
+echo "-----> Deploy FAILED ($APP)!" 
+echo "----------------------------------------"
+
+curl --verbose "$URL" || true
+exit 0
