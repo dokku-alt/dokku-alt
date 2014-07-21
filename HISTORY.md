@@ -1,5 +1,15 @@
 # History of Dokku-alt
 
+## 0.3.5
+
+* Added data volumes: docker and host-based.
+* Added support for config vars: PREBOOT_WAIT_TIME, PREBOOT_COOLDOWN_TIME, DOKKU_CHECKS_WAIT, DOKKU_CHECKS_TIMEOUT and DOKKU_CHECKS_RETRY.
+* Renamed zero-downtime to preboot. 
+
+## 0.3.4
+
+* Buildstep uses [Foreman](https://github.com/ddollar/foreman) by default.
+
 ## 0.3.3
 
 * Added image tagging: `dokku tags:add <app> <tag_name>; dokku deploy <app> <tag_name>`
