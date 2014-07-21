@@ -38,8 +38,19 @@ case "$1" in
     getent passwd $USER > /dev/null || false
     USERHOME=$(bash <<< "echo ~$USER")
 
-    KEY=$(cat)
-    FINGERPRINT=$(ssh-keygen -lf /dev/stdin <<< $(echo $KEY) | awk '{print $2}')
+    KEY_FILE=$(mktemp)
+    KEY=$(tee "$KEY_FILE")
+
+    delete_key_file() {
+      rm -f "$KEY_FILE"
+    }
+    trap delete_key_file INT EXIT
+
+    FINGERPRINT=$(ssh-keygen -lf "$KEY_FILE" | awk '{print $2}')
+    if [[ "$FINGERPRINT" == "" ]]; then
+      echo "Invalid ssh public key"
+      exit -1
+    fi
     KEY_PREFIX="command=\"FINGERPRINT=$FINGERPRINT NAME=$NAME \`cat $USERHOME/.sshcommand\` \$SSH_ORIGINAL_COMMAND\",no-agent-forwarding,no-user-rc,no-X11-forwarding,no-port-forwarding"
     echo "$KEY_PREFIX $KEY" >> "$USERHOME/.ssh/authorized_keys"
     echo $FINGERPRINT
