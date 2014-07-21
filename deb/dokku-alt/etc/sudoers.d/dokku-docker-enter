@@ -1,0 +1,2 @@
+# dokku-docker-enter
+%dokku ALL=(ALL) NOPASSWD:/usr/local/bin/docker-enter
