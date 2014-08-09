@@ -133,6 +133,22 @@ EOF
     fi
     ;;
 
+  mariadb:dump)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+
+    if ! db_info "$APP" "$DB_NAME"; then
+        fail "$DB_NAME: database is not linked to $APP"
+    fi
+    shift 2
+    docker run -i --rm \
+        --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+        -e MYSQL_PWD="$DB_PASSWORD" \
+        "$DB_IMAGE" \
+    bash -c "mysqldump -u \"$DB_USER\" -h \"$DB_HOST\" -P \"$DB_PORT\" \"$DB_DATABASE\""
+    ;;
+
   help)
     cat && cat<<EOF
     mariadb:create <db>         Create a MariaDB database
@@ -142,6 +158,7 @@ EOF
     mariadb:unlink <app> <db>   Unlink database from app
     mariadb:info <app> <db>     Display application informations
     mariadb:console <app> <db>  Launch console for MariaDB container
+    mariadb:dump <app> <db>     Dump database for an app
 EOF
     ;;
 
