@@ -66,15 +66,18 @@ case "$1" in
         INT_PORT="$APP_PORT"
         id=$(docker run --cidfile="$(get_cid_file_name app)" -d -p "$INT_PORT" -e PORT="$INT_PORT" --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG" /start)
         addr=$(docker port $id "$INT_PORT")
+        EXT_ADDR="${addr%:*}"
         EXT_PORT="${addr#*:}"
       else
         # Dockerfile
         EXT_PORT=""
         INT_PORT=""
+        EXT_ADDR=""
         id=$(docker run --cidfile="$(get_cid_file_name app)" -d -P --env-file=<(: | pluginhook env-vars "$APP") --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG")
         for test_port in 80 8080 "$APP_PORT"; do
           if addr=$(docker port $id "$test_port" 2>/dev/null); then
             INT_PORT="$test_port"
+            EXT_ADDR="${addr%:*}"
             EXT_PORT="${addr#*:}"
           fi
         done
@@ -86,6 +89,14 @@ case "$1" in
         pluginhook post-deploy "$APP" ""
         info2 "Application deployed"
       else
+        if [[ "$EXT_ADDR" == "0.0.0.0" ]]; then
+          verbose ''
+          verbose 'WARNING: You use potentially insecure docker configuration which exposes all ports to outside world.'
+          verbose 'Due to the way Docker works most of Firewall scripts will not block access to docker exposed ports.'
+          verbose 'Consider adding DOCKER_OPTS="$DOCKER_OPTS --ip=127.0.0.1" to /etc/default/docker and restart docker service.'
+          verbose ''
+        fi
+
         if [[ "$PREBOOT" != "" ]]; then
           verbose "Running pre-flight checks..."
           if ! pluginhook check-preboot "$APP" "$id" "$EXT_PORT"
