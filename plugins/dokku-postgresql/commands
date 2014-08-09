@@ -142,6 +142,26 @@ EOF
     fi
     ;;
 
+  postgresql:dump)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+
+    if ! db_info "$APP" "$DB_NAME"; then
+        fail "$DB_NAME: database is not linked to $APP"
+    fi
+
+    shift 2
+    docker run -i --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            -e PGDATABASE="$DB_NAME" \
+            -e PGUSER="$DB_USER" \
+            -e PGPASSWORD="$DB_PASSWORD" \
+            -e DB_PORT="$DB_PORT" \
+            "$DB_IMAGE" \
+        bash -c "pg_dump --host=\"$DB_HOST\" --port=\"$DB_PORT\""
+    ;;
+
   help)
     cat && cat<<EOF
     postgresql:create <db>         Create a PostgreSQL database
@@ -151,6 +171,7 @@ EOF
     postgresql:unlink <app> <db>   Unlink database from app
     postgresql:info <app> <db>     Display application informations
     postgresql:console <app> <db>  Launch console for PostgreSQL container
+    postgresql:dump <app> <db>     Dump database for an app
 EOF
     ;;
 
