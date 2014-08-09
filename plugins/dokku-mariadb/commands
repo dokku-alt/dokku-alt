@@ -118,11 +118,19 @@ EOF
         fail "$DB_NAME: database is not linked to $APP"
     fi
     shift 2
-    docker run -t -i --rm \
+    if [[ -t 0 ]]; then
+        docker run -i -t --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
             -e MYSQL_PWD="$DB_PASSWORD" \
             "$DB_IMAGE" \
         bash -c "mysql -u \"$DB_USER\" -h \"$DB_HOST\" -P \"$DB_PORT\" \"$DB_DATABASE\""
+    else
+        docker run -i --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            -e MYSQL_PWD="$DB_PASSWORD" \
+            "$DB_IMAGE" \
+        bash -c "mysql -u \"$DB_USER\" -h \"$DB_HOST\" -P \"$DB_PORT\" \"$DB_DATABASE\""
+    fi
     ;;
 
   help)
