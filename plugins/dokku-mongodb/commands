@@ -126,6 +126,51 @@ EOF
         bash -c "mongo -u \"$DB_USER\" -p \"$DB_PASSWORD\" \"$DB_HOST:$DB_PORT/$DB_NAME\""
     ;;
 
+  mongodb:import)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 4 "$@"
+
+    if ! db_info "$APP" "$DB_NAME"; then
+        fail "$DB_NAME: database is not linked to $APP"
+    fi
+
+    docker run -i --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            "$DB_IMAGE" \
+        bash -c "mongoimport --username \"$DB_USER\" --password \"$DB_PASSWORD\" --host \"$DB_HOST\" --port \"$DB_PORT\" --db \"$DB_NAME\" --collection \"$4\""
+    ;;
+
+  mongodb:export)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 4 "$@"
+
+    if ! db_info "$APP" "$DB_NAME"; then
+        fail "$DB_NAME: database is not linked to $APP"
+    fi
+
+    docker run -i --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            "$DB_IMAGE" \
+        bash -c "mongoexport --username \"$DB_USER\" --password \"$DB_PASSWORD\" --host \"$DB_HOST\" --port \"$DB_PORT\" --db \"$DB_NAME\" --collection \"$4\" --out -"
+    ;;
+
+  mongodb:dump)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 4 "$@"
+
+    if ! db_info "$APP" "$DB_NAME"; then
+        fail "$DB_NAME: database is not linked to $APP"
+    fi
+
+    docker run -i --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            "$DB_IMAGE" \
+        bash -c "mongodump --username \"$DB_USER\" --password \"$DB_PASSWORD\" --host \"$DB_HOST\" --port \"$DB_PORT\" --db \"$DB_NAME\" --collection \"$4\" --out -"
+    ;;
+
   help)
     cat && cat<<EOF
     mongodb:create <db>         Create a MongoDB database
@@ -135,6 +180,9 @@ EOF
     mongodb:unlink <app> <db>   Unlink database from app
     mongodb:info <app> <db>     Display application informations
     mongodb:console <app> <db>  Launch console for MongoDB container
+    mongodb:import <app> <db> <collection>    Import database collection for an app
+    mongodb:export <app> <db> <collection>    Export database collection for an app
+    mongodb:dump <app> <db> <collection>      Dump database collection in bson for an app
 EOF
     ;;
 
