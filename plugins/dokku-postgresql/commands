@@ -121,7 +121,8 @@ EOF
     fi
 
     shift 2
-    docker run -t -i --rm \
+    if [[ -t 0 ]]; then
+        docker run -t -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
             -e PGDATABASE="$DB_NAME" \
             -e PGUSER="$DB_USER" \
@@ -129,6 +130,16 @@ EOF
             -e DB_PORT="$DB_PORT" \
             "$DB_IMAGE" \
         bash -c "psql --host=\"$DB_HOST\" --port=\"$DB_PORT\""
+    else
+        docker run -i --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            -e PGDATABASE="$DB_NAME" \
+            -e PGUSER="$DB_USER" \
+            -e PGPASSWORD="$DB_PASSWORD" \
+            -e DB_PORT="$DB_PORT" \
+            "$DB_IMAGE" \
+        bash -c "psql --host=\"$DB_HOST\" --port=\"$DB_PORT\""
+    fi
     ;;
 
   help)
