@@ -23,7 +23,7 @@ case "$1" in
   logs)
     verify_app_name "$2"
 
-    if [[ $3 == "-t" ]]; then
+    if [[ $3 == "-t" ]] || [[ $3 == "-f" ]]; then
       docker logs --follow "$APP_NAME"
     else
       docker logs "$APP_NAME" | tail -n 100
@@ -93,7 +93,7 @@ case "$1" in
   help)
     cat && cat<<EOF
     delete <app>                                    Delete an application
-    logs <app> [-t]                                 Show the last logs for an application (-t follows)
+    logs <app> [-t|-f]                              Show the last logs for an application (-t or -f follows)
     run <app> <cmd>                                 Run a command in the environment of an application
     enter <app>                                     Enter into currently running container
     exec <app> <cmd>                                Execute command in currently running container
