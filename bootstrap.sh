@@ -2,6 +2,8 @@
 
 set -xe
 
+unset UCF_FORCE_CONFFOLD
+export UCF_FORCE_CONFFNEW=YES
 export DEBIAN_FRONTEND=noninteractive
 
 if [ ! -e /usr/lib/apt/methods/https ]; then
@@ -15,7 +17,7 @@ echo deb https://dokku-alt.github.io/dokku-alt / > /etc/apt/sources.list.d/dokku
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
 apt-key adv --keyserver keys.gnupg.net --recv-keys EAD883AF
 apt-get update
-apt-get install -y dokku-alt ruby ruby-sinatra
+apt-get install -o Dpkg::Options::="--force-confnew" --yes --force-yes dokku-alt ruby ruby-sinatra
 
 set +xe
 
