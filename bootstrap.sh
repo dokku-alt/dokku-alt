@@ -2,6 +2,8 @@
 
 set -xe
 
+export DEBIAN_FRONTEND=noninteractive
+
 if [ ! -e /usr/lib/apt/methods/https ]; then
 	apt-get update
 	apt-get install -y apt-transport-https
