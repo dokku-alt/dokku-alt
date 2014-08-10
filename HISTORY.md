@@ -1,5 +1,11 @@
 # History of Dokku-alt
 
+## BETA
+
+* Allow to import databases using `mariadb:console`, `postgresql:console`.
+* Added `mariadb:dump`, `postgresql:dump` and `mongodb:import`, `mongodb:export`, `mongodb:dump`.
+* Added -f to `dokku:logs`.
+
 ## 0.3.5
 
 * Added data volumes: docker and host-based.
