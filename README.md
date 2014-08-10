@@ -36,7 +36,7 @@ Assumes that you use Ubuntu 14.04 LTS right now. Ideally have a domain ready to 
 
 ## Installing
 
-    $ curl -s https://raw.githubusercontent.com/dokku-alt/dokku-alt/master/bootstrap.sh | sudo sh
+    $ sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/dokku-alt/dokku-alt/master/bootstrap.sh)"
 
 ## Configuring
 
