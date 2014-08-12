@@ -28,6 +28,7 @@ hostname 	= `bash -c '[[ $(dig +short $HOSTNAME) ]] && echo $HOSTNAME || curl ic
 template 	= DATA.read
 
 set :port, 2000
+set :bind, '0.0.0.0'
 set :environment, :production
 disable :protection
 
