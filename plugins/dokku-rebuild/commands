@@ -66,9 +66,9 @@ dokku_build_app_from_git() {
       DOCKER_ARGS="$(: | pluginhook docker-args "$APP" build)"
       # start data container for cache
       docker run -d -v "/cache" --name="$APP_CACHE_NAME" \
-                busybox "exit 0" 1>/dev/null 2>/dev/null || true
+                busybox:latest true 1>/dev/null 2>/dev/null || true
       # link volumes from data container
-      docker run -i -a stdin --volumes-from="$APP_CACHE_NAME" \
+      docker run -d --volumes-from="$APP_CACHE_NAME" \
                   $DOCKER_ARGS \
                   "$IMAGE_GENERIC:build" \
                   /build/builder | attach_and_commit_image "$IMAGE_GENERIC:build"
