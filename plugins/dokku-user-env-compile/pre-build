@@ -6,5 +6,5 @@ verify_app_name "$1"
 
 if [[ "$3" == "buildstep" ]]; then
   info "Installing ENV in build environment ..."
-  pluginhook env-vars "$APP" | docker run -i -a stdin "$IMAGE" /bin/bash -c "mkdir -p /app && cat >> /app/.env" | commit_image "$IMAGE"
+  : | pluginhook env-vars "$APP" | sed 's/^/export /g' | docker run -i -a stdin "$IMAGE" /bin/bash -c "mkdir -p /app && cat >> /app/.env" | commit_image "$IMAGE"
 fi
