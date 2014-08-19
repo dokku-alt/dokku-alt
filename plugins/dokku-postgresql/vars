@@ -59,3 +59,20 @@ function db_info() {
     [[ ! -f "$DB_LINK" ]] && return 1
     return 0
 }
+
+pgsql_shell() {
+    DB_USER="$1"
+    DB_PASSWORD="$2"
+    shift 2
+    ensure_database_container_is_running
+    docker run -i --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            -e PGUSER="$DB_USER" \
+            -e PGPASSWORD="$(cat "$DB_PASSWORD")" \
+            "$DB_IMAGE" \
+        bash -c "psql -v ON_ERROR_STOP=1 --host=\"$DB_HOST\" --port=\"$DB_PORT\" $@"
+}
+
+pgsql_admin() {
+    pgsql_shell "root" "$DB_ADMIN_PASSWORD" "--dbname=root" "$@"
+}

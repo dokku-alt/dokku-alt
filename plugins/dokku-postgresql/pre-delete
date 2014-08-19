@@ -6,6 +6,19 @@ verify_app_name "$1"
 
 DB_LINKS="$DB_APP_DATABASES$APP/"
 DB_APP_PASSWORD="$DB_APP_PASSWORDS$APP"
-rm -rf "$DB_LINKS" "$DB_APP_PASSWORD"
 
-# TODO: drop user
+# Revoke all privileges
+[[ ! -d "$DB_LINKS" ]] || ls -1 "$DB_LINKS" | while read DB_NAME; do
+    pgsql_admin <<EOF || true
+REVOKE ALL PRIVILEGES ON DATABASE "$DB_NAME" FROM "$APP";
+EOF
+done
+
+# Drop user
+if [[ -f "$DB_APP_PASSWORD" ]] || [[ -d "$DB_LINKS" ]]; then
+	pgsql_admin <<EOF || true
+DROP USER IF EXISTS "$APP";
+EOF
+fi
+
+rm -rf "$DB_LINKS" "$DB_APP_PASSWORD"
