@@ -16,7 +16,8 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. I
 * Built-in support for foreman-based Procfile
 * Data volumes with host-based volumes
 * Preboot / zero-downtime deploy
-* Enter and exec commands in already running containers (BETA)
+* Enter and exec commands in already running containers
+* Access-control: deploy only keys (BETA)
 
 ### Planned features:
 
@@ -27,7 +28,6 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. I
 * Support for running buildstep-based applications as non-root user
 * Support for `CHECKS` as described in https://labnotes.org/zero-downtime-deploy-with-dokku/
 * Full and incremental backup
-* Access-control: deploy only keys, non-admin users
 * Application migration
 
 ## Requirements
@@ -125,6 +125,38 @@ It's possible to run commands in the environment of the deployed application:
 SSH onto the server, then execute:
 
     $ dokku delete myapp
+
+## Create-only application (BETA)
+
+Dokku-alt allows you to create application before pushing it. It can be useful when you want to specify additional config variables or assign databases. Simply execute:
+
+    $ dokku create mynewapp
+
+There's also possiblity to disable auto-application creation on push. Add to `~/dokkurc`:
+
+    export DOKKU_DISABLE_AUTO_APP_CREATE=1
+
+From now on you will have to do `dokku create` at first.
+
+## Allowing push-access (deploy only) access for dokku (BETA)
+
+You can add ssh key and allow it explicit access to one or many applications. This key will be allowed only to push or pull from remote repository, it will not be allowed to automatically create a new app or access dokku commands (ie. modification of app config)
+
+Add locally:
+
+    $ cat .ssh/id_rsa.pub | dokku deploy:allow myapp
+    
+Add key remotely:
+
+    $ cat .ssh/id_rsa.pub | ssh dokku@dokku deploy:allow myapp
+
+To later revoke key execute:
+
+    $ dokku deploy:revoke myapp FINGERPRINT
+
+You can also list all fingerprints allowed to deploy an application:
+
+    $ dokku deploy:list myapp
 
 ## Environment variable management
 
