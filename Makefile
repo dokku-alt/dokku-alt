@@ -88,7 +88,7 @@ dpkg_commit: dpkg
 	gzip -c Packages > Packages.gz
 	gpg --clearsign -o InRelease Release
 	gpg -abs -o Release.gpg Release
-	git add *
+	git add $(DEB_PKG) Packages* Release* InRelease
 	# commit current release
 	git commit -m "New release"
 	git checkout $(DEB_BRANCH)
