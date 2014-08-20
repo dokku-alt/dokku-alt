@@ -1,0 +1,98 @@
+#!/bin/bash
+
+source "$(dirname $0)/vars"
+
+case "$1" in
+  access:add)
+    verify_max_args 1 "$@"
+
+    add_ssh_key "admin"
+    info "$FINGERPRINT added as an admin"
+    ;;
+
+  access:remove)
+    verify_fingerprint "$2"
+    verify_max_args 2 "$@"
+
+    remove_fingerprint "$FINGERPRINT"
+
+    for APP in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
+      if is_fingerprint_allowed "$1"
+      then
+        sed --in-place "/^$FINGERPRINT\$/d" "$DOKKU_ROOT/$APP/$DEPLOY_ALLOWED"
+      fi
+    done
+
+    info "$FINGERPRINT removed!"
+    ;;
+
+  access:list)
+    verify_max_args 1 "$@"
+
+    sed -n -e 's/^command="FINGERPRINT=\(.*\) NAME=\(.*\) `.*ssh-\(rsa\|dsa\).*$/\2\t\1/p' "$AUTHORIZED_KEYS"
+    ;;
+
+  access:info)
+    verify_fingerprint "$2"
+    verify_max_args 2 "$@"
+
+    if ! grep "FINGERPRINT=$FINGERPRINT " "$AUTHORIZED_KEYS" # | sed 's/^command="FINGERPRINT=.* NAME=\(.*\) `.*\(ssh-rsa.*$\)/\1\n\2/p'
+    then
+        fail "$FINGERPRINT: key not found"
+    fi
+
+    for APP in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
+      if  is_fingerprint_allowed "$1"
+      then
+        echo "Push-access to $APP."
+      fi
+    done
+    ;;
+
+  deploy:allow)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+
+    add_ssh_key "deploy"
+    if !  is_fingerprint_allowed "$FINGERPRINT"
+    then
+        echo "$FINGERPRINT" >> "$APP_DIR/$DEPLOY_ALLOWED"
+        info "$FINGERPRINT added to $APP as an deployment key"
+    else
+        info "$FINGERPRINT is already added to $APP as an deployment key"
+    fi
+    ;;
+
+  deploy:list)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+
+    cat "$APP_DIR/$DEPLOY_ALLOWED" 2>/dev/null || true
+    ;;
+
+  deploy:revoke)
+    verify_app_name "$2"
+    verify_fingerprint "$3"
+    verify_max_args 3 "$@"
+
+    if  is_fingerprint_allowed "$FINGERPRINT"
+    then
+        sed --in-place "/^$FINGERPRINT\$/d" "$APP_DIR/$DEPLOY_ALLOWED"
+        info "$FINGERPRINT removed from an $APP as an deployment key"
+    else
+        info "$FINGERPRINT is not added to $APP as an deployment key"
+    fi
+    ;;
+
+  help)
+    cat && cat<<EOF
+    access:add                          Add admin user
+    access:list                         List all SSH keys: admins and deployments
+    access:info <fingeprint>            Show information about the key
+    access:remove <fingerprint>         Revoke all permissions for specific SSH key
+    deploy:allow <app>                  Allow push-access (aka. deployment) to an app
+    deploy:list <app>                   List all push-acccesses for an application
+    deploy:revoke <app> <fingerprint>   Revoke push-access for an application
+EOF
+    ;;
+esac

@@ -1,0 +1,41 @@
+#!/bin/bash
+
+source "$(dirname $0)/../dokku_common"
+
+AUTHORIZED_KEYS="$DOKKU_ROOT/.ssh/authorized_keys"
+DEPLOY_ALLOWED="DEPLOY_ALLOWED"
+
+add_ssh_key() {
+    KEY_FILE=$(mktemp)
+    KEY=$(tee "$KEY_FILE")
+    NAME="$1"
+
+    delete_key_file() {
+      rm -f "$KEY_FILE"
+    }
+    trap delete_key_file INT EXIT
+
+    FINGERPRINT=$(ssh-keygen -lf "$KEY_FILE" | awk '{print $2}')
+    [[ -z "$FINGERPRINT" ]] && fail "Invalid ssh public key"
+    KEY_PREFIX="command=\"FINGERPRINT=$FINGERPRINT NAME=$NAME \`cat $DOKKU_ROOT/.sshcommand\` \$SSH_ORIGINAL_COMMAND\",no-agent-forwarding,no-user-rc,no-X11-forwarding,no-port-forwarding"
+    sed --in-place "/FINGERPRINT=$FINGERPRINT /d" "$AUTHORIZED_KEYS" # remove old key
+    echo "$KEY_PREFIX $KEY" >> "$AUTHORIZED_KEYS"
+}
+
+remove_fingerprint() {
+    sed --in-place "/FINGERPRINT=$1 /d" "$AUTHORIZED_KEYS"
+}
+
+verify_fingerprint() {
+    FINGERPRINT="$1"
+    [[ "$FINGERPRINT" =~ ^[0-9a-fA-F:]+$ ]] || fail "$FINGERPRINT: this is not fingerprint!"
+}
+
+is_fingerprint_allowed() {
+    if [[ -f "$DOKKU_ROOT/$APP/$DEPLOY_ALLOWED" ]] && grep -q "^$1\$" "$DOKKU_ROOT/$APP/$DEPLOY_ALLOWED"
+    then
+        return 0
+    else
+        return 1
+    fi
+}

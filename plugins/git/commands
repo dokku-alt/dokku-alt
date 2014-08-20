@@ -17,6 +17,10 @@ case "$1" in
   git-hook)
     verify_app_name "$2"
 
+    # if we got here we have full access
+    export NAME="dokku"
+    export FINGERPRINT=""
+
     while read oldrev newrev refname
     do
       # Only run this script for the master branch. You can remove this
