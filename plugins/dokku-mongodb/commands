@@ -90,7 +90,7 @@ EOF
 
     mongo_admin <<EOF
 use $3
-db.createUser({"user": "$2", "pwd":"$(cat "$DB_APP_PASSWORD")", "roles": ["readWrite"]})
+db.addUser({"user": "$2", "pwd":"$(cat "$DB_APP_PASSWORD")", "roles": ["readWrite"]})
 EOF
     mkdir -p "$DB_APP_DATABASES$APP"
     touch "$DB_APP_DATABASES$APP/$DB_NAME"
