@@ -1,16 +1,23 @@
 # History of Dokku-alt
 
-## BETA
+## 0.3.6
 
+* Added bind to 0.0.0.0 in dokku-installer.
+* Added WARNING about exposing ports to outside world.
 * Allow to import databases using `mariadb:console`, `postgresql:console`.
 * Added `mariadb:dump`, `postgresql:dump` and `mongodb:import`, `mongodb:export`, `mongodb:dump`.
 * Added -f to `dokku:logs`.
+* Fixed issue with not exposing env variables during buildstep build.
+* Use `docker logs` instead of `docker attach` to view output of containers during build.
+* Better run method for `bootstrap.sh` script - interactive mode.
+* Revoke PostgreSQL permissions on application destroy.
 
 ## 0.3.5
 
 * Added data volumes: docker and host-based.
 * Added support for config vars: PREBOOT_WAIT_TIME, PREBOOT_COOLDOWN_TIME, DOKKU_CHECKS_WAIT, DOKKU_CHECKS_TIMEOUT and DOKKU_CHECKS_RETRY.
-* Renamed zero-downtime to preboot. 
+* Renamed zero-downtime to preboot.
+* Added `dokku enter` and `dokku exec` which allows you to gain interactive shell or execute command in application container.
 
 ## 0.3.4
 

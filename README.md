@@ -244,11 +244,14 @@ Dokku provides easy TLS support from the box. To enable TLS connection to your a
     domains:redirect:get <app>                      Get redirect domains for an app
     domains:redirect:set <app> <domains...>         Set redirect app domains
     domains:set <app> <domains...>                  Set app domains
+    enter <app>                                     Enter into currently running container
+    exec <app> <cmd>                                Execute command in currently running container
     help                                            Print the list of commands
-    logs <app> [-t]                                 Show the last logs for an application (-t follows)
+    logs <app> [-t] [-f]                            Show the last logs for an application (-t or -f follows)
     mariadb:console <app> <db>                      Launch console for MariaDB container
     mariadb:create <db>                             Create a MariaDB database
     mariadb:delete <db>                             Delete specified MariaDB database
+    mariadb:dump <app> <db>                         Dump database for an app
     mariadb:info <app> <db>                         Display application informations
     mariadb:link <app> <db>                         Link database to app
     mariadb:list <app>                              List linked databases
@@ -256,6 +259,9 @@ Dokku provides easy TLS support from the box. To enable TLS connection to your a
     mongodb:console <app> <db>                      Launch console for MongoDB container
     mongodb:create <db>                             Create a MongoDB database
     mongodb:delete <db>                             Delete specified MongoDB database
+    mongodb:dump <app> <db> <collection>            Dump database collection in bson for an app
+    mongodb:export <app> <db> <collection>          Export database collection for an app
+    mongodb:import <app> <db> <collection>          Import database collection for an app
     mongodb:info <app> <db>                         Display application informations
     mongodb:link <app> <db>                         Link database to app
     mongodb:list <app>                              List linked databases
@@ -265,10 +271,16 @@ Dokku provides easy TLS support from the box. To enable TLS connection to your a
     postgresql:console <app> <db>                   Launch console for PostgreSQL container
     postgresql:create <db>                          Create a PostgreSQL database
     postgresql:delete <db>                          Delete specified PostgreSQL database
+    postgresql:dump <app> <db>                      Dump database for an app
     postgresql:info <app> <db>                      Display application informations
     postgresql:link <app> <db>                      Link database to app
     postgresql:list <app>                           List linked databases
     postgresql:unlink <app> <db>                    Unlink database from app
+    preboot:cooldown:time <app> <secs>              Re-enable specific app
+    preboot:disable <app>                           Stop specific app
+    preboot:enable <app>                            Stop specific app
+    preboot:status <app>                            Status of specific app
+    preboot:wait:time <app> <secs>                  Restart specific app (not-redeploy)
     rebuild:all                                     Rebuild all apps
     rebuild <app>                                   Rebuild an app
     redis:create <app>                              Create a Redis database
@@ -280,6 +292,13 @@ Dokku provides easy TLS support from the box. To enable TLS connection to your a
     tag:rm <app> <tag>                              Tag latest running image using specified name
     url <app>                                       Show the URL for an application
     version                                         Print dokku's version
+    volume:create <name> <paths...>                 Create a data volume for specified paths
+    volume:delete <name>                            Delete a data volume
+    volume:info <name>                              Display volume information
+    volume:link <app> <name>                        Link volume to app
+    volume:list:apps <name>                         Display apps linked to volume
+    volume:list                                     List volumes
+    volume:unlink <app> <name>                      Unlink volume from app
 
 ## Support
 
