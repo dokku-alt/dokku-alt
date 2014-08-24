@@ -11,7 +11,7 @@ echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/dock
 echo deb https://dokku-alt.github.io/dokku-alt / > /etc/apt/sources.list.d/dokku-alt.list
 
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
-apt-key adv --keyserver keys.gnupg.net --recv-keys EAD883AF
+apt-key adv --keyserver pgp.mit.edu --recv-keys EAD883AF
 apt-get update
 apt-get install -y dokku-alt ruby ruby-sinatra
 
