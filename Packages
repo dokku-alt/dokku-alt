@@ -168,6 +168,23 @@ SHA256: 0ed828c2322f224a16d794b651b62d7f3bfd7bcb2f4cc0fe5ca4b4d262db8d3b
 SHA512: 1f20dde47a8c8b92531a844583622cd271cdb5c495539952610317d932281b37bd3f1bb30ddd93eda93b90dd7c2fe3a036047daaf50d53e53b14c27336d82262
 Description: Docker powered mini-Heroku an fork of Dokku the Dokku Alternative.
 
+Package: dokku-alt-beta
+Priority: optional
+Section: base
+Maintainer: Kamil Trzciński <ayufan@ayufan.eu>
+Architecture: amd64
+Version: 0.3.6-11-gc65ea7b
+Provides: dokku-alt
+Depends: locales, git, make, curl, software-properties-common, lxc-docker (>= 0.11.0), nginx, dnsutils, linux-image-extra-virtual, aufs-tools
+Conflicts: pluginhook, dokku-alt
+Filename: ./dokku-alt-beta-0.3.6-11-gc65ea7b-amd64.deb
+Size: 1871132
+MD5sum: c3acdaeed8c4c96e1155758447519852
+SHA1: 6d006bab5fc9d9fa4e607f1147d0e338b7f5a26c
+SHA256: b1a438cb904ee20fa23a7a1a5664cc9c9338c7d533db25d13825fee1e9b16420
+SHA512: 6f720a7374a290b57073689cd068b9cfe609e2147ffbf79fe40c7185c7bd38053f1571c6fa25429516be5057da8ef1b7b7aa5c87cdab0b5a3a2b83fee7492ea9
+Description: Docker powered mini-Heroku an fork of Dokku the Dokku Alternative.
+
 Package: dokku-alt
 Priority: optional
 Section: base
