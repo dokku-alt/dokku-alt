@@ -38,6 +38,12 @@ Assumes that you use Ubuntu 14.04 LTS right now. Ideally have a domain ready to 
 
     $ sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/dokku-alt/dokku-alt/master/bootstrap.sh)"
 
+## Installing (with force-yes)
+
+Sometimes you may want to install dokku-alt completely non-interactive way. Now you can do it. Simply boostrap.sh without terminal:
+
+    $ sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/dokku-alt/dokku-alt/master/bootstrap.sh)" < /dev/null
+
 ## Configuring
 
 If you use bootstrap script from above at the end it will fireup ruby installation script. Point your browser to `http://<ip>:2000/` and finish configuration.

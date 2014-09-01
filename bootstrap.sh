@@ -12,8 +12,15 @@ echo deb https://dokku-alt.github.io/dokku-alt / > /etc/apt/sources.list.d/dokku
 
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
 apt-key adv --keyserver pgp.mit.edu --recv-keys EAD883AF
-apt-get update
-apt-get install -y dokku-alt ruby ruby-sinatra
+apt-get update -y
+
+if [[ -t 0 ]]; then
+	apt-get install -y dokku-alt ruby ruby-sinatra
+else
+	unset UCF_FORCE_CONFFOLD
+	export UCF_FORCE_CONFFNEW=YES
+	apt-get install -o Dpkg::Options::="--force-confnew" --yes --force-yes dokku-alt ruby ruby-sinatra
+fi
 
 set +xe
 
