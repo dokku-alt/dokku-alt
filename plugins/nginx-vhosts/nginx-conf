@@ -1,0 +1,45 @@
+#!/bin/bash
+
+export
+
+cat <<EOF
+upstream $APP { server $APP_ADDRESS; }
+
+server {
+  listen      [::]:80;
+  listen      80;
+  server_name ${hostnames[@]};
+  location    / {
+    proxy_pass  http://$APP;
+EOF
+
+for host in "${hostnames[@]}";
+do
+  cat <<EOF
+    proxy_redirect http://$host:$INT_PORT/ http://$host/;
+EOF
+done
+
+cat <<EOF
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host \$http_host;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header X-Forwarded-For \$remote_addr;
+    proxy_set_header X-Forwarded-Port \$server_port;
+    proxy_set_header X-Request-Start \$msec;
+  }
+}
+EOF
+
+if [[ "$redirect_hostnames" != "" ]]; then
+  cat <<EOF
+server {
+  listen      [::]:80;
+  listen      80;
+  server_name ${redirect_hostnames[@]};
+  return 302 http://$hostname\$request_uri;
+}
+EOF
+fi
