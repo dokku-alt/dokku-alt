@@ -91,7 +91,7 @@ case "$1" in
         pluginhook post-deploy "$APP" ""
         info2 "Application deployed"
       else
-        if [[ "$EXT_ADDR" == "0.0.0.0" ]]; then
+        if [[ "$DOKKU_SUPPRESS_FIREWALL_WARNING" != "1" ]] && [[ "$EXT_ADDR" == "0.0.0.0" ]]; then
           verbose ''
           verbose 'WARNING: You use potentially insecure docker configuration which exposes all ports to outside world.'
           verbose 'Due to the way Docker works most of Firewall scripts will not block access to docker exposed ports.'
