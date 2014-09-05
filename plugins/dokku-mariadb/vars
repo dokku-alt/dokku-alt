@@ -3,7 +3,7 @@
 source "$(dirname $0)/../dokku_common"
 
 DB_ROOT="$DOKKU_ROOT/.mariadb"
-DB_IMAGE="ayufan/dokku-alt-mariadb"
+DB_IMAGE="${MARIADB_IMAGE:=ayufan/dokku-alt-mariadb}"
 DB_VOLUME="$DB_ROOT/mysql"
 DB_ADMIN_PASSWORD="$DB_ROOT/mysql_password"
 DB_CONTAINER="mariadb_single_container"

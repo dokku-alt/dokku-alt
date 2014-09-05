@@ -274,6 +274,7 @@ Example:
 
 * `DOKKU_DISABLE_AUTO_APP_CREATE` – when set to `1`, applications won't be automatically created on push; [see Create only application](#create-only-application-beta).
 * `BUILDSTEP_IMAGE` – buildstep image to be used by Docker, defaults to [`ayufan/dokku-alt-buildstep:foreman`](https://registry.hub.docker.com/u/ayufan/dokku-alt-buildstep/).
+* `MARIADB_IMAGE` – Docker image to be used for MariaDB plugin, defaults to [`ayufan/dokku-alt-mariadb`](https://registry.hub.docker.com/u/ayufan/dokku-alt-mariadb/).
 * `POSTGRESQL_IMAGE` – Docker image to be used for PostgreSQL plugin, defaults to [`ayufan/dokku-alt-postgresql`](https://registry.hub.docker.com/u/ayufan/dokku-alt-postgresql/).
 * `REDIS_IMAGE` – Docker image to be used for Redis plugin, defaults to [`ayufan/dokku-alt-redis`](https://registry.hub.docker.com/u/ayufan/dokku-alt-redis/).
 
