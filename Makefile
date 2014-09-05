@@ -100,15 +100,15 @@ docker_run: docker_build
 	docker run --privileged --rm -i -t \
 		-v /home/dokku -v /var/lib/docker \
 		--hostname="dokku.me" \
-		ayufan/dokku-alt \
-		/bin/bash
+		ayufan/dokku-alt
 
-docker_tests: docker_build
-	docker run --privileged --rm -t \
-		-v /home/dokku -v /var/lib/docker \
+docker_tests:
+	-docker run -v /var/lib/docker --name="dokku-alt-docker-volume-data" busybox:latest true
+	docker run --privileged --rm -i -t \
+		--volumes-from dokku-alt-docker-volume-data \
 		--hostname="dokku.me" \
 		ayufan/dokku-alt \
-		/srv/dokku-alt/tests/run_localhost
+		/srv/dokku-alt/tests/run_localhost $(TESTS)
 
 pull:
 	rsync -av dokku.home:/srv/dokku-alt/ dokku

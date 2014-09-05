@@ -1,0 +1,44 @@
+#!/bin/bash
+
+REMOTE=$1
+REPO=$2
+
+set -xe
+
+echo Generate new ssh key...
+ssh-keygen -q -t rsa -N "" -f test_rsa
+FINGERPRINT=$(ssh-keygen -lf "test_rsa.pub" | awk '{print $2}')
+
+echo Try to access any dokku command using admin key
+ssh $REMOTE access:add < test_rsa.pub
+./ssh-test $REMOTE version
+
+echo List admins
+./ssh-test $REMOTE access:list
+
+echo Revoke admin permission
+./ssh-test $REMOTE access:remove $FINGERPRINT
+./ssh-test $REMOTE version && exit 1
+
+echo Try to access any dokku command using deploy key
+ssh $REMOTE deploy:allow $REPO < test_rsa.pub
+./ssh-test $REMOTE version && exit 1
+
+echo Try to push to non-existing repository as deploy we have no access
+export GIT_SSH="./ssh-test"
+git remote add new-target $REMOTE:$REPO-other
+git push new-target master && exit 1
+
+echo Create new repository and push once-again
+ssh $REMOTE create $REPO-other
+ssh $REMOTE deploy:allow $REPO-other < test_rsa.pub
+git push new-target master
+
+echo Try to revoke permission
+ssh $REMOTE deploy:revoke $REPO-other $FINGERPRINT
+git push new-target master && exit 1
+
+echo Try to upgrade deploy key
+ssh $REMOTE deploy:allow $REPO-other < test_rsa.pub
+ssh $REMOTE access:add < test_rsa.pub
+./ssh-test $REMOTE version

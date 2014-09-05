@@ -7,6 +7,7 @@ RUN apt-get update && \
 	curl software-properties-common \
 	nginx dnsutils aufs-tools \
 	dpkg-dev openssh-server man-db
+RUN apt-get install -y apache2-utils
 RUN chmod ugo+s /usr/bin/sudo
 
 # Configure environment
@@ -29,6 +30,8 @@ ADD / /srv/dokku-alt
 WORKDIR /srv/dokku-alt
 RUN sed -i 's/linux-image-extra-virtual, //g' deb/dokku-alt/DEBIAN/control
 RUN make install
+
+EXPOSE 22 80 443
 
 # Start all services
 CMD ["/srv/dokku-alt/start-services.sh"]

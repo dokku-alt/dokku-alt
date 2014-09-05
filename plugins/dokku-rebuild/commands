@@ -97,7 +97,7 @@ case "$1" in
       return
     fi
     
-    dokku_build_app_from_git "$APP" "$REF" | sed -u "s/^/"$'\e[1G'"/"
+    dokku_build_app_from_git "$APP" "$REF"
     ;;
 
   rebuild:all)

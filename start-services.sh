@@ -17,4 +17,6 @@ echo "root:$PASSWORD" | chpasswd
 echo "SSH Login:"
 echo "  user: root"
 echo "  password: $PASSWORD"
-wait
+echo "  ip: $(hostname -I)"
+
+while true; do sleep 1h; done

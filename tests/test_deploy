@@ -26,26 +26,26 @@ cleanup() {
 
 trap cleanup EXIT
 
-[[ -x post-deploy ]] && ./post-deploy $REMOTE $REPO
+if [[ ! -x post-deploy ]] || ./post-deploy $REMOTE $REPO $TARGET:80; then
+	URL=$(ssh $REMOTE url $REPO)$FORWARDED_PORT
 
-URL=$(ssh $REMOTE url $REPO)$FORWARDED_PORT
+	for i in 2 4 8
+	do
+		sleep $i
 
-for i in 2 4 8
-do
-	sleep $i
+		if ./check_deploy $URL $TARGET:80
+		then
+		    echo "----------------------------------------"
+			echo "-----> Deploy SUCCESS ($APP)!" 
+		    echo "----------------------------------------"
+		    exit 0
+		fi
+	done
 
-	if ./check_deploy $URL
-	then
-	    echo "----------------------------------------"
-		echo "-----> Deploy SUCCESS ($APP)!" 
-	    echo "----------------------------------------"
-	    exit 0
-	fi
-done
+	ssh $REMOTE logs $REPO
+fi
 
 echo "----------------------------------------"
 echo "-----> Deploy FAILED ($APP)!" 
 echo "----------------------------------------"
-
-curl --verbose "$URL" || true
-exit 0
+exit 1
