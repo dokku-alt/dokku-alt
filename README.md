@@ -260,6 +260,25 @@ Dokku-alt allows you to bind host-based volumes in very simple manner. To use th
 
 Dokku provides easy TLS support from the box. To enable TLS connection to your application, copy the `.crt` and `.key` files into the `/home/dokku/:app/ssl` folder (notice, file names should be `server.crt` and `server.key`, respectively). Redeployment of the application will be needed to apply TLS configuration. Once it is redeployed, the application will be accessible by `https://` (redirection from `http://` is applied as well).
 
+## dokkurc Configuration
+
+You can fine-tune some aspects of Dokku behaviour and its plugins by setting variables in `dokkurc` file placed in Dokku root directory – usually `/home/dokku`. `dokkurc` is sourced by the main `dokku` script.
+
+Example:
+
+    export DOKKU_DISABLE_AUTO_APP_CREATE=1
+    export BUILDSTEP_IMAGE="ayufan/dokku-alt-buildstep:foreman"
+
+
+### Known configuration variables
+
+* `DOKKU_DISABLE_AUTO_APP_CREATE` – when set to `1`, applications won't be automatically created on push; [see Create only application](#create-only-application-beta).
+* `BUILDSTEP_IMAGE` – buildstep image to be used by Docker, defaults to [`ayufan/dokku-alt-buildstep:foreman`](https://registry.hub.docker.com/u/ayufan/dokku-alt-buildstep/).
+* `MARIADB_IMAGE` – Docker image to be used for MariaDB plugin, defaults to [`ayufan/dokku-alt-mariadb`](https://registry.hub.docker.com/u/ayufan/dokku-alt-mariadb/).
+* `MONGODB_IMAGE` – Docker image to be used for MongoDB plugin, defaults to [`ayufan/dokku-alt-mongodb`](https://registry.hub.docker.com/u/ayufan/dokku-alt-mongodb/).
+* `POSTGRESQL_IMAGE` – Docker image to be used for PostgreSQL plugin, defaults to [`ayufan/dokku-alt-postgresql`](https://registry.hub.docker.com/u/ayufan/dokku-alt-postgresql/).
+* `REDIS_IMAGE` – Docker image to be used for Redis plugin, defaults to [`ayufan/dokku-alt-redis`](https://registry.hub.docker.com/u/ayufan/dokku-alt-redis/).
+
 ## Help
     
     $ dokku help
