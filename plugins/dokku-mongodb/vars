@@ -21,6 +21,17 @@ function start_database_container() {
         return
     fi
 
+    # Create .mongodb directory if does not exist
+    if [[ ! -d "$DB_ROOT" ]]; then
+        mkdir -p "$DB_ROOT"
+        chown -R dokku: "$DB_ROOT"
+    fi
+
+    # Create root password if not specified
+    if [[ ! -f "$DB_ADMIN_PASSWORD" ]]; then
+        generate_random_password > "$DB_ADMIN_PASSWORD"
+    fi
+
     docker run --detach "--publish=$DB_PORT" \
                --volume="$DB_VOLUME":"$DB_CONTAINER_VOLUME" \
                --volume="$DB_ADMIN_PASSWORD":"$DB_CONTAINER_PASSWORD" \
