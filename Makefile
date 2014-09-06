@@ -26,13 +26,7 @@ docker-enter/nsenter:
 	cd util-linux-2.24 && ./configure --without-ncurses && make nsenter
 	cp util-linux-2.24/nsenter docker-enter/nsenter
 
-docker-backup/docker-backup:
-	mkdir -p docker-backup
-	docker run --entrypoint="/bin/bash" --rm fish/docker-backup -c 'cat /docker-backup/docker-backup' > $@.tmp
-	chmod +x $@.tmp
-	mv $@.tmp $@
-
-dpkg: docker-enter/nsenter docker-backup/docker-backup
+dpkg: docker-enter/nsenter
 	rm -f dokku-alt-*.deb
 	rm -rf deb-tmp/
 	cp -r deb deb-tmp/
@@ -46,7 +40,6 @@ dpkg: docker-enter/nsenter docker-backup/docker-backup
 	cp dokku deb-tmp/dokku-alt/usr/local/bin
 	cp docker-enter/nsenter deb-tmp/dokku-alt/usr/local/bin
 	cp docker-enter/docker-enter deb-tmp/dokku-alt/usr/local/bin
-	cp docker-backup/docker-backup deb-tmp/dokku-alt/usr/local/bin
 	cp -r plugins deb-tmp/dokku-alt/var/lib/dokku-alt
 	cp dokku.1 deb-tmp/dokku-alt/usr/local/share/man/man1/dokku.1
 	cp contrib/dokku-installer.rb deb-tmp/dokku-alt/usr/local/share/dokku-alt/contrib

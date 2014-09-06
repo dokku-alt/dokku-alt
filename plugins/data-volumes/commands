@@ -102,17 +102,6 @@ case "$1" in
     fi
     ;;
 
-  volume:dump)
-    volume_info "$2"
-    verify_max_args 2 "$@"
-
-    if [[ -f "$VOLUME_PATHS" ]]; then
-        docker-backup store - "$VOLUME_CONTAINER" | gzip -c
-    else
-        fail "$VOLUME_NAME: volume doesn't exist"
-    fi
-    ;;
-
   help)
     cat && cat<<EOF
     volume:create <name> <paths...>    Create a data volume for specified paths
