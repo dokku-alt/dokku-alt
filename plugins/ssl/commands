@@ -1,0 +1,69 @@
+#!/bin/bash
+
+source "$(dirname $0)/vars"
+
+case "$1" in
+  ssl:generate)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+
+    mkdir -p "$APP_DIR/ssl"
+
+    [[ -f "$APP_DIR/ssl/server.csr" ]] && fail "$APP: CSR is already generated"
+    [[ -f "$APP_DIR/ssl/server.key" ]] || openssl genrsa -out "$APP_DIR/ssl/server.key" 2048
+    openssl req -out "$APP_DIR/ssl/server.csr" -key "$APP_DIR/ssl/server.key" -new
+
+    cat "$APP_DIR/ssl/server.csr"
+    ;;
+
+  ssl:certificate)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    mkdir -p "$APP_DIR/ssl"
+    CERTIFICATE=$(cat)
+    echo "$CERTIFICATE" | openssl x509 -text -noout
+    echo "$CERTIFICATE" > "$APP_DIR/ssl/server.crt"
+
+    [[ ! -f "$APP_DIR/ssl/server.key" ]] || dokku deploy "$APP"
+    ;;
+
+  ssl:key)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    mkdir -p "$APP_DIR/ssl"
+    KEY=$(cat)
+    echo "$KEY" | openssl rsa -in privateKey.key -check
+    echo "$KEY" > "$APP_DIR/ssl/server.key"
+
+    [[ ! -f "$APP_DIR/ssl/server.crt" ]] || dokku deploy "$APP"
+    ;;
+
+  ssl:info)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+
+    if [[ -f "$APP_DIR/ssl/server.csr" ]]; then
+        openssl x509 -in "$APP_DIR/ssl/server.csr" -text -noout || true
+    fi
+    if [[ -f "$APP_DIR/ssl/server.crt" ]]; then
+        openssl x509 -in "$APP_DIR/ssl/server.crt" -text -noout || true
+    fi
+    ;;
+
+  ssl:forget)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    rm -f "$APP_DIR/ssl/server.csr" "$APP_DIR/ssl/server.crt" "$APP_DIR/ssl/server.key"
+    dokku deploy "$APP"
+    ;;
+
+  help)
+    cat && cat<<EOF
+    ssl:generate <app>      Generate certificate signing request for an APP
+    ssl:certificate <app>   Pipe signed certifcate with all intermediates for an APP
+    ssl:key <app>           Pipe private key for an APP
+    ssl:info <app>          Show info about certifcate and certificate request
+    ssl:forget <app>        Wipes certificate for an APP
+EOF
+    ;;
+esac
