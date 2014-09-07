@@ -30,6 +30,7 @@ dpkg: docker-enter/nsenter
 	rm -f dokku-alt-*.deb
 	rm -rf deb-tmp/
 	cp -r deb deb-tmp/
+	chmod 0440 deb-tmp/dokku-alt/etc/sudoers.d/*
 	mkdir -p deb-tmp/dokku-alt/usr/local/bin
 	mkdir -p deb-tmp/dokku-alt/var/lib/dokku-alt
 	mkdir -p deb-tmp/dokku-alt/usr/local/share/man/man1
