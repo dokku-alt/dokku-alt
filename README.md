@@ -19,6 +19,7 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. I
 * Enter and exec commands in already running containers
 * Access-control: deploy only keys (BETA)
 * Create-only application (BETA)
+* Simple SSL commands (BETA)
 
 ### Planned features:
 
@@ -268,6 +269,31 @@ Dokku-alt allows you to bind host-based volumes in very simple manner. To use th
 ## TLS support
 
 Dokku provides easy TLS support from the box. To enable TLS connection to your application, copy the `.crt` and `.key` files into the `/home/dokku/:app/ssl` folder (notice, file names should be `server.crt` and `server.key`, respectively). Redeployment of the application will be needed to apply TLS configuration. Once it is redeployed, the application will be accessible by `https://` (redirection from `http://` is applied as well).
+
+## TLS support (BETA)
+
+Dokku-alt extends this even further by allowing you to use command line interface for certificates:
+
+    ssl:generate <app>                              Generate certificate signing request for an APP
+    ssl:certificate <app>                           Pipe signed certifcate with all intermediates for an APP
+    ssl:forget <app>                                Wipes certificate for an APP
+    ssl:info <app>                                  Show info about certifcate and certificate request
+    ssl:key <app>                                   Pipe private key for an APP
+
+First use: `dokku ssl:generate myapp` to generate certificate signing request (CSR). At the end of process you will receive `BEGIN CERTIFICATE REQUEST` which you can ten copy-n-paste to your SSL signer (ie. http://startssl.com).
+
+When you receive your signed certificate pipe it with **ALL INTERMEDIATES** to `dokku ssl:certificate myapp`. If done correctly you have SSL enabled for your site.
+
+    cat mycert.pem intermediate.pem ca.pem | dokku ssl:certificate myapp
+
+If it happens that you have already created certificate you can use it, by piping your **UNENCRYPTED** your certificate and your private key:
+
+    cat mycert.pem intermediate.pem ca.pem | dokku ssl:certificate myapp
+    cat mycert.key | dokku ssl:key myapp
+
+To view asigned certificate:
+
+    dokku ssl:info myapp
 
 ## dokkurc Configuration
 
