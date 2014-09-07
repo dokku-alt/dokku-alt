@@ -56,7 +56,7 @@ else
 	echo "Conflicts: pluginhook, dokku-alt, dokku-alt-beta" >> deb-tmp/dokku-alt/DEBIAN/control
 endif
 endif
-	dpkg-deb --build deb-tmp/dokku-alt $(DEB_PKG)
+	fakeroot dpkg-deb --build deb-tmp/dokku-alt $(DEB_PKG)
 	rm -rf deb-tmp/
 
 install: dpkg

@@ -2,7 +2,7 @@ box: wercker-labs/docker
 build:
   steps:
     - install-packages:
-        packages: lxc-docker=1.2.0 apt-transport-https locales git make curl software-properties-common nginx dnsutils aufs-tools dpkg-dev openssh-server man-db apache2-utils
+        packages: lxc-docker=1.2.0 apt-transport-https locales git make curl software-properties-common nginx dnsutils aufs-tools dpkg-dev openssh-server man-db apache2-utils fakeroot
     - script:
         name: print the docker version
         code: docker version
