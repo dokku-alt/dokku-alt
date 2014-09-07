@@ -18,6 +18,7 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. I
 * Preboot / zero-downtime deploy
 * Enter and exec commands in already running containers
 * Access-control: deploy only keys (BETA)
+* Create-only application (BETA)
 
 ### Planned features:
 
