@@ -147,7 +147,7 @@ From now on you will have to do `dokku create` at first.
 
 ## Allowing push-access (deploy only) access for dokku (BETA)
 
-You can add ssh key and allow it explicit access to one or many applications. This key will be allowed only to push or pull from remote repository, it will not be allowed to automatically create a new app or access dokku commands (ie. modification of app config)
+Dokku-alt allows you to add additional public keys to applications. The specific case is to add special deploy-only key, used for example by Countinous Integration (ie. Jenkins). Key added as deploy-only can only be used to `git push` specific application. It will not allowed to execute any on `dokku` commands. You can add ssh key and allow it explicit access to one or many applications. 
 
 Add locally:
 
@@ -164,6 +164,14 @@ To later revoke key execute:
 You can also list all fingerprints allowed to deploy an application:
 
     $ dokku deploy:list myapp
+
+Add a new admin user:
+
+    $ cat .ssh/id_rsa.pub | dokku access:add
+
+Revoke permissions for admin user:
+
+    $ dokku access:revoke FINGERPRINT
 
 ## Environment variable management
 
