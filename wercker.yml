@@ -1,0 +1,21 @@
+box: wercker-labs/docker
+build:
+  steps:
+    - install-packages:
+        packages: lxc-docker=1.2.0 apt-transport-https locales git make curl software-properties-common nginx dnsutils aufs-tools dpkg-dev openssh-server man-db apache2-utils
+    - script:
+        name: print the docker version
+        code: docker version
+    - script:
+        name: print system-wide docker info
+        code: docker info
+    - script:
+        name: do not depend on linux-image-extra-virtual
+        code: sed -i 's/linux-image-extra-virtual, //g' deb/dokku-alt/DEBIAN/control
+    - script:
+        name: install dokku-alt
+        code: make install
+    - script:
+        name: run the test suite
+        code: tests/run_localhost
+

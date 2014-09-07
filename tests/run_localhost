@@ -8,24 +8,23 @@ echo "=====> Starting services..."
 echo "========================================"
 echo ""
 
-service nginx start
-service docker start
-service ssh start
+sudo service nginx restart
+sudo service docker restart
+sudo service ssh restart
 
 echo "========================================"
 echo "=====> Configuring dokku..."
 echo "========================================"
 echo ""
 
-export HOME=/root
 [[ -f ~/.ssh/id_rsa ]] || ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa
 cat <<EOF > ~/.ssh/config
 Host *
     StrictHostKeyChecking no
 EOF
-sshcommand create dokku /usr/local/bin/dokku
-cat ~/.ssh/id_rsa.pub | sshcommand acl-add dokku testkey
-dokku plugins-install
+sudo sshcommand create dokku /usr/local/bin/dokku
+cat ~/.ssh/id_rsa.pub | sudo sshcommand acl-add dokku testkey
+sudo dokku plugins-install
 ssh dokku@localhost version
 
 echo "========================================"
@@ -47,7 +46,8 @@ echo "=====> Running test deploy with VHOST"
 echo "========================================"
 echo ""
 
-echo "dokku.me" > /home/dokku/VHOST
+sudo bash -c 'echo dokku.me > /home/dokku/VHOST'
+
 for app_path in apps/*; do
   app=$(basename $app_path)
   echo "----------------------------------------"

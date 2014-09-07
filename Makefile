@@ -60,8 +60,8 @@ endif
 	rm -rf deb-tmp/
 
 install: dpkg
-	dpkg -i $(DEB_PKG)
-	apt-get -f -y install
+	sudo dpkg -i $(DEB_PKG)
+	sudo apt-get -f -y install
 
 devinstall:
 	[ -e /usr/local/bin/dokku ] || echo Please install dokku-alt first
