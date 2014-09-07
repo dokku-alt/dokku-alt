@@ -50,6 +50,13 @@ server {
     proxy_pass  http://$APP;
 EOF
 
+    if [[ -f "$APP_DIR/htpasswd" ]]; then
+      cat <<EOF >> $DOKKU_ROOT/$APP/nginx.conf
+    auth_basic "closed website";
+    auth_basic_user_file "$APP_DIR/htpasswd";
+EOF
+    fi
+
     for host in "${hostnames[@]}";
     do
       cat <<EOF >> $DOKKU_ROOT/$APP/nginx.conf
@@ -83,6 +90,13 @@ server {
   location    / {
     proxy_pass  http://$APP;
 EOF
+
+    if [[ -f "$APP_DIR/htpasswd" ]]; then
+      cat <<EOF >> $DOKKU_ROOT/$APP/nginx.conf
+    auth_basic "closed website";
+    auth_basic_user_file "$APP_DIR/htpasswd";
+EOF
+    fi
 
     for host in "${hostnames[@]}";
     do

@@ -19,6 +19,7 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. I
 * Enter and exec commands in already running containers
 * Access-control: deploy only keys (BETA)
 * Create-only application (BETA)
+* HTTP-Basic Auth support (BETA)
 * Simple SSL commands (BETA)
 
 ### Planned features:
@@ -265,6 +266,30 @@ It is just simple as this.
 Dokku-alt allows you to bind host-based volumes in very simple manner. To use this feature you have to be logged as `root` and than simply type:
 
     dokku volume:create host-based-volume /path/to/host/volume:/path/to/volume/in/container
+
+## HTTP-Basic Auth support (BETA)
+
+Dokku-alt allows you to secure any application with HTTP-Basic Auth. There are a few commands that makes it happen:
+
+    htpasswd:add <app> <user>                       Add http-basic auth user
+    htpasswd:disable <app>                          Remove http-basic Auth
+    htpasswd:remove <app> <user>                    Remove user
+
+If you want to enable and add a new user simply type command below and when prompted type your password twice:
+
+    dokku htpasswd:add myapp myuser
+
+You can also pipe password:
+
+    echo mypass | dokku htpasswd:add myapp myuser
+
+To revoke user's permission:
+
+    dokku htpasswd:remove myapp
+
+To remove HTTP-Basic Auth completely:
+
+    dokku htpasswd:disable myapp
 
 ## TLS support
 
