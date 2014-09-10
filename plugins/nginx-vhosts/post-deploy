@@ -43,6 +43,17 @@ EOF
   ssl_prefer_server_ciphers on;
 
 EOF
+
+  DOKKU_ENABLE_HSTS="$(config_get DOKKU_ENABLE_HSTS || true)"
+  DOKKU_ENABLE_HSTS="${DOKKU_ENABLE_HSTS:-$DOKKU_FORCE_ENABLE_HSTS}"
+
+  if [[ -n "$DOKKU_ENABLE_HSTS" ]] && [[ -z "$DOKKU_ENABLE_HTTP_HOST" ]]; then
+    cat <<EOF
+  add_header Strict-Transport-Security "max-age=31536000; includeSubdomains";
+
+EOF
+  fi
+
   else
     cat <<EOF
   listen      [::]:80;
