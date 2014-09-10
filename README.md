@@ -21,6 +21,7 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. I
 * Create-only application (BETA)
 * HTTP-Basic Auth support (BETA)
 * Simple SSL commands (BETA)
+* SPDY and HSTS (BETA)
 
 ### Planned features:
 
@@ -320,6 +321,18 @@ To view asigned certificate:
 
     dokku ssl:info myapp
 
+## HSTS support (BETA)
+
+HTTP Strict Transport Security (HSTS) is a web security policy mechanism whereby a web server declares that complying user agents (such as a web browser) are to interact with it using only secure HTTPS connections. Once enabled all further communication will be done over TLS only, there's no revert mechanism. As this is additional security feature you have to do it by hand. To enable HSTS for site use:
+
+    dokku config:set myapp DOKKU_ENABLE_HSTS=1
+
+## Serve an app over HTTP as well (BETA)
+
+By default `dokku-alt` for all TLS-enabled apps will create redirects which requires user to use `https://`. In some cases it maybe required to allow `http://` access which is potentially insecure. To enable simulatenous HTTP and HTTPS set specific config:
+
+    dokku config:set myapp DOKKU_ENABLE_HTTP_HOST=1
+
 ## dokkurc Configuration
 
 You can fine-tune some aspects of Dokku behaviour and its plugins by setting variables in `dokkurc` file placed in Dokku root directory – usually `/home/dokku`. `dokkurc` is sourced by the main `dokku` script.
@@ -338,6 +351,8 @@ Example:
 * `MONGODB_IMAGE` – Docker image to be used for MongoDB plugin, defaults to [`ayufan/dokku-alt-mongodb`](https://registry.hub.docker.com/u/ayufan/dokku-alt-mongodb/).
 * `POSTGRESQL_IMAGE` – Docker image to be used for PostgreSQL plugin, defaults to [`ayufan/dokku-alt-postgresql`](https://registry.hub.docker.com/u/ayufan/dokku-alt-postgresql/).
 * `REDIS_IMAGE` – Docker image to be used for Redis plugin, defaults to [`ayufan/dokku-alt-redis`](https://registry.hub.docker.com/u/ayufan/dokku-alt-redis/).
+* `DOKKU_FORCE_ENABLE_HSTS` (BETA) - Force to enable HSTS header (validity for one year) for all TLS-enabled apps
+* `DOKKU_DISABLE_NGINX_X_FORWARDED` (BETA) - Disable setting of `X-Forwarded` headers by nginx, useful for CDN installations.
 
 ## Help
     
