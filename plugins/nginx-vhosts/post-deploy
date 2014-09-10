@@ -28,9 +28,12 @@ EOF
 
   if [[ "$SCHEME" == "https" ]]; then
     cat <<EOF
-  listen      [::]:443;
-  listen      443;
+  listen      [::]:443 ssl spdy;
+  listen      443 ssl spdy;
   server_name $@;
+
+  keepalive_timeout   70;
+  add_header Alternate-Protocol 443:npn-spdy/2;
 
   ssl on;
   ssl_certificate     $SSL_INUSE/server.crt;
