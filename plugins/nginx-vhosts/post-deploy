@@ -89,12 +89,12 @@ EOF
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection "upgrade";
     proxy_set_header Host \$http_host;
+    proxy_set_header X-Forwarded-For \$remote_addr;
 EOF
 
   if [[ -z "$DOKKU_DISABLE_NGINX_X_FORWARDED" ]]; then
     cat <<EOF
     proxy_set_header X-Forwarded-Proto \$scheme;
-    proxy_set_header X-Forwarded-For \$remote_addr;
     proxy_set_header X-Forwarded-Port \$server_port;
     proxy_set_header X-Request-Start \$msec;
 EOF
