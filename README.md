@@ -22,6 +22,7 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. I
 * HTTP-Basic Auth support (BETA)
 * Simple SSL commands (BETA)
 * SPDY and HSTS (BETA)
+* Configure NGINX listen address (BETA)
 
 ### Planned features:
 
@@ -351,6 +352,8 @@ Example:
 * `MONGODB_IMAGE` – Docker image to be used for MongoDB plugin, defaults to [`ayufan/dokku-alt-mongodb`](https://registry.hub.docker.com/u/ayufan/dokku-alt-mongodb/).
 * `POSTGRESQL_IMAGE` – Docker image to be used for PostgreSQL plugin, defaults to [`ayufan/dokku-alt-postgresql`](https://registry.hub.docker.com/u/ayufan/dokku-alt-postgresql/).
 * `REDIS_IMAGE` – Docker image to be used for Redis plugin, defaults to [`ayufan/dokku-alt-redis`](https://registry.hub.docker.com/u/ayufan/dokku-alt-redis/).
+* `DOKKU_LISTEN_IPV4` (BETA) - Set the IPV4 address on which NGINX will listen for requests
+* `DOKKU_LISTEN_IPV6` (BETA) - Set the IPV6 address on which NGINX will listen for requests
 * `DOKKU_FORCE_ENABLE_HSTS` (BETA) - Force to enable HSTS header (validity for one year) for all TLS-enabled apps
 * `DOKKU_DISABLE_NGINX_X_FORWARDED` (BETA) - Disable setting of `X-Forwarded` headers by nginx, useful for CDN installations.
 
