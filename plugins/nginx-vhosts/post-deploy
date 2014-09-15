@@ -19,6 +19,8 @@ hostnames_for_app "$APP"
 http_host() {
   [[ $# -le 1 ]] && return
 
+  DOKKU_LISTEN_IPV4="${DOKKU_LISTEN_IPV4:-*}"
+  DOKKU_LISTEN_IPV6="${DOKKU_LISTEN_IPV6:-[::]}"
   SCHEME="$1"
   shift
 
@@ -28,8 +30,8 @@ EOF
 
   if [[ "$SCHEME" == "https" ]]; then
     cat <<EOF
-  listen      [::]:443 ssl spdy;
-  listen      443 ssl spdy;
+  listen      $DOKKU_LISTEN_IPV6:443 ssl spdy;
+  listen      $DOKKU_LISTEN_IPV4:443 ssl spdy;
   server_name $@;
 
   keepalive_timeout   70;
@@ -56,8 +58,8 @@ EOF
 
   else
     cat <<EOF
-  listen      [::]:80;
-  listen      80;
+  listen      $DOKKU_LISTEN_IPV6:80;
+  listen      $DOKKU_LISTEN_IPV4:80;
   server_name $@;
 
 EOF
@@ -112,8 +114,8 @@ http_redirect() {
 
   cat<<EOF
 server {
-  listen      [::]:80;
-  listen      80;
+  listen      $DOKKU_LISTEN_IPV6:80;
+  listen      $DOKKU_LISTEN_IPV4:80;
   server_name $@;
   return 302 $SCHEME://$hostname\$request_uri;
 }
