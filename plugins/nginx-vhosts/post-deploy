@@ -108,6 +108,8 @@ EOF
 http_redirect() {
   [[ $# -le 1 ]] && return
 
+  DOKKU_LISTEN_IPV4="${DOKKU_LISTEN_IPV4:-*}"
+  DOKKU_LISTEN_IPV6="${DOKKU_LISTEN_IPV6:-[::]}"
   SCHEME="$1"
   shift
 
