@@ -79,9 +79,8 @@ EOF
 
   for host in "$@";
   do
-    cat <<EOF
-    proxy_redirect http://$host:$INT_PORT/ http://$host/;
-EOF
+    echo "proxy_redirect http://$host:$INT_PORT/ $SCHEME://$host/;"
+    [[ "$SCHEME" == "https" ]] && echo "proxy_redirect https://$host:$INT_PORT/ $SCHEME://$host/;"
   done
 
   cat <<EOF
