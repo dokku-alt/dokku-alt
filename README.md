@@ -152,12 +152,12 @@ From now on you will have to do `dokku create` at first.
 
 ## Allowing push-access (deploy only) access for dokku
 
-Dokku-alt allows you to add additional public keys to applications. The specific case is to add special deploy-only key, used for example by Countinous Integration (ie. Jenkins). Key added as deploy-only can only be used to `git push` specific application. It will not allowed to execute any on `dokku` commands. You can add ssh key and allow it explicit access to one or many applications. 
+Dokku-alt allows you to add additional public keys to applications. The specific case is to add special deploy-only key, used for example by Countinous Integration (ie. Jenkins). Key added as deploy-only can only be used to `git push` specific application. It will not allowed to execute any on `dokku` commands. You can add ssh key and allow it explicit access to one or many applications.
 
 Add locally:
 
     $ cat .ssh/id_rsa.pub | dokku deploy:allow myapp
-    
+
 Add key remotely:
 
     $ cat .ssh/id_rsa.pub | ssh dokku@dokku deploy:allow myapp
@@ -364,8 +364,18 @@ Example:
 * `DOKKU_FORCE_ENABLE_HSTS` - Force to enable HSTS header (validity for one year) for all TLS-enabled apps
 * `DOKKU_DISABLE_NGINX_X_FORWARDED` - Disable setting of `X-Forwarded` headers by nginx, useful for CDN installations.
 
+#### PostgreSQL specific
+
+These parameters should only be changed when you are using a PostgreSQL image that has a different setup.
+
+* `POSTGRESQL_USER` - PostgreSQL admin user, defaults to `root`
+* `POSTGRESQL_PORT` - PostgreSQL listen port, defaults to `5432`
+* `POSTGRESQL_COMMAND` - PostgreSQL startup command for Docker, defaults to `/usr/bin/start_pgsql.sh`
+* `POSTGRESQL_CONTAINER_VOLUME` - Where the data volume gets mounted in the PostgreSQL container, defaults to `/opt/postgresql`
+* `POSTGRESQL_CONTAINER_PASSWORD` - Where the password file gets mounted in the PostgreSQL container, defaults to `/opt/postgresql_password`
+
 ## Help
-    
+
     $ dokku help
     apps:disable <app>                              Disable specific app
     apps:enable <app>                               Re-enable specific app
