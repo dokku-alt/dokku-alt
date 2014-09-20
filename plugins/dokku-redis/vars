@@ -3,10 +3,11 @@
 source "$(dirname $0)/../dokku_common"
 
 DB_ROOT="$DOKKU_ROOT/.redis"
-DB_IMAGE="${REDIS_IMAGE:=ayufan/dokku-alt-redis}"
+DB_IMAGE="${REDIS_IMAGE:-ayufan/dokku-alt-redis}"
 DB_CONTAINER_LINK="redis"
-DB_CONTAINER_VOLUME="/var/lib/redis"
-DB_PORT=6379
+DB_CONTAINER_VOLUME="${REDIS_CONTAINER_VOLUME:-/var/lib/redis}"
+DB_PORT="${REDIS_PORT:-6379}"
+DB_COMMAND="${REDIS_COMMAND:-/usr/bin/start_redis.sh}"
 
 function redis_for_app() {
 	verify_app_name "$1"
@@ -21,11 +22,12 @@ function start_database_container() {
 	docker run --name="$DB_DATA_CONTAINER" \
 		-v "$DB_CONTAINER_VOLUME" \
 		busybox:latest true 1>/dev/null 2>/dev/null || true
+
 	docker run --detach \
-		--volumes-from="$DB_DATA_CONTAINER" \
-		--name="$DB_CONTAINER" \
-		"$DB_IMAGE" \
-		/usr/bin/start_redis.sh >/dev/null
+		   --volumes-from="$DB_DATA_CONTAINER" \
+		   --name="$DB_CONTAINER" \
+		   "$DB_IMAGE" \
+		   "$DB_COMMAND" >/dev/null
 }
 
 function ensure_database_container_is_running() {

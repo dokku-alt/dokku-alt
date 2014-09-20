@@ -392,6 +392,14 @@ These parameters should only be changed when you are using a PostgreSQL image th
 * `POSTGRESQL_CONTAINER_VOLUME` - Where the data volume gets mounted in the PostgreSQL container, defaults to `/opt/postgresql`
 * `POSTGRESQL_CONTAINER_PASSWORD` - Where the password file gets mounted in the PostgreSQL container, defaults to `/opt/postgresql_password`
 
+#### Redis specific
+
+These parameters should only be changed when you are using a Redis image that has a different setup.
+
+* `REDIS_PORT` - PostgreSQL listen port, defaults to `6379`
+* `REDIS_COMMAND` - PostgreSQL startup command for Docker, defaults to `/usr/bin/start_redis.sh`
+* `REDIS_CONTAINER_VOLUME` - Where the data volume gets mounted in the Redis container, defaults to `/var/lib/redis`
+
 ## Help
 
     $ dokku help
