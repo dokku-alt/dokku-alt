@@ -1,0 +1,56 @@
+#!/bin/bash
+
+function start_database_container() {
+    if docker inspect "$DB_CONTAINER" >/dev/null 2>/dev/null; then
+        return
+    fi
+
+    # Create data directory if does not exist
+    if [[ ! -d "$DB_ROOT" ]]; then
+        mkdir -p "$DB_ROOT"
+        chown -R dokku: "$DB_ROOT"
+    fi
+
+    # Create root password if not specified
+    if [[ ! -f "$DB_ADMIN_PASSWORD" ]]; then
+        generate_random_password > "$DB_ADMIN_PASSWORD"
+    fi
+
+    docker run --detach \
+               --name="$DB_CONTAINER" \
+               --volume="$DB_VOLUME":"$DB_CONTAINER_VOLUME" \
+               --volume="$DB_ADMIN_PASSWORD":"$DB_CONTAINER_PASSWORD" \
+               "$DB_IMAGE" \
+               "$DB_COMMAND" >/dev/null
+    for i in $(seq 1 100); do
+        echo "Waiting for $DB_HOST to boot ($i)..."
+        if [[ -f "$DB_VOLUME/initialized" ]]; then
+            break
+        fi
+        sleep 5s
+    done
+    sleep 5s
+}
+
+function restart_database_container() {
+    stop_and_remove_container "$DB_CONTAINER"
+    start_database_container
+}
+
+function ensure_database_container_is_running() {
+    remove_container "$DB_CONTAINER"
+    start_database_container
+}
+
+function db_info() {
+    APP="$1"
+    DB_NAME="$2"
+    DB_PASSWORD="$DB_APP_PASSWORDS$APP"
+    DB_LINK="$DB_APP_DATABASES$APP/$DB_NAME"
+    DB_PASSWORD="$(cat "$DB_PASSWORD" 2>/dev/null)"
+    DB_USER="$APP"
+    DB_DATABASE="$DB_NAME"
+    DB_URL="$DB_PROTOCOL://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_DATABASE"
+    [[ ! -f "$DB_LINK" ]] && return 1
+    return 0
+}
