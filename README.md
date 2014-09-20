@@ -364,6 +364,15 @@ Example:
 * `DOKKU_FORCE_ENABLE_HSTS` - Force to enable HSTS header (validity for one year) for all TLS-enabled apps
 * `DOKKU_DISABLE_NGINX_X_FORWARDED` - Disable setting of `X-Forwarded` headers by nginx, useful for CDN installations.
 
+#### MariaDB specific
+
+These parameters should only be changed when you are using a MariaDB image that has a different setup.
+
+* `MARIADB_PORT` - MariaDB listen port, defaults to `3306`
+* `MARIADB_COMMAND` - MariaDB startup command for Docker, defaults to `/usr/bin/start_mariadb.sh`
+* `MARIADB_CONTAINER_VOLUME` - Where the data volume gets mounted in the MariaDB container, defaults to `/opt/mysql`
+* `MARIADB_CONTAINER_PASSWORD` - Where the password file gets mounted in the MariaDB container, defaults to `/opt/mysql_password`
+
 #### PostgreSQL specific
 
 These parameters should only be changed when you are using a PostgreSQL image that has a different setup.
