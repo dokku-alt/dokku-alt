@@ -21,18 +21,18 @@ DB_APP_PASSWORDS="$DB_ROOT/pwd_app_"
 DB_APP_DATABASES="$DB_ROOT/dbs_app_"
 
 pgsql_shell() {
-    DB_USER="$1"
-    DB_PASSWORD="$2"
-    shift 2
-    ensure_database_container_is_running
-    docker run -i --rm \
-            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
-            -e PGUSER="$DB_USER" \
-            -e PGPASSWORD="$(cat "$DB_PASSWORD")" \
-            "$DB_IMAGE" \
-        bash -c "psql -v ON_ERROR_STOP=1 --host=\"$DB_HOST\" --port=\"$DB_PORT\" $@"
+  DB_USER="$1"
+  DB_PASSWORD="$2"
+  shift 2
+  ensure_database_container_is_running
+  docker run -i --rm \
+             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+             -e PGUSER="$DB_USER" \
+             -e PGPASSWORD="$(cat "$DB_PASSWORD")" \
+             "$DB_IMAGE" \
+             bash -c "psql -v ON_ERROR_STOP=1 --host=\"$DB_HOST\" --port=\"$DB_PORT\" $@"
 }
 
 pgsql_admin() {
-    pgsql_shell "$DB_ADMIN_USER" "$DB_ADMIN_PASSWORD" "--dbname=$DB_ADMIN_USER" "$@"
+  pgsql_shell "$DB_ADMIN_USER" "$DB_ADMIN_PASSWORD" "--dbname=$DB_ADMIN_USER" "$@"
 }
