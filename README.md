@@ -373,6 +373,15 @@ These parameters should only be changed when you are using a MariaDB image that 
 * `MARIADB_CONTAINER_VOLUME` - Where the data volume gets mounted in the MariaDB container, defaults to `/opt/mysql`
 * `MARIADB_CONTAINER_PASSWORD` - Where the password file gets mounted in the MariaDB container, defaults to `/opt/mysql_password`
 
+#### MongoDB specific
+
+These parameters should only be changed when you are using a MongoDB image that has a different setup.
+
+* `MONGODB_PORT` - MongoDB listen port, defaults to `27017`
+* `MONGODB_COMMAND` - MongoDB startup command for Docker, defaults to `/usr/bin/start_mariadb.sh`
+* `MONGODB_CONTAINER_VOLUME` - Where the data volume gets mounted in the MongoDB container, defaults to `/opt/mongodb`
+* `MONGODB_CONTAINER_PASSWORD` - Where the password file gets mounted in the MongoDB container, defaults to `/opt/mongodb_password`
+
 #### PostgreSQL specific
 
 These parameters should only be changed when you are using a PostgreSQL image that has a different setup.

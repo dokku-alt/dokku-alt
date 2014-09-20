@@ -3,15 +3,16 @@
 source "$(dirname $0)/../dokku_common"
 
 DB_ROOT="$DOKKU_ROOT/.mongodb"
-DB_IMAGE="${MONGODB_IMAGE:=ayufan/dokku-alt-mongodb}"
+DB_IMAGE="${MONGODB_IMAGE:-ayufan/dokku-alt-mongodb}"
 DB_VOLUME="$DB_ROOT/mongodb"
 DB_ADMIN_PASSWORD="$DB_ROOT/mongodb_password"
 DB_CONTAINER="mongodb_single_container"
 DB_CONTAINER_LINK="mongodb"
-DB_CONTAINER_VOLUME="/opt/mongodb"
-DB_CONTAINER_PASSWORD="/opt/mongodb_password"
-DB_PORT=27017
+DB_CONTAINER_VOLUME="${MONGODB_CONTAINER_VOLUME:-/opt/mongodb}"
+DB_CONTAINER_PASSWORD="${MONGODB_CONTAINER_PASSWORD:-/opt/mongodb_password}"
+DB_PORT="${MONGODB_PORT:-27017}"
 DB_HOST="$DB_CONTAINER_LINK"
+DB_COMMAND="${MONGODB_COMMAND:-/usr/bin/start_mongodb.sh}"
 
 DB_APP_PASSWORDS="$DB_ROOT/pwd_app_"
 DB_APP_DATABASES="$DB_ROOT/dbs_app_"
@@ -33,11 +34,12 @@ function start_database_container() {
     fi
 
     docker run --detach \
+               --name="$DB_CONTAINER" \
                --volume="$DB_VOLUME":"$DB_CONTAINER_VOLUME" \
                --volume="$DB_ADMIN_PASSWORD":"$DB_CONTAINER_PASSWORD" \
-               --name="$DB_CONTAINER" \
+               --env="DB_ADMIN_PASS=$(cat $DB_ADMIN_PASSWORD 2>/dev/null)" \
                "$DB_IMAGE" \
-               /usr/bin/start_mongodb.sh >/dev/null
+               "$DB_COMMAND" >/dev/null
     for i in $(seq 1 100); do
         echo "Waiting for $DB_HOST to boot ($i)..."
         if [[ -f "$DB_VOLUME/initialized" ]]; then
