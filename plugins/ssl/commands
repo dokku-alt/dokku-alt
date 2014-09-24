@@ -32,7 +32,7 @@ case "$1" in
     verify_max_args 2 "$@"
     mkdir -p "$APP_DIR/ssl"
     KEY=$(cat)
-    echo "$KEY" | openssl rsa -in privateKey.key -check
+    echo "$KEY" | openssl rsa -check
     echo "$KEY" > "$APP_DIR/ssl/server.key"
 
     [[ ! -f "$APP_DIR/ssl/server.crt" ]] || dokku deploy "$APP"
