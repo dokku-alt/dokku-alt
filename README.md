@@ -437,13 +437,32 @@ Example:
 
 ## Support
 
-You can use [Github Issues](https://github.com/dokku-alt/dokku-alt/issues), check [Troubleshooting](https://github.com/progrium/dokku/wiki/Troubleshooting) on the wiki, or join us on [freenode in #dokku](https://webchat.freenode.net/?channels=%23dokku)
+You can use [Github Issues](https://github.com/dokku-alt/dokku-alt/issues).
+
+### Fix Shellshock vulnerability
+
+Shellshock (CVE-2014-6271, CVE-2014-7169, CVE-2014-7186, CVE-2014-7187) is a vulnerability in GNU's bash shell that gives attackers access to run remote commands on a vulnerable system. More info you can find there: https://shellshocker.net/.
+
+1. `sudo dokku plugins-install`
+2. If you use Dockerfile you need for every app which uses it redownload image names used by `FROM`. Then issue docker pull every image used by FROM: `docker pull ubuntu:trusty`. You don't have to do it for buildstep-based images, it were done by `plugins-install`. Please check `Dockerfile` of the app:
+
+        FROM ubuntu:trusty
+        RUN ...
+
+    Then run in server's terminal: `docker pull ubuntu:trusty`
+
+3. Rebuild all applications with cache wipe: `dokku rebuild:all:force` (for now only available in BETA).
+4. Voila. Your are secure!
 
 ## Components
 
  * [Docker](https://github.com/dotcloud/docker) - Container runtime and manager
  * [Dokku](https://github.com/progrium/dokku) - Orginal Dokku instance
- * [Buildstep](https://github.com/progrium/buildstep) - Buildpack builder
+ * [Buildstep](https://github.com/dokku-alt/progrium-buildstep-dockerfiles) - Buildpack builder
+ * [PostgreSQL](https://github.com/dokku-alt/postgresql-dockerfiles) - PostgreSQL image
+ * [MariaDB](https://github.com/dokku-alt/mariadb-dockerfiles) - MariaDB image
+ * [MongoDB](https://github.com/dokku-alt/mongodb-dockerfiles) - MongoDB image
+ * [Redis](https://github.com/dokku-alt/redis-dockerfiles) - Redis image
  * [pluginhook](https://github.com/progrium/pluginhook) - Shell based plugins and hooks
  * [sshcommand](https://github.com/progrium/sshcommand) - Fixed commands over SSH
 
