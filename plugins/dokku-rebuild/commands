@@ -51,7 +51,13 @@ dokku_build_app_from_git() {
       info "Building $APP using Dockerfile..."
       dokku_restore_timestamps "$REV"
       find -name .git -prune -exec rm -rf {} \; > /dev/null
-      docker build -t "$IMAGE_GENERIC:build" .
+      if [[ -f "$APP_DIR/FORCE_CLEAN_CACHE" ]]; then
+        docker build --no-cache=true -t "$IMAGE_GENERIC:build" .
+        # Mark as cleaned-up
+        rm -f "$APP_DIR/FORCE_CLEAN_CACHE"
+      else
+        docker build -t "$IMAGE_GENERIC:build" .
+      fi
       pluginhook pre-build "$APP" "$REV" "dockerfile"
       pluginhook post-build "$APP" "$REV" "dockerfile"
     else
@@ -64,6 +70,11 @@ dokku_build_app_from_git() {
 
       pluginhook pre-build "$APP" "$REV" "buildstep"
       DOCKER_ARGS="$(: | pluginhook docker-args "$APP" build)"
+      if [[ -f "$APP_DIR/FORCE_CLEAN_CACHE" ]]; then
+        remove_container "$APP_CACHE_NAME"
+        # Mark as cleaned-up
+        rm -f "$APP_DIR/FORCE_CLEAN_CACHE"
+      fi
       # start data container for cache
       docker run -d -v "/cache" --name="$APP_CACHE_NAME" \
                 busybox:latest true 1>/dev/null 2>/dev/null || true
@@ -100,6 +111,15 @@ case "$1" in
     dokku_build_app_from_git "$APP" "$REF"
     ;;
 
+  rebuild:force)
+    verify_app_name "$2"
+    verify_max_args 3 "$@"
+
+    touch "$APP_DIR/FORCE_CLEAN_CACHE"
+
+    dokku rebuild "$@"
+    ;;
+
   rebuild:all)
     verify_max_args 1 "$@"
 
@@ -110,10 +130,22 @@ case "$1" in
     done
     ;;
 
+  rebuild:all:force)
+    verify_max_args 1 "$@"
+
+    for app in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
+      touch "$app/FORCE_CLEAN_CACHE"
+    done
+
+    dokku rebuild:all
+    ;;
+
   help)
     cat && cat<<EOF
-    rebuild <app>                                   Rebuild an app
+    rebuild <app> [ref]                             Rebuild an app (using optional ref)
+    rebuild:force <app> [ref]                       Remove all caches and rebuild an app (using optional ref)
     rebuild:all                                     Rebuild all apps
+    rebuild:all:force                               Remove all caches and rebuild all apps
 EOF
   ;;
 
