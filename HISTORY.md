@@ -1,5 +1,20 @@
 # History of Dokku-alt
 
+## 0.3.7
+
+* Added integration testing using Wercker and Travis-CI (not yet fully working)
+* Added `dokku create`
+* Added ACL plugin: admin and deploy only keys
+* Fixed MongoDB user creation
+* Use `postgres` instead of `postgresql` in DATABASE_URL
+* Allow to use alternative images for MariaDB, MongoDB, PostgreSQL and Redis (different server versions)
+* Added plugin for easy TLS certificate management
+* Added HTTP-Basic support
+* Enable SPDY support and allow to use HSTS by specifying DOKKU_ENABLE_HSTS=1 for an app
+* Fixed bug with data-volumes being injected during buildstep process
+* Allow to configure NGINX listen address
+* `X-Forwarded-For` uses `$proxy_add_x_forwarded_for`
+
 ## 0.3.6
 
 * Added bind to 0.0.0.0 in dokku-installer.
