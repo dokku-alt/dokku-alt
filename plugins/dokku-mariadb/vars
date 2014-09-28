@@ -3,7 +3,7 @@
 source "$(dirname $0)/../dokku_common"
 
 DB_ROOT="$DOKKU_ROOT/.mariadb"
-DB_IMAGE="ayufan/dokku-alt-mariadb"
+DB_IMAGE="${MARIADB_IMAGE:=ayufan/dokku-alt-mariadb}"
 DB_VOLUME="$DB_ROOT/mysql"
 DB_ADMIN_PASSWORD="$DB_ROOT/mysql_password"
 DB_CONTAINER="mariadb_single_container"
@@ -19,6 +19,17 @@ DB_APP_DATABASES="$DB_ROOT/dbs_app_"
 function start_database_container() {
     if docker inspect "$DB_CONTAINER" >/dev/null 2>/dev/null; then
         return
+    fi
+
+    # Create .mariadb directory if does not exist
+    if [[ ! -d "$DB_ROOT" ]]; then
+        mkdir -p "$DB_ROOT"
+        chown -R dokku: "$DB_ROOT"
+    fi
+
+    # Create root password if not specified
+    if [[ ! -f "$DB_ADMIN_PASSWORD" ]]; then
+        generate_random_password > "$DB_ADMIN_PASSWORD"
     fi
 
     docker run --detach "--publish=$DB_PORT" \

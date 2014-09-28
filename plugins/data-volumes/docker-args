@@ -8,7 +8,9 @@ shopt -s nullglob
 
 cat
 
-while read VOLUME_APP; do
-	VOLUME="$VOLUME_CONTAINER_PREFIX$(basename "$(dirname "$VOLUME_APP")")"
-	echo "--volumes-from $VOLUME "
-done < <(find "$VOLUME_ROOT" -type f -name "$APP")
+if [[ "$2" == "web" ]] || [[ "$2" == "run" ]]; then
+	while read VOLUME_APP; do
+		VOLUME="$VOLUME_CONTAINER_PREFIX$(basename "$(dirname "$VOLUME_APP")")"
+		echo "--volumes-from $VOLUME "
+	done < <(find "$VOLUME_ROOT" -type f -name "$APP")
+fi

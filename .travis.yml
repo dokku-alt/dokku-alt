@@ -1,0 +1,30 @@
+---
+sudo: false
+env:
+  global:
+    - USE_VHOST=1
+  matrix:
+    - APP_NAME=acl
+    - APP_NAME=htpasswd
+    - APP_NAME=mariadb
+    - APP_NAME=mongodb
+    - APP_NAME=config
+    - APP_NAME=dockerfile
+    - APP_NAME=gitsubmodules
+    - APP_NAME=go
+    - APP_NAME=java
+    - APP_NAME=multi
+    - APP_NAME=nodejs-express
+    - APP_NAME=php
+    - APP_NAME=postgresql
+    - APP_NAME=python-flask
+    - APP_NAME=static
+    - APP_NAME=static USE_VHOST=0
+matrix:
+  fast_finish: true
+install:
+  - contrib/install_docker_and_uml.sh
+script:
+  - sed -i 's/linux-image-extra-virtual, //g' deb/dokku-alt/DEBIAN/control
+  - sudo make install
+  - contrib/start_docker_and_uml.sh APP_NAME=$APP_NAME USE_VHOST=$USE_VHOST

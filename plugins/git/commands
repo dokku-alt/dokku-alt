@@ -2,9 +2,24 @@
 
 source "$(dirname $0)/../dokku_common"
 
+create_bare_repository() {
+    git init --bare "$2" > /dev/null
+    PRERECEIVE_HOOK="$2/hooks/pre-receive"
+    cat > "$PRERECEIVE_HOOK" <<EOF
+#!/usr/bin/env bash
+set -e; set -o pipefail;
+cat | DOKKU_ROOT="$DOKKU_ROOT" dokku git-hook "$1"
+EOF
+    chmod +x "$PRERECEIVE_HOOK"
+}
+
 case "$1" in
   git-hook)
     verify_app_name "$2"
+
+    # if we got here we have full access
+    export NAME="dokku"
+    export FINGERPRINT=""
 
     while read oldrev newrev refname
     do
@@ -25,14 +40,8 @@ case "$1" in
     check_app_name "$APP"
 
     if [[ $1 == "git-receive-pack" && ! -d "$APP_DIR/refs" ]]; then
-        git init --bare $APP_DIR > /dev/null
-        PRERECEIVE_HOOK="$APP_DIR/hooks/pre-receive"
-        cat > "$PRERECEIVE_HOOK" <<EOF
-#!/usr/bin/env bash
-set -e; set -o pipefail;
-cat | DOKKU_ROOT="$DOKKU_ROOT" dokku git-hook "$APP"
-EOF
-        chmod +x "$PRERECEIVE_HOOK"
+      [[ "$DOKKU_DISABLE_AUTO_APP_CREATE" == "1" ]] && fail "$APP: application doesn't exit, please create it with: dokku create $APP"
+      create_bare_repository "$APP" "$APP_DIR"
     fi
 
     verify_app_name "$APP"
@@ -41,8 +50,18 @@ EOF
     git-shell -c "$args"
     ;;
 
+  create)
+    check_app_name "$2"
+    verify_max_args 2 "$@"
+    [[ -d "$APP_DIR/refs" ]] && fail "$APP: already exist"
+    create_bare_repository "$APP" "$APP_DIR"
+    info "Application $APP created!"
+    ;;
+
   help)
-    cat
+    cat && cat <<EOF
+    create <app>                 Create shallow app
+EOF
     ;;
 esac
 

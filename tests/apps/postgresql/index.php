@@ -9,4 +9,4 @@ $db = substr($url["path"],1);
 
 pg_connect("dbname=$db host=$server user=$username password=$password") or die("Failed to connect");
 
-echo "postgresql-buildstep-test"
+echo "postgresql-buildstep-test";

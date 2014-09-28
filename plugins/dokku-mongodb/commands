@@ -27,7 +27,7 @@ case "$1" in
   mongodb:create)
     verify_db_name "$2"
     verify_max_args 2 "$@"
-    
+
     mongo_admin <<EOF
 use $DB_NAME
 EOF
@@ -90,7 +90,7 @@ EOF
 
     mongo_admin <<EOF
 use $3
-db.addUser("$2", "$(cat "$DB_APP_PASSWORD")")
+db.addUser({"user": "$2", "pwd":"$(cat "$DB_APP_PASSWORD")", "roles": ["readWrite"]})
 EOF
     mkdir -p "$DB_APP_DATABASES$APP"
     touch "$DB_APP_DATABASES$APP/$DB_NAME"

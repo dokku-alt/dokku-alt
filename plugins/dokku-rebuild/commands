@@ -93,10 +93,11 @@ case "$1" in
     elif [[ -f "$APP_DIR/refs/heads/master" ]]; then
       REF="$(cat "$APP_DIR/refs/heads/master")"
     else
-      fail "$APP: No refs/heads/master found"
+      verbose "$APP not yet deployed"
+      return
     fi
     
-    dokku_build_app_from_git "$APP" "$REF" | sed -u "s/^/"$'\e[1G'"/"
+    dokku_build_app_from_git "$APP" "$REF"
     ;;
 
   rebuild:all)

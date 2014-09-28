@@ -30,6 +30,7 @@ dpkg: docker-enter/nsenter
 	rm -f dokku-alt-*.deb
 	rm -rf deb-tmp/
 	cp -r deb deb-tmp/
+	chmod 0440 deb-tmp/dokku-alt/etc/sudoers.d/*
 	mkdir -p deb-tmp/dokku-alt/usr/local/bin
 	mkdir -p deb-tmp/dokku-alt/var/lib/dokku-alt
 	mkdir -p deb-tmp/dokku-alt/usr/local/share/man/man1
@@ -56,12 +57,12 @@ else
 	echo "Conflicts: pluginhook, dokku-alt, dokku-alt-beta" >> deb-tmp/dokku-alt/DEBIAN/control
 endif
 endif
-	dpkg-deb --build deb-tmp/dokku-alt $(DEB_PKG)
+	fakeroot dpkg-deb --build deb-tmp/dokku-alt $(DEB_PKG)
 	rm -rf deb-tmp/
 
 install: dpkg
-	dpkg -i $(DEB_PKG)
-	apt-get -f -y install
+	sudo dpkg -i $(DEB_PKG)
+	sudo apt-get -f -y install
 
 devinstall:
 	[ -e /usr/local/bin/dokku ] || echo Please install dokku-alt first
@@ -81,7 +82,7 @@ dpkg_commit: dpkg
 	gzip -c Packages > Packages.gz
 	gpg --clearsign -o InRelease Release
 	gpg -abs -o Release.gpg Release
-	git add *
+	git add $(DEB_PKG) Packages* Release* InRelease
 	# commit current release
 	git commit -m "New release"
 	git checkout $(DEB_BRANCH)
@@ -99,15 +100,15 @@ docker_run: docker_build
 	docker run --privileged --rm -i -t \
 		-v /home/dokku -v /var/lib/docker \
 		--hostname="dokku.me" \
-		ayufan/dokku-alt \
-		/bin/bash
+		ayufan/dokku-alt
 
-docker_tests: docker_build
-	docker run --privileged --rm -t \
-		-v /home/dokku -v /var/lib/docker \
+docker_tests:
+	-docker run -v /var/lib/docker --name="dokku-alt-docker-volume-data" busybox:latest true
+	docker run --privileged --rm -i -t \
+		--volumes-from dokku-alt-docker-volume-data \
 		--hostname="dokku.me" \
 		ayufan/dokku-alt \
-		/srv/dokku-alt/tests/run_localhost
+		/srv/dokku-alt/tests/run_localhost $(TESTS)
 
 pull:
 	rsync -av dokku.home:/srv/dokku-alt/ dokku

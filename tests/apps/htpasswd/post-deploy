@@ -1,0 +1,29 @@
+#!/bin/bash
+
+REMOTE=$1
+REPO=$2
+PROXY=$3
+
+set -xe
+
+URL=$(ssh $REMOTE url $REPO)
+curl --verbose --fail -x "$PROXY" $URL
+
+echo pass | ssh $REMOTE htpasswd:add $REPO user
+curl --verbose --fail -x "$PROXY" $URL && exit 1
+curl -u user:pass --verbose --fail -x "$PROXY" $URL
+curl -u user:pass2 --verbose --fail -x "$PROXY" $URL && exit 1
+
+echo pass2 | ssh $REMOTE htpasswd:add $REPO user
+curl -u user:pass --verbose --fail -x "$PROXY" $URL && exit 1
+curl -u user:pass2 --verbose --fail -x "$PROXY" $URL
+
+echo pass3 | ssh $REMOTE htpasswd:add $REPO user2
+curl -u user:pass2 --verbose --fail -x "$PROXY" $URL
+curl -u user2:pass3 --verbose --fail -x "$PROXY" $URL
+
+ssh $REMOTE htpasswd:remove $REPO user2
+curl -u user:pass2 --verbose --fail -x "$PROXY" $URL
+curl -u user2:pass3 --verbose --fail -x "$PROXY" $URL && exit 1
+
+ssh $REMOTE htpasswd:disable $REPO

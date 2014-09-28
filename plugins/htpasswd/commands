@@ -1,0 +1,52 @@
+#!/bin/bash
+
+source "$(dirname $0)/vars"
+
+case "$1" in
+  htpasswd:add)
+    verify_app_name "$2"
+    verify_max_args 3 "$@"
+
+    OPTS=""
+    [[ ! -t 0 ]] && OPTS="-i"
+
+    if [[ ! -f "$APP_DIR/htpasswd" ]]; then
+        htpasswd $OPTS -c "$APP_DIR/htpasswd" "$3"
+        info "HTTP-Basic enabled"
+        dokku deploy "$APP"
+    else
+        htpasswd $OPTS "$APP_DIR/htpasswd" "$3"
+    fi
+    ;;
+
+  htpasswd:remove)
+    verify_app_name "$2"
+    verify_max_args 3 "$@"
+
+    if [[ -f "$APP_DIR/htpasswd" ]]; then
+        htpasswd -D "$APP_DIR/htpasswd" "$3"
+        info "$3 user remove from htpasswd!"
+    else
+        info "HTTP-Basic Auth not enabled for $APP"
+    fi
+    ;;
+
+  htpasswd:disable)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+
+    if [[ -f "$APP_DIR/htpasswd" ]]; then
+        rm -f "$APP_DIR/htpasswd"
+        info "HTTP-Basic auth removed from $APP"
+        dokku deploy "$APP"
+    fi
+    ;;
+
+  help)
+    cat && cat<<EOF
+    htpasswd:add <app> <user>           Add http-basic auth user
+    htpasswd:remove <app> <user>        Remove user
+    htpasswd:disable <app>              Remove http-basic Auth
+EOF
+    ;;
+esac

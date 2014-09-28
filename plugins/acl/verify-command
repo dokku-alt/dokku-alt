@@ -1,0 +1,35 @@
+#!/bin/bash
+
+source "$(dirname $0)/vars"
+
+cat
+
+[[ -z "$NAME" ]] && [[ $(id -un) != "root" ]] && fail "Access denied. No user supplied."
+
+if [[ "$NAME" != "deploy" ]]; then
+    # Allow everything
+    exit 0
+fi
+
+[[ -z "$FINGERPRINT" ]] && fail "Access denied. No fingerprint supplied."
+
+case "$1" in
+    git-hook)
+        APP="$2"
+        ;;
+
+    git-*)
+        APP="$(echo "$2" | perl -pe 's/(?<!\\)'\''//g' | sed 's/\\'\''/'\''/g')"
+        ;;
+
+    *)
+        fail "Access denied. Please login as an admin."
+        ;;
+esac
+
+check_app_name "$APP"
+
+if ! is_fingerprint_allowed "$FINGERPRINT"
+then
+    fail "Access denied. You don't have permission to access this app."
+fi

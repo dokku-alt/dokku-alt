@@ -5,14 +5,3 @@ source "$(dirname $0)/vars"
 if docker inspect "$DB_IMAGE" >/dev/null 2>/dev/null; then
 	script -q -c "docker pull '$DB_IMAGE'" /dev/null
 fi
-
-# Create .mariadb directory if does not exist
-if [[ ! -d "$DB_ROOT" ]]; then
-    mkdir -p "$DB_ROOT"
-    chown -R dokku: "$DB_ROOT"
-fi
-
-# Create root password if not specified
-if [[ ! -f "$DB_ADMIN_PASSWORD" ]]; then
-	generate_random_password > "$DB_ADMIN_PASSWORD"
-fi

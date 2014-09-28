@@ -1,0 +1,60 @@
+box: wercker-labs/docker
+build:
+  steps:
+    - install-packages:
+        packages: lxc-docker make
+    - script:
+        name: print the docker version
+        code: docker version
+    - script:
+        name: print system-wide docker info
+        code: docker info
+    - script:
+        name: build dokku-alt docker image
+        code: make docker_build
+    - script:
+        name: run acl tests
+        code: make docker_tests TESTS=apps/acl
+    - script:
+        name: run config tests
+        code: make docker_tests TESTS=apps/config
+    - script:
+        name: run dockerfile tests
+        code: make docker_tests TESTS=apps/dockerfile
+    - script:
+        name: run submodules tests
+        code: make docker_tests TESTS=apps/gitsubmodules
+    - script:
+        name: run go tests
+        code: make docker_tests TESTS=apps/go
+    - script:
+        name: run htpasswd tests
+        code: make docker_tests TESTS=apps/htpasswd
+    - script:
+        name: run java tests
+        code: make docker_tests TESTS=apps/java
+    - script:
+        name: run mariadb tests
+        code: make docker_tests TESTS=apps/mariadb
+    - script:
+        name: run mongodb tests
+        code: make docker_tests TESTS=apps/mongodb
+    - script:
+        name: run multi tests
+        code: make docker_tests TESTS=apps/multi
+    - script:
+        name: run nodejs-express tests
+        code: make docker_tests TESTS=apps/nodejs-express
+    - script:
+        name: run php tests
+        code: make docker_tests TESTS=apps/php
+    - script:
+        name: run postgresql tests
+        code: make docker_tests TESTS=apps/postgresql
+    - script:
+        name: run python-flask tests
+        code: make docker_tests TESTS=apps/python-flask
+    - script:
+        name: run static tests
+        code: make docker_tests TESTS=apps/static
+
