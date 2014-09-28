@@ -53,7 +53,7 @@ case "$1" in
     verify_app_name "$2"
     verify_max_args 2 "$@"
 
-    add_ssh_key "deploy"
+    add_ssh_key "deploy" "deploy"
     if !  is_fingerprint_allowed "$FINGERPRINT"
     then
         echo "$FINGERPRINT" >> "$APP_DIR/$DEPLOY_ALLOWED"

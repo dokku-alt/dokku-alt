@@ -9,6 +9,7 @@ add_ssh_key() {
     KEY_FILE=$(mktemp)
     KEY=$(tee "$KEY_FILE")
     NAME="$1"
+    VERIFY_NAME="$2"
 
     delete_key_file() {
       rm -f "$KEY_FILE"
@@ -17,6 +18,10 @@ add_ssh_key() {
 
     FINGERPRINT=$(ssh-keygen -lf "$KEY_FILE" | awk '{print $2}')
     [[ -z "$FINGERPRINT" ]] && fail "Invalid ssh public key"
+    [[ -n "$VERIFY_NAME" ]] && grep -q "FINGERPRINT=$FINGERPRINT " "$AUTHORIZED_KEYS" && \
+        ! grep -q "FINGERPRINT=$FINGERPRINT NAME=$VERIFY_NAME" "$AUTHORIZED_KEYS" && \
+        fail "$FINGERPRINT is already added with different permission. You have to manually edit authorized_keys and remove the entry."
+
     KEY_PREFIX="command=\"FINGERPRINT=$FINGERPRINT NAME=$NAME \`cat $DOKKU_ROOT/.sshcommand\` \$SSH_ORIGINAL_COMMAND\",no-agent-forwarding,no-user-rc,no-X11-forwarding,no-port-forwarding"
     sed --in-place "/FINGERPRINT=$FINGERPRINT /d" "$AUTHORIZED_KEYS" # remove old key
     echo "$KEY_PREFIX $KEY" >> "$AUTHORIZED_KEYS"

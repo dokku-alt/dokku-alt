@@ -17,12 +17,12 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. I
 * Data volumes with host-based volumes
 * Preboot / zero-downtime deploy
 * Enter and exec commands in already running containers
-* Access-control: deploy only keys (BETA)
-* Create-only application (BETA)
-* HTTP-Basic Auth support (BETA)
-* Simple SSL commands (BETA)
-* SPDY and HSTS (BETA)
-* Configure NGINX listen address (BETA)
+* Access-control: deploy only keys
+* Create-only application
+* HTTP-Basic Auth support
+* Simple SSL commands
+* SPDY and HSTS
+* Configure NGINX listen address
 
 ### Planned features:
 
@@ -61,7 +61,7 @@ Set up a domain and a wildcard domain pointing to that host. Make sure `/home/do
 
 You'll have to add a public key associated with a username by doing something like this from your local machine:
 
-    $ cat ~/.ssh/id_rsa.pub | ssh dokku.me "sudo sshcommand acl-add dokku dokku"
+    $ cat ~/.ssh/id_rsa.pub | ssh dokku.me sudo dokku access:add
 
 ## Upgrade and beta releases
 
@@ -137,7 +137,7 @@ SSH onto the server, then execute:
 
     $ dokku delete myapp
 
-## Create-only application (BETA)
+## Create-only application
 
 Dokku-alt allows you to create application before pushing it. It can be useful when you want to specify additional config variables or assign databases. Simply execute:
 
@@ -149,7 +149,7 @@ There's also possiblity to disable auto-application creation on push. Add to `~/
 
 From now on you will have to do `dokku create` at first.
 
-## Allowing push-access (deploy only) access for dokku (BETA)
+## Allowing push-access (deploy only) access for dokku
 
 Dokku-alt allows you to add additional public keys to applications. The specific case is to add special deploy-only key, used for example by Countinous Integration (ie. Jenkins). Key added as deploy-only can only be used to `git push` specific application. It will not allowed to execute any on `dokku` commands. You can add ssh key and allow it explicit access to one or many applications. 
 
@@ -269,7 +269,7 @@ Dokku-alt allows you to bind host-based volumes in very simple manner. To use th
 
     dokku volume:create host-based-volume /path/to/host/volume:/path/to/volume/in/container
 
-## HTTP-Basic Auth support (BETA)
+## HTTP-Basic Auth support
 
 Dokku-alt allows you to secure any application with HTTP-Basic Auth. There are a few commands that makes it happen:
 
@@ -297,7 +297,7 @@ To remove HTTP-Basic Auth completely:
 
 Dokku provides easy TLS support from the box. To enable TLS connection to your application, copy the `.crt` and `.key` files into the `/home/dokku/:app/ssl` folder (notice, file names should be `server.crt` and `server.key`, respectively). Redeployment of the application will be needed to apply TLS configuration. Once it is redeployed, the application will be accessible by `https://` (redirection from `http://` is applied as well).
 
-## TLS support (BETA)
+## TLS support
 
 Dokku-alt extends this even further by allowing you to use command line interface for certificates:
 
@@ -322,13 +322,13 @@ To view asigned certificate:
 
     dokku ssl:info myapp
 
-## HSTS support (BETA)
+## HSTS support
 
 HTTP Strict Transport Security (HSTS) is a web security policy mechanism whereby a web server declares that complying user agents (such as a web browser) are to interact with it using only secure HTTPS connections. Once enabled all further communication will be done over TLS only, there's no revert mechanism. As this is additional security feature you have to do it by hand. To enable HSTS for site use:
 
     dokku config:set myapp DOKKU_ENABLE_HSTS=1
 
-## Serve an app over HTTP as well (BETA)
+## Serve an app over HTTP as well
 
 By default `dokku-alt` for all TLS-enabled apps will create redirects which requires user to use `https://`. In some cases it maybe required to allow `http://` access which is potentially insecure. To enable simulatenous HTTP and HTTPS set specific config:
 
@@ -352,10 +352,10 @@ Example:
 * `MONGODB_IMAGE` – Docker image to be used for MongoDB plugin, defaults to [`ayufan/dokku-alt-mongodb`](https://registry.hub.docker.com/u/ayufan/dokku-alt-mongodb/).
 * `POSTGRESQL_IMAGE` – Docker image to be used for PostgreSQL plugin, defaults to [`ayufan/dokku-alt-postgresql`](https://registry.hub.docker.com/u/ayufan/dokku-alt-postgresql/).
 * `REDIS_IMAGE` – Docker image to be used for Redis plugin, defaults to [`ayufan/dokku-alt-redis`](https://registry.hub.docker.com/u/ayufan/dokku-alt-redis/).
-* `DOKKU_LISTEN_IPV4` (BETA) - Set the IPV4 address on which NGINX will listen for requests
-* `DOKKU_LISTEN_IPV6` (BETA) - Set the IPV6 address on which NGINX will listen for requests
-* `DOKKU_FORCE_ENABLE_HSTS` (BETA) - Force to enable HSTS header (validity for one year) for all TLS-enabled apps
-* `DOKKU_DISABLE_NGINX_X_FORWARDED` (BETA) - Disable setting of `X-Forwarded` headers by nginx, useful for CDN installations.
+* `DOKKU_LISTEN_IPV4` - Set the IPV4 address on which NGINX will listen for requests
+* `DOKKU_LISTEN_IPV6` - Set the IPV6 address on which NGINX will listen for requests
+* `DOKKU_FORCE_ENABLE_HSTS` - Force to enable HSTS header (validity for one year) for all TLS-enabled apps
+* `DOKKU_DISABLE_NGINX_X_FORWARDED` - Disable setting of `X-Forwarded` headers by nginx, useful for CDN installations.
 
 ## Help
     
