@@ -1,3 +1,0 @@
-#!/bin/bash
-
-exec ssh -i test_rsa -o IdentitiesOnly=yes -o PasswordAuthentication=no "$@"

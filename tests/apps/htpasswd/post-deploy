@@ -7,9 +7,11 @@ PROXY=$3
 set -xe
 
 URL=$(ssh $REMOTE url $REPO)
+sleep 3s
 curl --verbose --fail -x "$PROXY" $URL
 
 echo pass | ssh $REMOTE htpasswd:add $REPO user
+sleep 3s
 curl --verbose --fail -x "$PROXY" $URL && exit 1
 curl -u user:pass --verbose --fail -x "$PROXY" $URL
 curl -u user:pass2 --verbose --fail -x "$PROXY" $URL && exit 1
