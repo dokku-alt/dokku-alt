@@ -84,13 +84,11 @@ EOF
     DB_APP_PASSWORD="$DB_APP_PASSWORDS$APP"
     if [[ ! -f "$DB_APP_PASSWORD" ]]; then
         DB_NEW_PASSWORD="$(generate_random_password)"
-        mysql_admin <<EOF
-CREATE USER '$APP'@'%' IDENTIFIED BY '$DB_NEW_PASSWORD';
-EOF
         echo "$DB_NEW_PASSWORD" > "$DB_APP_PASSWORD"
     fi
     mysql_admin <<EOF
-GRANT ALL ON \`$DB_NAME\`.* TO '$APP'@'%';
+GRANT ALL ON \`$DB_NAME\`.* TO '$APP'@'%' IDENTIFIED BY '$(cat $DB_APP_PASSWORD)';
+FLUSH PRIVILEGES;
 EOF
     mkdir -p "$DB_APP_DATABASES$APP"
     touch "$DB_APP_DATABASES$APP/$DB_NAME"
