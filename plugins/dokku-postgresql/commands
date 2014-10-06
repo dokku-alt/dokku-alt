@@ -7,11 +7,16 @@ verify_db_name() {
     DB_NAME="$1"
 }
 
+verify_extension() {
+    sanitize_name "$1" "extension name"
+    EXTENSION="$1"
+}
+
 case "$1" in
   postgresql:create)
     verify_db_name "$2"
     verify_max_args 2 "$@"
-    
+
     pgsql_admin <<EOF
 CREATE DATABASE "$DB_NAME";
 EOF
@@ -81,6 +86,18 @@ EOF
     touch "$DB_APP_DATABASES$APP/$DB_NAME"
     redeploy_app "$APP"
     ;;
+
+  postgresql:create_extension)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_extension "$4"
+
+    pgsql_admin <<EOF
+CREATE EXTENSION "$EXTENSION";
+EOF
+    redeploy_app "$APP"
+   ;;
+
 
   postgresql:unlink)
     verify_app_name "$2"
