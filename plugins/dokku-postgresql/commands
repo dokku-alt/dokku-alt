@@ -164,14 +164,15 @@ EOF
 
   help)
     cat && cat<<EOF
-    postgresql:create <db>         Create a PostgreSQL database
-    postgresql:delete <db>         Delete specified PostgreSQL database
-    postgresql:list <app>          List linked databases
-    postgresql:link <app> <db>     Link database to app
-    postgresql:unlink <app> <db>   Unlink database from app
-    postgresql:info <app> <db>     Display application informations
-    postgresql:console <app> <db>  Launch console for PostgreSQL container
-    postgresql:dump <app> <db>     Dump database for an app
+    postgresql:create <db>                              Create a PostgreSQL database
+    postgresql:delete <db>                              Delete specified PostgreSQL database
+    postgresql:list <app>                               List linked databases
+    postgresql:link <app> <db>                          Link database to app
+    postgresql:unlink <app> <db>                        Unlink database from app
+    postgresql:info <app> <db>                          Display application informations
+    postgresql:console <app> <db>                       Launch console for PostgreSQL container
+    postgresql:dump <app> <db>                          Dump database for an app
+    postgresql:create_extension <app> <db> <extension>  Create extension in pg database by superuser.
 EOF
     ;;
 
