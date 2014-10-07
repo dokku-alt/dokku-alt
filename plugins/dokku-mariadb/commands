@@ -115,6 +115,23 @@ EOF
     redeploy_app "$APP"
     ;;
 
+  mariadb:admin_console)
+    DB_USER="root"
+    if [[ -t 0 ]]; then
+        docker run -i -t --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            -e MYSQL_PWD="$(cat $DB_ADMIN_PASSWORD)" \
+            "$DB_IMAGE" \
+            bash -c "mysql -u \"$DB_USER\" -h \"$DB_HOST\" -P \"$DB_PORT\" \"$DB_NAME\""
+    else
+            docker run -i --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            -e MYSQL_PWD="$(cat $DB_ADMIN_PASSWORD)" \
+            "$DB_IMAGE" \
+            bash -c "mysql -u \"$DB_USER\" -h \"$DB_HOST\" -P \"$DB_PORT\"  \"$DB_NAME\""
+    fi
+    ;;
+
   mariadb:console)
     verify_app_name "$2"
     verify_db_name "$3"
@@ -164,6 +181,7 @@ EOF
     mariadb:unlink <app> <db>   Unlink database from app
     mariadb:info <app> <db>     Display application informations
     mariadb:console <app> <db>  Launch console for MariaDB container
+    mariadb:admin_console       Launch console as root
     mariadb:dump <app> <db>     Dump database for an app
 EOF
     ;;
