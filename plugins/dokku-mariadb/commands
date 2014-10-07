@@ -27,7 +27,7 @@ case "$1" in
   mariadb:create)
     verify_db_name "$2"
     verify_max_args 2 "$@"
-    
+
     mysql_admin <<EOF
 CREATE DATABASE IF NOT EXISTS \`$DB_NAME\` DEFAULT CHARACTER SET \`utf8\` COLLATE \`utf8_unicode_ci\`;
 EOF
@@ -84,9 +84,12 @@ EOF
     DB_APP_PASSWORD="$DB_APP_PASSWORDS$APP"
     if [[ ! -f "$DB_APP_PASSWORD" ]]; then
         DB_NEW_PASSWORD="$(generate_random_password)"
-        mysql_admin <<EOF
-FLUSH PRIVILEGES;
-EOF
+      mysql_admin <<EOF
+        GRANT USAGE ON *.* TO '$APP'@'%';
+        DROP USER '$APP'@'%';
+        FLUSH PRIVILEGES;
+      EOF
+
         mysql_admin <<EOF
 CREATE USER '$APP'@'%' IDENTIFIED BY '$DB_NEW_PASSWORD';
 EOF
