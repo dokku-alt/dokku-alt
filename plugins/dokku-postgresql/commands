@@ -89,8 +89,7 @@ EOF
 
   postgresql:create_extension)
     verify_app_name "$2"
-    verify_db_name "$3"
-    verify_extension "$4"
+    verify_extension "$3"
 
     pgsql_admin <<EOF
 CREATE EXTENSION "$EXTENSION";
