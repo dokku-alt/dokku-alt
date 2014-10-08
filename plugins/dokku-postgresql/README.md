@@ -11,15 +11,15 @@ Commands
 ```
 $ dokku help
 
-    postgresql:console <app> <db>                       Launch console for PostgreSQL container
-    postgresql:create <db>                              Create a PostgreSQL database
-    postgresql:delete <db>                              Delete specified PostgreSQL database
-    postgresql:dump <app> <db>                          Dump database for an app
-    postgresql:info <app> <db>                          Display application informations
-    postgresql:link <app> <db>                          Link database to app
-    postgresql:list <app>                               List linked databases
-    postgresql:unlink <app> <db>                        Unlink database from app
-    postgresql:create_extension <app> <db> <extension>  Create extension in pg database by superuser.
+    postgresql:console <app> <db>                  Launch console for PostgreSQL container
+    postgresql:create <db>                         Create a PostgreSQL database
+    postgresql:delete <db>                         Delete specified PostgreSQL database
+    postgresql:dump <app> <db>                     Dump database for an app
+    postgresql:info <app> <db>                     Display application informations
+    postgresql:link <app> <db>                     Link database to app
+    postgresql:list <app>                          List linked databases
+    postgresql:unlink <app> <db>                   Unlink database from app
+    postgresql:create_extension <app> <extension>  Create extension in pg database by superuser.
 ```
 
 Simple usage
