@@ -27,7 +27,7 @@ case "$1" in
   mariadb:create)
     verify_db_name "$2"
     verify_max_args 2 "$@"
-    
+
     mysql_admin <<EOF
 CREATE DATABASE IF NOT EXISTS \`$DB_NAME\` DEFAULT CHARACTER SET \`utf8\` COLLATE \`utf8_unicode_ci\`;
 EOF
@@ -84,6 +84,12 @@ EOF
     DB_APP_PASSWORD="$DB_APP_PASSWORDS$APP"
     if [[ ! -f "$DB_APP_PASSWORD" ]]; then
         DB_NEW_PASSWORD="$(generate_random_password)"
+      mysql_admin <<EOF
+        GRANT USAGE ON *.* TO '$APP'@'%';
+        DROP USER '$APP'@'%';
+        FLUSH PRIVILEGES;
+      EOF
+
         mysql_admin <<EOF
 CREATE USER '$APP'@'%' IDENTIFIED BY '$DB_NEW_PASSWORD';
 EOF
@@ -107,6 +113,23 @@ REVOKE ALL ON \`$DB_NAME\`.* FROM '$APP'@'%';
 EOF
     rm "$DB_APP_DATABASES$APP/$DB_NAME"
     redeploy_app "$APP"
+    ;;
+
+  mariadb:admin_console)
+    DB_USER="root"
+    if [[ -t 0 ]]; then
+        docker run -i -t --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            -e MYSQL_PWD="$(cat $DB_ADMIN_PASSWORD)" \
+            "$DB_IMAGE" \
+            bash -c "mysql -u \"$DB_USER\" -h \"$DB_HOST\" -P \"$DB_PORT\" \"$DB_NAME\""
+    else
+            docker run -i --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            -e MYSQL_PWD="$(cat $DB_ADMIN_PASSWORD)" \
+            "$DB_IMAGE" \
+            bash -c "mysql -u \"$DB_USER\" -h \"$DB_HOST\" -P \"$DB_PORT\"  \"$DB_NAME\""
+    fi
     ;;
 
   mariadb:console)
@@ -158,6 +181,7 @@ EOF
     mariadb:unlink <app> <db>   Unlink database from app
     mariadb:info <app> <db>     Display application informations
     mariadb:console <app> <db>  Launch console for MariaDB container
+    mariadb:admin_console       Launch console as root
     mariadb:dump <app> <db>     Dump database for an app
 EOF
     ;;
