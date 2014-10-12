@@ -451,7 +451,7 @@ Shellshock (CVE-2014-6271, CVE-2014-7169, CVE-2014-7186, CVE-2014-7187) is a vul
 
     Then run in server's terminal: `docker pull ubuntu:trusty`
 
-3. Rebuild all applications with cache wipe: `dokku rebuild:all:force` (for now only available in BETA).
+3. Rebuild all applications with cache wipe: `dokku rebuild:all:force`.
 4. Voila. Your are secure!
 
 ## Components

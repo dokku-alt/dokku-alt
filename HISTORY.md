@@ -1,5 +1,13 @@
 # History of Dokku-alt
 
+## 0.3.8
+
+* Added `dokku rebuild:force myapp`, `dokku rebuild:all` and `dokku rebuild:all:force`
+* Updated vhost and list of TLS ciphers.
+* Fixed restart issue.
+* Fixed mariadb user credential creation.
+* Fixed mariadb and mongodb tests.
+
 ## 0.3.7
 
 * Added integration testing using Wercker and Travis-CI (not yet fully working)
