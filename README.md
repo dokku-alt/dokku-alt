@@ -189,6 +189,11 @@ config:set <app> KEY1=VALUE1 [KEY2=VALUE2 ...] - set one or more config vars
 config:unset <app> KEY1 [KEY2 ...] - unset one or more config vars
 ```
 
+### Available environment variables
+
+* `DOKKU_NGINX_PROXY_READ_TIMEOUT` - allows to override `nginx proxy_read_timeout`. Default value is set to '60s'. For more info please refer to: http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_read_timeout.
+* `DOKKU_ENABLE_HTTP_HOST` - when set to 1 application will also serve content on HTTP if HTTPS is enabled
+
 ## Image tagging
 
 When you successfully deploy an app, you can tag it with your name and later in case of failure quickly revert back to that image.

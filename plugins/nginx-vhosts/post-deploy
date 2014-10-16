@@ -101,6 +101,9 @@ EOF
 EOF
   fi
 
+  DOKKU_NGINX_PROXY_READ_TIMEOUT=$(config_get DOKKU_NGINX_PROXY_READ_TIMEOUT || true)
+  [[ -n "$DOKKU_NGINX_PROXY_READ_TIMEOUT" ]] && echo "    proxy_read_timeout $DOKKU_NGINX_PROXY_READ_TIMEOUT;"
+
   cat <<EOF
   }
 }
