@@ -3,7 +3,7 @@
 source "$(dirname $0)/../dokku_common"
 
 case "$1" in
-  apps:list)
+  apps:list|list)
     verify_max_args 1 "$@"
     for app in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
       if [[ -f "$app/refs/heads/master" ]]; then
@@ -12,7 +12,7 @@ case "$1" in
     done
     ;;
 
-  apps:status)
+  apps:status|status)
     verify_app_name "$2"
     verify_max_args 2 "$@"
 
@@ -24,21 +24,21 @@ case "$1" in
   	fi
 	;;
 
-  apps:start)
+  apps:start|start)
     verify_app_name "$2"
     verify_max_args 2 "$@"
     
     docker start "$APP_NAME"
 	;;
 
-  apps:stop)
+  apps:stop|stop)
     verify_app_name "$2"
     verify_max_args 2 "$@"
     
     docker stop "$APP_NAME"
 	;;
 
-  apps:disable)
+  apps:disable|disable)
     verify_app_name "$2"
     verify_max_args 2 "$@"
     if [[ ! -f "$APP_DIR/DISABLED" ]]; then
@@ -49,7 +49,7 @@ case "$1" in
     fi
   ;;
 
-  apps:enable)
+  apps:enable|enable)
     verify_app_name "$2"
     verify_max_args 2 "$@"
     if [[ -f "$APP_DIR/DISABLED" ]]; then
@@ -60,13 +60,13 @@ case "$1" in
     fi
   ;;
 
-  apps:restart)
+  apps:restart|restart)
     verify_app_name "$2"
     verify_max_args 2 "$@"
     docker restart "$APP_NAME"
     ;;
 
-  apps:top)
+  apps:top|top)
     verify_app_name "$2"
     verify_max_args 2 "$@"
     
@@ -76,14 +76,14 @@ case "$1" in
 
   help)
     cat && cat<<EOF
-    apps:list                 List app
-    apps:status <app>         Status of specific app
-    apps:start <app>	        Stop specific app
-    apps:stop <app>		        Stop specific app
-    apps:restart <app>        Restart specific app (not-redeploy)
-    apps:enable <app>         Re-enable specific app
-    apps:disable <app>        Disable specific app
-    apps:top <app> [args...]  Show running processes
+    list                 List app
+    status <app>         Status of specific app
+    start <app>	        Stop specific app
+    stop <app>		        Stop specific app
+    restart <app>        Restart specific app (not-redeploy)
+    enable <app>         Re-enable specific app
+    disable <app>        Disable specific app
+    top <app> [args...]  Show running processes
 EOF
     ;;
 esac
