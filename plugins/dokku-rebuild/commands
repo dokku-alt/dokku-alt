@@ -117,7 +117,7 @@ case "$1" in
 
     touch "$APP_DIR/FORCE_CLEAN_CACHE"
 
-    dokku rebuild "$@"
+    dokku rebuild "$APP"
     ;;
 
   rebuild:all)
