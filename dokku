@@ -136,7 +136,7 @@ case "$1" in
   cleanup)
     info "Cleaning up ..."
     docker ps -a | grep -v " Up " | grep -v "seconds ago" | grep -v "_data" | awk '{print $1}' | xargs docker rm &> /dev/null || true
-    docker images -a | grep '<none>' |  awk '{print $3}'  | xargs docker rmi &> /dev/null || true
+    docker images --filter=dangling=true --quiet | xargs docker rmi &> /dev/null || true
     ;;
 
   plugins)
