@@ -22,7 +22,8 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. I
 * HTTP-Basic Auth support
 * Simple SSL commands
 * SPDY and HSTS
-* Configure NGINX listen address
+* Configure NGINX listen address and proxy read timeout (BETA)
+* Custom buildstep image (BETA)
 
 ### Planned features:
 
@@ -191,8 +192,9 @@ config:unset <app> KEY1 [KEY2 ...] - unset one or more config vars
 
 ### Available environment variables
 
-* `DOKKU_NGINX_PROXY_READ_TIMEOUT` - allows to override `nginx proxy_read_timeout`. Default value is set to '60s'. For more info please refer to: http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_read_timeout.
+* `DOKKU_NGINX_PROXY_READ_TIMEOUT` (BETA) - allows to override `nginx proxy_read_timeout`. Default value is set to '60s'. For more info please refer to: http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_read_timeout.
 * `DOKKU_ENABLE_HTTP_HOST` - when set to 1 application will also serve content on HTTP if HTTPS is enabled
+* `DOKKU_BUILDSTEP_IMAGE` (BETA) - allows you to set custom buildstep image on per app basis. Image has to be compatible with https://github.com/progrium/buildstep or https://github.com/dokku-alt/progrium-buildstep-dockerfiles. In case of image forked from https://github.com/progrium/buildstep there might be small incompatibility: image is run with `/start` instead of `/start web` as in orginal `dokku`.
 
 ## Image tagging
 

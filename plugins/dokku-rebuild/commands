@@ -64,6 +64,14 @@ dokku_build_app_from_git() {
       # or buildstep (heroku-style)
       info "Building $APP using buildstep..."
 
+      # Allow to override buildstep image with DOKKU_BUILDSTEP_IMAGE variable set
+      DOKKU_BUILDSTEP_IMAGE="$(config_get DOKKU_BUILDSTEP_IMAGE || true)"
+      if [[ -n "$DOKKU_BUILDSTEP_IMAGE" ]]; then
+        info "Using custom buildstep image: $DOKKU_BUILDSTEP_IMAGE"
+      else
+        DOKKU_BUILDSTEP_IMAGE="$BUILDSTEP_IMAGE"
+      fi
+
       find -name .git -prune -exec rm -rf {} \; > /dev/null
       tar c . | docker run -i -a stdin "$BUILDSTEP_IMAGE" /bin/bash \
                         -c "mkdir -p /app && tar -xC /app" | commit_image "$IMAGE_GENERIC:build"
