@@ -154,6 +154,10 @@ case "$1" in
     dokku deploy:all
     ;;
 
+  plugins-install-dependencies)
+    pluginhook dependencies
+    ;;
+
   # temporary hack for https://github.com/progrium/dokku/issues/82
   deploy:all)
     for app in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
