@@ -97,15 +97,23 @@ dokku_build_app_from_git() {
 
     tag_image "$IMAGE" "$IMAGE_GENERIC:build"
 
-    dokku release "$APP"
-    dokku deploy "$APP"
-
-    # Do cleanup only if everything finished!
-    flock -n "$DOKKU_ROOT/cleanup.lock" dokku cleanup
+    dokku release:locked "$APP"
+    dokku deploy:locked "$APP"
 }
 
 case "$1" in
   rebuild)
+    verify_app_name "$2"
+    verify_max_args 3 "$@"
+
+    if ! flock -n "$APP_BUILD_LOCK" true; then
+      info2 "$APP is currently being deployed or locked. We will wait for other process to finish."
+    fi
+
+    flock "$APP_BUILD_LOCK" dokku rebuild:locked "$@"
+    ;;
+
+  rebuild:locked)
     verify_app_name "$2"
     verify_max_args 3 "$@"
 
@@ -117,8 +125,9 @@ case "$1" in
       verbose "$APP not yet deployed"
       return
     fi
-    
+
     dokku_build_app_from_git "$APP" "$REF"
+    dokku cleanup
     ;;
 
   rebuild:force)

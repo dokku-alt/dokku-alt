@@ -75,6 +75,7 @@ function check_app_name() {
 	APP_CID_DIR="$APP_DIR/CONTAINERS"
 	APP_CACHE_NAME="cache_data_$APP"
 	APP_PERSISTENT_NAMES="$APP_CACHE_NAME"
+	APP_BUILD_LOCK="$APP_DIR/build.lock"
 	return 0
 }
 

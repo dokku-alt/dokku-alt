@@ -26,6 +26,14 @@ fi
 
 case "$1" in
   release)
+    if ! flock -n "$APP_BUILD_LOCK" true; then
+      info2 "$APP is currently locked. We will wait for other process to finish."
+    fi
+
+    flock "$APP_BUILD_LOCK" dokku release:locked "$@"
+    ;;
+
+  release:locked)
     verify_app_name "$2"
     verify_max_args "2" "$@"
 
@@ -47,6 +55,14 @@ case "$1" in
     ;;
 
   deploy)
+    if ! flock -n "$APP_BUILD_LOCK" true; then
+      info2 "$APP is currently locked. We will wait for other process to finish."
+    fi
+
+    flock "$APP_BUILD_LOCK" dokku deploy:locked "$@"
+    ;;
+
+  deploy:locked)
     verify_app_name "$2"
     verify_max_args "3" "$@"
 
