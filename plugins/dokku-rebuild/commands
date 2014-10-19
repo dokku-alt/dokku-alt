@@ -110,6 +110,8 @@ case "$1" in
       info2 "$APP is currently being deployed or locked. We will wait for other process to finish."
     fi
 
+    shift 1
+
     flock "$APP_BUILD_LOCK" dokku rebuild:locked "$@"
     ;;
 
