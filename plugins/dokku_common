@@ -171,9 +171,19 @@ function is_image_buildstep_based() {
 	docker run --entrypoint="/bin/bash" --rm "$@" -c "[[ -f /exec ]]"
 }
 
+function wait_for_id() {
+	while read ID; do
+		[[ "$ID" =~ ^[0-9a-f]+$ ]] && return
+		echo "$ID"
+	done
+	return 1
+}
+
 function commit_image() {
-	read ID
+	wait_for_id
 	wait_for_container "$ID"
+	echo "wait for image..."
+	docker wait "$ID"
 	test $(docker wait "$ID") -eq 0
 	docker commit "$ID" "$@" 1>/dev/null 2>/dev/null
 	docker rm -f "$ID" 1>/dev/null 2>/dev/null || true
@@ -181,7 +191,7 @@ function commit_image() {
 }
 
 function attach_and_commit_image() {
-	read ID
+	wait_for_id
 	wait_for_container "$ID"
 	docker logs -f "$ID"
 	test $(docker wait "$ID") -eq 0
