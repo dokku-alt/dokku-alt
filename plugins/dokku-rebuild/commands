@@ -58,7 +58,6 @@ dokku_build_app_from_git() {
       else
         docker build -t "$IMAGE" .
       fi
-      pluginhook pre-build "$APP" "$REV" "dockerfile"
       pluginhook post-build "$APP" "$REV" "dockerfile"
     else
       # or buildstep (heroku-style)
