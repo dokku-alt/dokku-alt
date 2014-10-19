@@ -32,7 +32,7 @@ function start_database_container() {
         generate_random_password > "$DB_ADMIN_PASSWORD"
     fi
 
-    docker run --detach "--publish=$DB_PORT" \
+    docker run --detach \
                --volume="$DB_VOLUME":"$DB_CONTAINER_VOLUME" \
                --volume="$DB_ADMIN_PASSWORD":"$DB_CONTAINER_PASSWORD" \
                --name="$DB_CONTAINER" \
