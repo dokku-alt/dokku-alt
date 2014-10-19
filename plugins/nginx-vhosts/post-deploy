@@ -2,7 +2,7 @@
 
 source "$(dirname $0)/vars"
 
-APP="$1"; PORT="$2"; INT_PORT="$3"
+APP="$1"; PORT="$2"; INT_PORT="$3"; IP="${4:-127.0.0.1}"
 [[ "$INT_PORT" != "" ]] || INT_PORT="$APP_PORT"
 WILDCARD_SSL="$DOKKU_ROOT/ssl"
 SSL="$DOKKU_ROOT/$APP/ssl"
@@ -129,7 +129,7 @@ EOF
 }
 
 cat<<EOF > $DOKKU_ROOT/$APP/nginx.conf
-upstream $APP { server 127.0.0.1:$PORT; }
+upstream $APP { server $IP:$PORT; }
 EOF
 
 if [[ "$hostname" != "" ]]; then

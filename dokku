@@ -93,26 +93,40 @@ case "$1" in
       # start the app
       if is_image_buildstep_based "$IMAGE_GENERIC:$TAG"; then
         # buildstep
-        INT_PORT="$APP_PORT"
-        id=$(docker run --cidfile="$(get_cid_file_name app)" -d -p "$INT_PORT" -e PORT="$INT_PORT" --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG" /start)
-        addr=$(docker port $id "$INT_PORT")
-        EXT_ADDR="${addr%:*}"
-        EXT_PORT="${addr#*:}"
+        id=$(docker run --cidfile="$(get_cid_file_name app)" -d --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG" /start)
       else
         # Dockerfile
-        EXT_PORT=""
-        INT_PORT=""
-        EXT_ADDR=""
-        id=$(docker run --cidfile="$(get_cid_file_name app)" -d -P --env-file=<(: | pluginhook env-vars "$APP") --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG")
-        sleep 5s
-        for test_port in 80 8080 "$APP_PORT"; do
-          if addr=$(docker port $id "$test_port" 2>/dev/null); then
-            INT_PORT="$test_port"
-            EXT_ADDR="${addr%:*}"
-            EXT_PORT="${addr#*:}"
-          fi
-        done
+        id=$(docker run --cidfile="$(get_cid_file_name app)" -d --env-file=<(: | pluginhook env-vars "$APP") --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG")
       fi
+
+      EXT_IP="$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' "$id")"
+      EXT_PORT=""
+      INT_PORT=""
+
+      for CONTAINER_PORT in $(docker inspect --format '{{range $p, $conf := .NetworkSettings.Ports}}{{$p}} {{end}}' "$id"); do
+        case "$CONTAINER_PORT" in
+          "5000/tcp")
+            EXT_PORT="5000"
+            INT_PORT="5000"
+            break
+            ;;
+
+          "8080/tcp")
+            EXT_PORT="8080"
+            INT_PORT="8080"
+            break
+            ;;
+
+          "80/tcp")
+            EXT_PORT="80"
+            INT_PORT="80"
+            break
+            ;;
+
+          *)
+            ;;
+        esac
+      done
 
       if [[ "$EXT_PORT" == "" ]] || [[ "$INT_PORT" == "" ]]; then
         echo -n > "$DOKKU_ROOT/$APP/URL"
@@ -130,15 +144,15 @@ case "$1" in
 
         if [[ "$PREBOOT" != "" ]]; then
           verbose "Running pre-flight checks..."
-          if ! pluginhook check-preboot "$APP" "$id" "$EXT_PORT"
+          if ! pluginhook check-preboot "$APP" "$id" "$EXT_PORT" "$EXT_IP"
           then
             stop_and_remove_container "$id"
             fail "Application failed to deploy!"
           fi
         fi
 
-        echo "http://$(< "$DOKKU_ROOT/HOSTNAME"):$EXT_PORT" > "$DOKKU_ROOT/$APP/URL"
-        pluginhook post-deploy "$APP" "$EXT_PORT" "$INT_PORT"
+        echo "http://$EXT_IP:$EXT_PORT" > "$DOKKU_ROOT/$APP/URL"
+        pluginhook post-deploy "$APP" "$EXT_PORT" "$INT_PORT" "$EXT_IP"
         info2 "Application deployed:"
         verbose "$(dokku url $APP)"
       fi
