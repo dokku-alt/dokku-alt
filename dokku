@@ -45,17 +45,14 @@ case "$1" in
     info "Releasing $APP ..."
     # use :latest tag to ensure compatiblity with orginal dokku
     tag_image "$IMAGE_GENERIC:build" "$IMAGE"
-    pluginhook pre-release "$APP"
     if is_image_buildstep_based "$IMAGE"; then
+      pluginhook pre-release "$APP"
       dokku config "$APP" --shell | \
         docker run -i -a stdin "$IMAGE" \
         /bin/bash -c "mkdir -p /app/.profile.d && cat > /app/.profile.d/app-env.sh" | \
         commit_image "$IMAGE"
-    else
-      docker run -d -P --env-file=<(: | pluginhook env-vars "$APP") "$IMAGE" | \
-        commit_image "$IMAGE"
+      pluginhook post-release "$APP"
     fi
-    pluginhook post-release "$APP"
     tag_image "$IMAGE" "$IMAGE_GENERIC:release"
     ;;
 
@@ -106,7 +103,8 @@ case "$1" in
         EXT_PORT=""
         INT_PORT=""
         EXT_ADDR=""
-        id=$(docker run --cidfile="$(get_cid_file_name app)" -d -P --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG")
+        id=$(docker run --cidfile="$(get_cid_file_name app)" -d -P --env-file=<(: | pluginhook env-vars "$APP") --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG")
+        sleep 5s
         for test_port in 80 8080 "$APP_PORT"; do
           if addr=$(docker port $id "$test_port" 2>/dev/null); then
             INT_PORT="$test_port"
