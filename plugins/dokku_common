@@ -65,12 +65,7 @@ function check_app_name() {
 	if [[ "$IMAGE_TAG" != "" ]]; then
 		IMAGE="$IMAGE_GENERIC:$IMAGE_TAG"
 	else
-		local CMD_TYPE="$(basename $0)"
-		case "$CMD_TYPE" in
-			"pre-build"|"post-build")		IMAGE="$IMAGE_GENERIC:build" ;;
-			"pre-release"|"post-release")	IMAGE="$IMAGE_GENERIC:release" ;;
-			*)								IMAGE="$IMAGE_GENERIC:latest" ;;
-		esac
+		IMAGE="$IMAGE_GENERIC:latest"
 	fi
 
 	APP_DIR="$DOKKU_ROOT/$APP"

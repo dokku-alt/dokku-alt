@@ -52,11 +52,11 @@ dokku_build_app_from_git() {
       dokku_restore_timestamps "$REV"
       find -name .git -prune -exec rm -rf {} \; > /dev/null
       if [[ -f "$APP_DIR/FORCE_CLEAN_CACHE" ]]; then
-        docker build --no-cache=true -t "$IMAGE_GENERIC:build" .
+        docker build --no-cache=true -t "$IMAGE" .
         # Mark as cleaned-up
         rm -f "$APP_DIR/FORCE_CLEAN_CACHE"
       else
-        docker build -t "$IMAGE_GENERIC:build" .
+        docker build -t "$IMAGE" .
       fi
       pluginhook pre-build "$APP" "$REV" "dockerfile"
       pluginhook post-build "$APP" "$REV" "dockerfile"
@@ -74,7 +74,7 @@ dokku_build_app_from_git() {
 
       find -name .git -prune -exec rm -rf {} \; > /dev/null
       tar c . | docker run -i -a stdin "$BUILDSTEP_IMAGE" /bin/bash \
-                        -c "mkdir -p /app && tar -xC /app" | commit_image "$IMAGE_GENERIC:build"
+                        -c "mkdir -p /app && tar -xC /app" | commit_image "$IMAGE"
 
       pluginhook pre-build "$APP" "$REV" "buildstep"
       DOCKER_ARGS="$(: | pluginhook docker-args "$APP" build)"
@@ -89,11 +89,13 @@ dokku_build_app_from_git() {
       # link volumes from data container
       docker run -d --volumes-from="$APP_CACHE_NAME" \
                   $DOCKER_ARGS \
-                  "$IMAGE_GENERIC:build" \
-                  /build/builder | attach_and_commit_image "$IMAGE_GENERIC:build"
+                  "$IMAGE" \
+                  /build/builder | attach_and_commit_image "$IMAGE"
 
       pluginhook post-build "$APP" "$REV" "buildstep"
     fi
+
+    tag_image "$IMAGE" "$IMAGE_GENERIC:build"
 
     dokku release "$APP"
     dokku deploy "$APP"

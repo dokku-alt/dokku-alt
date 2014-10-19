@@ -30,15 +30,20 @@ case "$1" in
     verify_max_args "2" "$@"
 
     info "Releasing $APP ..."
-    tag_image "$IMAGE_GENERIC:build" "$IMAGE_GENERIC:release"
+    # use :latest tag to ensure compatiblity with orginal dokku
+    tag_image "$IMAGE_GENERIC:build" "$IMAGE"
     pluginhook pre-release "$APP"
-    if is_image_buildstep_based "$IMAGE_GENERIC:release"; then
+    if is_image_buildstep_based "$IMAGE"; then
       dokku config "$APP" --shell | \
-        docker run -i -a stdin "$IMAGE_GENERIC:release" \
+        docker run -i -a stdin "$IMAGE" \
         /bin/bash -c "mkdir -p /app/.profile.d && cat > /app/.profile.d/app-env.sh" | \
-        commit_image "$IMAGE_GENERIC:release"
+        commit_image "$IMAGE"
+    else
+      docker run -d -P --env-file=<(: | pluginhook env-vars "$APP") "$IMAGE" | \
+        commit_image "$IMAGE"
     fi
     pluginhook post-release "$APP"
+    tag_image "$IMAGE" "$IMAGE_GENERIC:release"
     ;;
 
   deploy)
@@ -75,7 +80,7 @@ case "$1" in
         EXT_PORT=""
         INT_PORT=""
         EXT_ADDR=""
-        id=$(docker run --cidfile="$(get_cid_file_name app)" -d -P --env-file=<(: | pluginhook env-vars "$APP") --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG")
+        id=$(docker run --cidfile="$(get_cid_file_name app)" -d -P --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG")
         for test_port in 80 8080 "$APP_PORT"; do
           if addr=$(docker port $id "$test_port" 2>/dev/null); then
             INT_PORT="$test_port"
@@ -118,7 +123,7 @@ case "$1" in
       echo "$id" > "$APP_NAME_FILE"
 
       if [[ "$TAG" != "latest" ]]; then
-        tag_image "$IMAGE_GENERIC:$TAG" "$IMAGE_GENERIC:latest"
+        tag_image "$IMAGE_GENERIC:$IMAGE_TAG" "$IMAGE_GENERIC:deployed"
       fi
 
       if [[ "$PREBOOT" != "" ]]; then
@@ -129,11 +134,17 @@ case "$1" in
       stop_and_remove_app_containers
       verbose "Application disabled - will not be run"
       pluginhook post-deploy "$APP" ""
-      tag_image "$IMAGE_GENERIC:release" "$IMAGE_GENERIC:latest"
+      if [[ "$TAG" != "latest" ]]; then
+        tag_image "$IMAGE_GENERIC:$IMAGE_TAG" "$IMAGE_GENERIC:deployed"
+      fi
     fi
     ;;
 
   cleanup)
+    flock -n "$DOKKU_ROOT/cleanup.lock" dokku cleanup:locked
+    ;;
+
+  cleanup:locked)
     info "Cleaning up ..."
     docker ps -a | grep -v " Up " | grep -v "seconds ago" | grep -v "_data" | awk '{print $1}' | xargs docker rm &> /dev/null || true
     docker images --filter=dangling=true --quiet | xargs docker rmi &> /dev/null || true
@@ -160,9 +171,10 @@ case "$1" in
 
   # temporary hack for https://github.com/progrium/dokku/issues/82
   deploy:all)
+    # redeploy lastly deployed image with tag :deployed
     for app in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
       if [[ -f "$app/refs/heads/master" ]]; then
-        dokku deploy "$(basename $app)" "latest" || true
+        dokku deploy "$(basename $app)" "deployed" || true
       fi
     done
     wait

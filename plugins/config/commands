@@ -37,18 +37,12 @@ config_shell_hash() {
   done
 }
 
-config_restart_app() {
-  APP="$1";
-  dokku release "$APP"
-  dokku deploy "$APP"
-}
-
 config_write() {
   ENV_TEMP="$1"
   echo -e "$ENV_TEMP" | sed '/^$/d' | sort > "$ENV_FILE_TEMP"
   if ! cmp -s "$ENV_FILE" "$ENV_FILE_TEMP"; then
     cp -f "$ENV_FILE_TEMP" "$ENV_FILE"
-    config_restart_app "$APP"
+    dokku rebuild "$APP"
   fi
   rm -f "$ENV_FILE_TEMP"
 }
