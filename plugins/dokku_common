@@ -177,8 +177,6 @@ function wait_for_id() {
 function commit_image() {
 	wait_for_id
 	wait_for_container "$ID"
-	echo "wait for image..."
-	docker wait "$ID"
 	test $(docker wait "$ID") -eq 0
 	docker commit "$ID" "$@" 1>/dev/null 2>/dev/null
 	docker rm -f "$ID" 1>/dev/null 2>/dev/null || true
