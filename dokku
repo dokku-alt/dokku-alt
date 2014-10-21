@@ -110,7 +110,7 @@ case "$1" in
       # enumare container ports and look to one from predefined list
       for CONTAINER_PORT in $(docker inspect --format '{{range $p, $conf := .NetworkSettings.Ports}}{{$p}} {{end}}' "$id"); do
         for port in $DOKKU_EXPOSED_PORTS; do
-          if [[ "$port/tcp" != "$CONTAINER_PORT" ]]; then
+          if [[ "$port/tcp" == "$CONTAINER_PORT" ]]; then
             EXT_PORT="$port"
             INT_PORT="$port"
             break 2
