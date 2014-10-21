@@ -53,7 +53,7 @@ case "$1" in
         commit_image "$IMAGE"
       pluginhook post-release "$APP"
     else
-      docker create -d --env-file=<(: | pluginhook env-vars "$APP") "$IMAGE" | \
+      docker create --env-file=<(: | pluginhook env-vars "$APP") "$IMAGE" | \
         commit_image "$IMAGE"
     fi
     tag_image "$IMAGE" "$IMAGE_GENERIC:release"
