@@ -61,7 +61,7 @@ case "$1" in
 
   deploy)
     verify_app_name "$2"
-    verify_max_args "2" "$@"
+    verify_max_args "3" "$@"
 
     if ! flock -n "$APP_BUILD_LOCK" true; then
       info2 "$APP is currently locked. We will wait for other process to finish."
