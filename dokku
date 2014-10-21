@@ -52,6 +52,9 @@ case "$1" in
         /bin/bash -c "mkdir -p /app/.profile.d && cat > /app/.profile.d/app-env.sh" | \
         commit_image "$IMAGE"
       pluginhook post-release "$APP"
+    else
+      docker create -d --env-file=<(: | pluginhook env-vars "$APP") "$IMAGE" | \
+        commit_image "$IMAGE"
     fi
     tag_image "$IMAGE" "$IMAGE_GENERIC:release"
     ;;
@@ -91,41 +94,28 @@ case "$1" in
       fi
 
       # start the app
+
       if is_image_buildstep_based "$IMAGE_GENERIC:$TAG"; then
-        # buildstep
-        id=$(docker run --cidfile="$(get_cid_file_name app)" -d --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG" /start)
+        START_CMD="/start"
       else
-        # Dockerfile
-        id=$(docker run --cidfile="$(get_cid_file_name app)" -d --env-file=<(: | pluginhook env-vars "$APP") --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG")
+        START_CMD=""
       fi
+      
+      id=$(docker run --cidfile="$(get_cid_file_name app)" -d --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG" $START_CMD)
 
       EXT_IP="$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' "$id")"
       EXT_PORT=""
       INT_PORT=""
 
+      # enumare container ports and look to one from predefined list
       for CONTAINER_PORT in $(docker inspect --format '{{range $p, $conf := .NetworkSettings.Ports}}{{$p}} {{end}}' "$id"); do
-        case "$CONTAINER_PORT" in
-          "5000/tcp")
-            EXT_PORT="5000"
-            INT_PORT="5000"
-            break
-            ;;
-
-          "8080/tcp")
-            EXT_PORT="8080"
-            INT_PORT="8080"
-            break
-            ;;
-
-          "80/tcp")
-            EXT_PORT="80"
-            INT_PORT="80"
-            break
-            ;;
-
-          *)
-            ;;
-        esac
+        for port in $DOKKU_EXPOSED_PORTS; do
+          if [[ "$port/tcp" != "$CONTAINER_PORT" ]]; then
+            EXT_PORT="$port"
+            INT_PORT="$port"
+            break 2
+          fi
+        done
       done
 
       if [[ "$EXT_PORT" == "" ]] || [[ "$INT_PORT" == "" ]]; then
@@ -160,8 +150,8 @@ case "$1" in
       # save container ID
       echo "$id" > "$APP_NAME_FILE"
 
-      if [[ "$TAG" != "latest" ]]; then
-        tag_image "$IMAGE_GENERIC:$IMAGE_TAG" "$IMAGE_GENERIC:deployed"
+      if [[ "$TAG" != "deployed" ]]; then
+        tag_image "$IMAGE_GENERIC:$TAG" "$IMAGE_GENERIC:deployed"
       fi
 
       if [[ "$PREBOOT" != "" ]]; then
@@ -172,8 +162,8 @@ case "$1" in
       stop_and_remove_app_containers
       verbose "Application disabled - will not be run"
       pluginhook post-deploy "$APP" ""
-      if [[ "$TAG" != "latest" ]]; then
-        tag_image "$IMAGE_GENERIC:$IMAGE_TAG" "$IMAGE_GENERIC:deployed"
+      if [[ "$TAG" != "deployed" ]]; then
+        tag_image "$IMAGE_GENERIC:$TAG" "$IMAGE_GENERIC:deployed"
       fi
     fi
     ;;

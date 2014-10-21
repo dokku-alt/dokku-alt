@@ -1,6 +1,7 @@
 #!/bin/bash
 
 BUILDSTEP_IMAGE="${BUILDSTEP_IMAGE:=ayufan/dokku-alt-buildstep:foreman}"
+DOKKU_EXPOSED_PORTS="5000 8080 80"
 
 set -eo pipefail
 [[ $DOKKU_TRACE ]] && set -x
