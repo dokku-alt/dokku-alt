@@ -104,6 +104,7 @@ EOF
     fi
 
     shift 2
+    ensure_database_container_is_running
     if [[ -t 0 ]]; then
         docker run -t -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
@@ -125,6 +126,31 @@ EOF
     fi
     ;;
 
+  postgresql:console:admin)
+    verify_max_args 1 "$@"
+
+    ensure_database_container_is_running
+    if [[ -t 0 ]]; then
+        docker run -t -i --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            -e PGDATABASE="root" \
+            -e PGUSER="root" \
+            -e PGPASSWORD="$(cat "$DB_ADMIN_PASSWORD")" \
+            -e DB_PORT="$DB_PORT" \
+            "$DB_IMAGE" \
+        bash -c "psql --host=\"$DB_HOST\" --port=\"$DB_PORT\""
+    else
+        docker run -i --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            -e PGDATABASE="root" \
+            -e PGUSER="root" \
+            -e PGPASSWORD="$(cat "$DB_ADMIN_PASSWORD")" \
+            -e DB_PORT="$DB_PORT" \
+            "$DB_IMAGE" \
+        bash -c "psql --host=\"$DB_HOST\" --port=\"$DB_PORT\""
+    fi
+    ;;
+
   postgresql:dump)
     verify_app_name "$2"
     verify_db_name "$3"
@@ -135,6 +161,7 @@ EOF
     fi
 
     shift 2
+    ensure_database_container_is_running
     docker run -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
             -e PGDATABASE="$DB_NAME" \
@@ -154,6 +181,7 @@ EOF
     postgresql:unlink <app> <db>   Unlink database from app
     postgresql:info <app> <db>     Display application informations
     postgresql:console <app> <db>  Launch console for PostgreSQL container
+    postgresql:console:admin       Launch admin console (be careful!)
     postgresql:dump <app> <db>     Dump database for an app
 EOF
     ;;

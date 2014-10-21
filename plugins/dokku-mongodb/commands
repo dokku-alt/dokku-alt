@@ -120,6 +120,7 @@ EOF
         fail "$DB_NAME: database is not linked to $APP"
     fi
 
+    ensure_database_container_is_running
     docker run -t -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
             "$DB_IMAGE" \
@@ -135,6 +136,7 @@ EOF
         fail "$DB_NAME: database is not linked to $APP"
     fi
 
+    ensure_database_container_is_running
     docker run -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
             "$DB_IMAGE" \
@@ -150,6 +152,7 @@ EOF
         fail "$DB_NAME: database is not linked to $APP"
     fi
 
+    ensure_database_container_is_running
     docker run -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
             "$DB_IMAGE" \
@@ -165,6 +168,7 @@ EOF
         fail "$DB_NAME: database is not linked to $APP"
     fi
 
+    ensure_database_container_is_running
     docker run -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
             "$DB_IMAGE" \

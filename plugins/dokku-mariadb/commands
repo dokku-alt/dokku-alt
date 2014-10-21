@@ -115,6 +115,7 @@ EOF
     if ! db_info "$APP" "$DB_NAME"; then
         fail "$DB_NAME: database is not linked to $APP"
     fi
+    ensure_database_container_is_running
     shift 2
     if [[ -t 0 ]]; then
         docker run -i -t --rm \
@@ -131,6 +132,26 @@ EOF
     fi
     ;;
 
+  mariadb:console:admin)
+    verify_max_args 1 "$@"
+
+    ensure_database_container_is_running
+
+    if [[ -t 0 ]]; then
+        docker run -i -t --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            -e MYSQL_PWD="$(cat "$DB_ADMIN_PASSWORD")" \
+            "$DB_IMAGE" \
+        bash -c "mysql -u \"root\" -h \"$DB_HOST\" -P \"$DB_PORT\""
+    else
+        docker run -i --rm \
+            --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
+            -e MYSQL_PWD="$(cat "$DB_ADMIN_PASSWORD")" \
+            "$DB_IMAGE" \
+        bash -c "mysql -u \"root\" -h \"$DB_HOST\" -P \"$DB_PORT\""
+    fi
+    ;;
+
   mariadb:dump)
     verify_app_name "$2"
     verify_db_name "$3"
@@ -140,6 +161,7 @@ EOF
         fail "$DB_NAME: database is not linked to $APP"
     fi
     shift 2
+    ensure_database_container_is_running
     docker run -i --rm \
         --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
         -e MYSQL_PWD="$DB_PASSWORD" \
@@ -156,6 +178,7 @@ EOF
     mariadb:unlink <app> <db>   Unlink database from app
     mariadb:info <app> <db>     Display application informations
     mariadb:console <app> <db>  Launch console for MariaDB container
+    mariadb:console:admin       Launch admin (be careful!)
     mariadb:dump <app> <db>     Dump database for an app
 EOF
     ;;
