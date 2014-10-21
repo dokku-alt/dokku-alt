@@ -24,14 +24,17 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. I
 * SPDY and HSTS
 * Configure NGINX listen address and proxy read timeout (BETA)
 * Custom buildstep image (BETA)
+* Support better image tagging (BETA) (yet compatible with dokku)
+* Support for running buildstep-based applications as non-root user (BETA - using custom buildstep image)
 
 ### Planned features:
 
-* Support better image tagging
+* Dokku-alt as service in container
+* Integrate dokku-alt-manager
+* Nginx proxy in container with automatic service reload
 * Support for RabbitMQ and Memcached
 * Support for custom nginx templates
 * Support for application scaling
-* Support for running buildstep-based applications as non-root user
 * Support for `CHECKS` as described in https://labnotes.org/zero-downtime-deploy-with-dokku/
 * Full and incremental backup
 * Application migration
