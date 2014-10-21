@@ -191,6 +191,22 @@ case "$1" in
       echo "Installing $plugin..."
       $script "$@"
     done
+
+    if [[ ! -e "$DOKKU_ROOT/.update.v1" ]]; then
+      verbose ''
+      verbose 'WARNING:'
+      verbose 'Due to buildstep, security and docker changes all images needs to be rebuilt.'
+      verbose 'It will take considerable amount of time to finish. Be patient and afterwards test your apps.'
+      verbose ''
+      verbose 'If something goes wrong you can force to rebuild specific app with: dokku rebuild:force app'
+      verbose 'Or rebuild all apps: dokku rebuild:all:force'
+      verbose ''
+      touch "$DOKKU_ROOT/.update.v1"
+      # due to buildstep, port and docker changes we need to rebuild all images
+      dokku rebuild:all
+    fi
+
+    # we can proceed with normal deployment if we assume that rebuild were done already
     dokku deploy:all
     ;;
 
