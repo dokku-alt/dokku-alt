@@ -3,20 +3,14 @@
 
 BOX_NAME = ENV["BOX_NAME"] || "trusty"
 BOX_URI = ENV["BOX_URI"] || "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
-BOX_MEMORY = ENV["BOX_MEMORY"] || "512"
+BOX_MEMORY = ENV["BOX_MEMORY"] || "1024"
 DOKKU_DOMAIN = ENV["DOKKU_DOMAIN"] || "dokku.me"
 DOKKU_IP = ENV["DOKKU_IP"] || "10.0.0.2"
-PREBUILT_STACK_URL = File.exist?("#{File.dirname(__FILE__)}/stack.tgz") ? 'file:///root/dokku/stack.tgz' : nil
-
-make_cmd = "make install"
-if PREBUILT_STACK_URL
-  make_cmd = "PREBUILT_STACK_URL='#{PREBUILT_STACK_URL}' #{make_cmd}"
-end
 
 Vagrant::configure("2") do |config|
   config.vm.box = BOX_NAME
   config.vm.box_url = BOX_URI
-  config.vm.synced_folder File.dirname(__FILE__), "/root/dokku"
+  config.vm.synced_folder File.dirname(__FILE__), "/srv/dokku-alt"
   config.vm.network :forwarded_port, guest: 80, host: 8080
   config.vm.hostname = "#{DOKKU_DOMAIN}"
   config.vm.network :private_network, ip: DOKKU_IP
@@ -29,5 +23,13 @@ Vagrant::configure("2") do |config|
     vb.customize ["modifyvm", :id, "--memory", BOX_MEMORY]
   end
 
-  config.vm.provision :shell, :inline => "apt-get -qq -y install git > /dev/null && cd /root/dokku && #{make_cmd}"
+  # Configure docker apt sources
+  config.vm.provision :shell, :inline => "apt-get update -qq"
+  config.vm.provision :shell, :inline => "apt-get install -y apt-transport-https git"
+  config.vm.provision :shell, :inline => "apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9"
+  config.vm.provision :shell, :inline => "echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
+  config.vm.provision :shell, :inline => "apt-get update -qq"
+
+  # Install dokku-alt
+  config.vm.provision :shell, :inline => "cd /srv/dokku-alt && make install && make devinstall"
 end

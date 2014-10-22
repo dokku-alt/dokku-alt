@@ -61,15 +61,15 @@ endif
 	rm -rf deb-tmp/
 
 install: dpkg
-	sudo dpkg -i $(DEB_PKG)
-	sudo apt-get -f -y install
+	sudo dpkg -i $(DEB_PKG) || sudo apt-get -f -y install && sudo dpkg -i $(DEB_PKG)
 
 devinstall:
 	[ -e /usr/local/bin/dokku ] || echo Please install dokku-alt first
 	ln -sf "$(PWD)/dokku" /usr/local/bin/dokku
 	ln -sf "$(PWD)/sshcommand/sshcommand" /usr/local/bin/sshcommand
 	ln -sf "$(PWD)/gitreceive/gitreceive" /usr/local/bin/gitreceive
-	ln -sf "$(PWD)/plugins" /var/lib/dokku-alt/plugins
+	rm -rf /var/lib/dokku-alt/plugins
+	ln -sf "$(PWD)/plugins" /var/lib/dokku-alt/
 
 dpkg_commit: dpkg
 	# sign current release
