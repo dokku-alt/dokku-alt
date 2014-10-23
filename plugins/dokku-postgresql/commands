@@ -11,7 +11,7 @@ case "$1" in
   postgresql:create)
     verify_db_name "$2"
     verify_max_args 2 "$@"
-    
+
     pgsql_admin <<EOF
 CREATE DATABASE "$DB_NAME";
 EOF
@@ -133,8 +133,8 @@ EOF
     if [[ -t 0 ]]; then
         docker run -t -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
-            -e PGDATABASE="root" \
-            -e PGUSER="root" \
+            -e PGDATABASE="$DB_ADMIN_USER" \
+            -e PGUSER="$DB_ADMIN_USER" \
             -e PGPASSWORD="$(cat "$DB_ADMIN_PASSWORD")" \
             -e DB_PORT="$DB_PORT" \
             "$DB_IMAGE" \
@@ -142,8 +142,8 @@ EOF
     else
         docker run -i --rm \
             --link="$DB_CONTAINER":"$DB_CONTAINER_LINK" \
-            -e PGDATABASE="root" \
-            -e PGUSER="root" \
+            -e PGDATABASE="$DB_ADMIN_USER" \
+            -e PGUSER="$DB_ADMIN_USER" \
             -e PGPASSWORD="$(cat "$DB_ADMIN_PASSWORD")" \
             -e DB_PORT="$DB_PORT" \
             "$DB_IMAGE" \
