@@ -4,8 +4,15 @@ source "$(dirname $0)/../dokku_common"
 
 verify_app_name "$1"
 
-if [[ "$2" != "" ]]; then
-      cat <<EOF | docker build -t "$IMAGE" -
+[[ -z "$2" ]] && exit 0
+
+if is_image_buildstep_based "$IMAGE"; then
+  echo '-----> Injecting git revision'
+  id=$(echo "export GIT_REV=${2}" | docker run -i -a stdin $IMAGE /bin/bash -c "cat > /app/.profile.d/git-rev.sh")
+  test $(docker wait $id) -eq 0
+  docker commit $id $IMAGE > /dev/null
+else
+  cat <<EOF | docker build -t "$IMAGE" -
 FROM $IMAGE
 ENV GIT_REV $2
 EOF
