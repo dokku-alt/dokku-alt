@@ -83,10 +83,10 @@ case "$1" in
 
   help)
     cat && cat<<EOF
-manager:install  Install and configure dokku-alt-manager
-manager:uninstall  Uninstall and wipe dokku-alt-manager
-manager:enable  Enable dokku-alt-manager application
-manager:disable  Disable dokku-alt-manager application
+    manager:install  Install and configure dokku-alt-manager
+    manager:uninstall  Uninstall and wipe dokku-alt-manager
+    manager:enable  Enable dokku-alt-manager application
+    manager:disable  Disable dokku-alt-manager application
 EOF
     ;;
 esac
