@@ -38,6 +38,18 @@ case "$1" in
     [[ ! -f "$APP_DIR/ssl/server.crt" ]] || dokku deploy "$APP"
     ;;
 
+  ssl:selfsigned)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+
+    mkdir -p "$APP_DIR/ssl"
+
+    [[ -f "$APP_DIR/ssl/server.crt" ]] && fail "$APP: There's certificate already"
+    [[ -f "$APP_DIR/ssl/server.key" ]] || openssl genrsa -out "$APP_DIR/ssl/server.key" 2048
+    openssl req -new -x509 -key "$APP_DIR/ssl/server.key" -out "$APP_DIR/ssl/server.crt" -days 3650
+    dokku deploy "$APP"
+    ;;
+
   ssl:info)
     verify_app_name "$2"
     verify_max_args 2 "$@"
@@ -60,6 +72,7 @@ case "$1" in
   help)
     cat && cat<<EOF
     ssl:generate <app>      Generate certificate signing request for an APP
+    ssl:selfsigned <app>      Generate self-signed certificate an APP
     ssl:certificate <app>   Pipe signed certifcate with all intermediates for an APP
     ssl:key <app>           Pipe private key for an APP
     ssl:info <app>          Show info about certifcate and certificate request
