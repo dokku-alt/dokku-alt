@@ -145,8 +145,18 @@ function deploy_app() {
 }
 
 function redeploy_app() {
-	release_app "$@"
-	deploy_app "$@"
+	(
+		# run everything in subshell
+		verify_app_name "$1"
+		if ! docker_image_exists "$IMAGE_GENERIC:build"; then
+			verbose "Application ($IMAGE_GENERIC:build) is not yet deployed!"
+			# we don't fail here, because we assume that this is intended
+			exit 0
+		fi
+
+		release_app "$@"
+		deploy_app "$@"
+	)
 }
 
 function tag_image() {
@@ -196,6 +206,10 @@ function attach_and_commit_image() {
 
 function reset_timestamps() {
 	find "$@" -exec touch -t 201401010000 "{}" \;
+}
+
+function docker_image_exists() {
+	docker inspect "$@" >/dev/null 2>/dev/null
 }
 
 [[ -z "$DOKKU_ROOT" ]] && fail "DOKKU_ROOT not set"

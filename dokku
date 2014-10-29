@@ -8,6 +8,9 @@ if [[ $(id -un) != "dokku" && $1 != "plugins-install" ]]; then
   exit
 fi
 
+# it fixes some not nice docker errors
+cd $DOKKU_ROOT
+
 # locale
 export LANGUAGE=${LANGUAGE:-en_US.UTF-8}
 export LANG=${LANG:-en_US.UTF-8}
@@ -41,6 +44,11 @@ case "$1" in
   release:locked)
     verify_app_name "$2"
     verify_max_args "2" "$@"
+
+    if ! docker_image_exists "$IMAGE_GENERIC:build"; then
+      info "Application ($IMAGE_GENERIC:build) is not yet build!"
+      exit 1
+    fi
 
     info "Releasing $APP ..."
     # use :latest tag to ensure compatiblity with orginal dokku
@@ -79,6 +87,11 @@ case "$1" in
     TAG="${3:-release}"
     export IMAGE_TAG="$TAG"
 
+    if ! docker_image_exists "$IMAGE_GENERIC:$IMAGE_TAG"; then
+      info "Application ($IMAGE_GENERIC:$IMAGE_TAG) is not yet released!"
+      exit 1
+    fi
+
     # prepare for deployment
     info "Deploying $APP ..."
     pluginhook pre-deploy "$APP"
@@ -94,7 +107,6 @@ case "$1" in
       fi
 
       # start the app
-
       if is_image_buildstep_based "$IMAGE_GENERIC:$TAG"; then
         START_CMD="/start"
       else
