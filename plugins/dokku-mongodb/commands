@@ -175,6 +175,14 @@ EOF
         bash -c "mongodump --username \"$DB_USER\" --password \"$DB_PASSWORD\" --host \"$DB_HOST\" --port \"$DB_PORT\" --db \"$DB_NAME\" --collection \"$4\" --out -"
     ;;
 
+  mongodb:restart)
+    info "Stopping MongoDB container..."
+    stop_and_remove_container "$DB_CONTAINER"
+    info "Starting MongoDB container..."
+    start_database_container
+    info "MongoDB container started!"
+    ;;
+
   help)
     cat && cat<<EOF
     mongodb:create <db>         Create a MongoDB database
@@ -187,6 +195,7 @@ EOF
     mongodb:import <app> <db> <collection>    Import database collection for an app
     mongodb:export <app> <db> <collection>    Export database collection for an app
     mongodb:dump <app> <db> <collection>      Dump database collection in bson for an app
+    mongodb:restart             Restart MongoDB container (for example to switch image)
 EOF
     ;;
 

@@ -172,6 +172,14 @@ EOF
         bash -c "pg_dump --host=\"$DB_HOST\" --port=\"$DB_PORT\""
     ;;
 
+  postgresql:restart)
+    info "Stopping PostgreSQL container..."
+    stop_and_remove_container "$DB_CONTAINER"
+    info "Starting PostgreSQL container..."
+    start_database_container
+    info "PostgreSQL container started!"
+    ;;
+
   help)
     cat && cat<<EOF
     postgresql:create <db>         Create a PostgreSQL database
@@ -183,6 +191,7 @@ EOF
     postgresql:console <app> <db>  Launch console for PostgreSQL container
     postgresql:console:admin       Launch admin console (be careful!)
     postgresql:dump <app> <db>     Dump database for an app
+    postgresql:restart             Restart PostgreSQL container (for example to switch image)
 EOF
     ;;
 

@@ -169,6 +169,14 @@ EOF
     bash -c "mysqldump -u \"$DB_USER\" -h \"$DB_HOST\" -P \"$DB_PORT\" \"$DB_DATABASE\""
     ;;
 
+  mariadb:restart)
+    info "Stopping MariaDB container..."
+    stop_and_remove_container "$DB_CONTAINER"
+    info "Starting MariaDB container..."
+    start_database_container
+    info "MariaDB container started!"
+    ;;
+
   help)
     cat && cat<<EOF
     mariadb:create <db>         Create a MariaDB database
@@ -180,6 +188,7 @@ EOF
     mariadb:console <app> <db>  Launch console for MariaDB container
     mariadb:console:admin       Launch admin (be careful!)
     mariadb:dump <app> <db>     Dump database for an app
+    mariadb:restart             Restart MariaDB container (for example to switch image)
 EOF
     ;;
 
