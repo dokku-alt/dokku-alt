@@ -6,7 +6,7 @@ case "$1" in
   delete)
     verify_app_name "$2"
 
-    if [[ ! -d "$DOKKU_ROOT/$APP" ]]; then
+    if [[ ! -d "$APP_DIR" ]]; then
         echo "App does not exist"
         exit 1
     fi
@@ -58,7 +58,13 @@ case "$1" in
 
     [[ "$APP_NAME" == "" ]] && fail "$APP: application not running"
 
-    sudo -H docker-enter "$APP_NAME" /bin/bash
+    if is_image_buildstep_based "$IMAGE"; then
+      # buildstep
+      docker exec -i -t "$APP_NAME" /exec /bin/bash
+    else
+      # dockerfile
+      docker exec -i -t "$APP_NAME" /bin/bash
+    fi
     ;;
 
   exec)
@@ -67,7 +73,13 @@ case "$1" in
 
     [[ "$APP_NAME" == "" ]] && fail "$APP: application not running"
 
-    sudo -H docker-enter "$APP_NAME" "$@"
+    if is_image_buildstep_based "$IMAGE"; then
+      # buildstep
+      docker exec "$APP_NAME" /exec "$@"
+    else
+      # dockerfile
+      docker exec "$APP_NAME" "$@"
+    fi
     ;;
 
   url)

@@ -22,11 +22,7 @@ help:
 	# Type "make dpkg_stable" to build and commit stable version.
 	# Type "make dpkg_beta" to build and commit beta version.
 
-docker-enter/nsenter:
-	cd util-linux-2.24 && ./configure --without-ncurses && make nsenter
-	cp util-linux-2.24/nsenter docker-enter/nsenter
-
-dpkg: docker-enter/nsenter
+dpkg:
 	rm -f dokku-alt-*.deb
 	rm -rf deb-tmp/
 	cp -r deb deb-tmp/
@@ -39,8 +35,6 @@ dpkg: docker-enter/nsenter
 	cp gitreceive/gitreceive deb-tmp/dokku-alt/usr/local/bin/gitreceive
 	cp pluginhook/pluginhook deb-tmp/dokku-alt/usr/local/bin/pluginhook
 	cp dokku deb-tmp/dokku-alt/usr/local/bin
-	cp docker-enter/nsenter deb-tmp/dokku-alt/usr/local/bin
-	cp docker-enter/docker-enter deb-tmp/dokku-alt/usr/local/bin
 	cp -r plugins deb-tmp/dokku-alt/var/lib/dokku-alt
 	cp dokku.1 deb-tmp/dokku-alt/usr/local/share/man/man1/dokku.1
 	cp contrib/dokku-installer.rb deb-tmp/dokku-alt/usr/local/share/dokku-alt/contrib
