@@ -61,6 +61,9 @@ case "$1" in
         commit_image "$IMAGE"
       pluginhook post-release "$APP"
     else
+      # now do empty docker build to trigger ONBUILD hooks (manage or bootstrap jobs)
+      echo "FROM $IMAGE" | docker build -t "$IMAGE" -
+
       docker create --env-file=<(: | pluginhook env-vars "$APP") "$IMAGE" | \
         commit_image "$IMAGE"
     fi
