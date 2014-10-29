@@ -123,7 +123,7 @@ server {
   listen      $DOKKU_LISTEN_IPV6:80;
   listen      $DOKKU_LISTEN_IPV4:80;
   server_name $@;
-  return 302 $SCHEME://$hostname\$request_uri;
+  return 302 $SCHEME://$host$request_uri$is_args$args;
 }
 EOF
 }
