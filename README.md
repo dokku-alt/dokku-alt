@@ -26,11 +26,11 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. I
 * Custom buildstep image (BETA)
 * Support better image tagging (BETA) (yet compatible with dokku)
 * Support for running buildstep-based applications as non-root user (BETA - using custom buildstep image)
+* Integration with dokku-alt-manager (BETA) (https://github.com/romaninsh/dokku-alt-manager)
 
 ### Planned features:
 
 * Dokku-alt as service in container
-* Integrate dokku-alt-manager
 * Nginx proxy in container with automatic service reload
 * Support for RabbitMQ and Memcached
 * Support for custom nginx templates
@@ -103,6 +103,21 @@ You're done!
 
 Right now Buildstep supports buildpacks for Node.js, Ruby, Python, [and more](https://github.com/progrium/buildstep#supported-buildpacks). It's not hard to add more, [go add more](https://github.com/progrium/buildstep#adding-buildpacks)!
 Please check the documentation for your particular build pack as you may need to include configuration files (such as a Procfile) in your project root.
+
+## Dokku-alt-manager (BETA)
+
+It's web interface to easily manage your dokku-alt instance. Simply run to install manager:
+
+    dokku manager:install
+
+Anytime you can enable or disable it:
+
+    dokku manager:enable
+    dokku manager:disable
+
+Or even uninstall if you prefer command line access (it will also wipe used database):
+
+    dokku manager:uninstall
 
 ## Dockerfile images
 
