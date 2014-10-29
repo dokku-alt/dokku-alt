@@ -46,6 +46,8 @@ dokku_build_app_from_git() {
     git checkout "$REV" > /dev/null
     git submodule update --init --recursive > /dev/null
 
+    REV="$(git rev-parse HEAD)"
+
     # Build using either Dockerfile
     if [[ -f "Dockerfile" ]]; then
       info "Building $APP using Dockerfile..."
