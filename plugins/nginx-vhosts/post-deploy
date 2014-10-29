@@ -115,7 +115,8 @@ http_redirect() {
 
   DOKKU_LISTEN_IPV4="${DOKKU_LISTEN_IPV4:-*}"
   DOKKU_LISTEN_IPV6="${DOKKU_LISTEN_IPV6:-[::]}"
-  SCHEME="$1"
+  WHERE="$1"
+
   shift
 
   cat<<EOF
@@ -123,7 +124,7 @@ server {
   listen      $DOKKU_LISTEN_IPV6:80;
   listen      $DOKKU_LISTEN_IPV4:80;
   server_name $@;
-  return 302 $SCHEME://$hostname\$request_uri;
+  return 302 $WHERE;
 }
 EOF
 }
@@ -144,10 +145,10 @@ if [[ "$hostname" != "" ]]; then
     DOKKU_ENABLE_HTTP_HOST=$(config_get DOKKU_ENABLE_HTTP_HOST || true)
     if [[ -n "$DOKKU_ENABLE_HTTP_HOST" ]]; then
       http_host http ${hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
-      http_redirect https ${redirect_hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf # we prefer https over http
+      http_redirect "https://$hostname\$request-uri" ${redirect_hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf # we prefer https over http
     else
-      http_redirect https ${hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
-      http_redirect https ${redirect_hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
+      http_redirect "https://\$host\$request_uri\$is_args\$args" ${hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
+      http_redirect "https://$hostname\$request-uri" ${redirect_hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
     fi
     http_host https ${hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
 
@@ -155,7 +156,7 @@ if [[ "$hostname" != "" ]]; then
   else
     # default nginx.conf
     http_host http ${hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
-    http_redirect http ${redirect_hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
+    http_redirect "https://$hostname\$request-uri" ${redirect_hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
 
     echo "http://$hostname" > "$DOKKU_ROOT/$APP/URL"
   fi
