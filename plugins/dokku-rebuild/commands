@@ -124,7 +124,7 @@ case "$1" in
       REF="$(cat "$APP_DIR/refs/heads/master")"
     else
       verbose "$APP not yet deployed"
-      return
+      exit 1
     fi
 
     dokku_build_app_from_git "$APP" "$REF"
@@ -137,7 +137,8 @@ case "$1" in
 
     touch "$APP_DIR/FORCE_CLEAN_CACHE"
 
-    dokku rebuild "$APP"
+    shift
+    dokku rebuild "$@"
     ;;
 
   rebuild:all)
