@@ -11,6 +11,7 @@ case "$1" in
         exit 1
     fi
 
+    info "Deleting application $APP..."
     pluginhook pre-delete $APP
 
     stop_and_remove_app_containers
@@ -18,6 +19,7 @@ case "$1" in
     remove_image "$IMAGE"
 
     pluginhook post-delete $APP
+    info "Application deleted: $APP"
     ;;
 
   logs)
