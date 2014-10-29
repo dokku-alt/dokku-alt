@@ -1,0 +1,92 @@
+#!/bin/bash
+
+source "$(dirname $0)/../dokku_common"
+
+DOKKU_ALT_MANAGER="dam"
+DOKKU_ALT_MANAGER_SSH_KEY="dam-access-key"
+DOKKU_ALT_MANAGER_SSH_PUB_KEY="dam-access-key.pub"
+DOKKU_ALT_MANAGER_REPOSITORY="https://github.com/romaninsh/dokku-alt-manager"
+DOKKU_ALT_MANAGER_BRANCH="master"
+DOKKU_ALT_MANAGER_BOOTSTRAP="php /app/bootstrap.php"
+
+uninstall() {
+    if [[ -e "$APP_DIR/$DOKKU_ALT_MANAGER_SSH_KEY.pub" ]]; then
+        FINGERPRINT=$(ssh-keygen -lf "$APP_DIR/$DOKKU_ALT_MANAGER_SSH_KEY.pub" | awk '{print $2}')
+        dokku access:remove "$FINGERPRINT"
+    fi
+    dokku delete "$DOKKU_ALT_MANAGER"
+    dokku mariadb:destroy "$DOKKU_ALT_MANAGER"
+}
+
+cleanup_install() {
+    set +e
+    info "Installation failed. Reverting all the changes..."
+    uninstall
+    info "Everything is reverted. You can try: dokku manager:install"
+    exit 1
+}
+
+case "$1" in
+  manager:install)
+    verify_max_args 2 "$@"
+    check_app_name "$DOKKU_ALT_MANAGER"
+
+    if [[ -d "$APP_DIR" ]]; then
+        verbose "It looks like $DOKKU_ALT_MANAGER is already deployed."
+        verbose "You can always uninstall it: dokku manager:uninstall."
+        exit 0
+    fi
+
+    trap cleanup_install EXIT
+
+    info "Clonning dokku-alt-manager sources into $APP_DIR..."
+    git clone --bare --branch "$DOKKU_ALT_MANAGER_BRANCH" "$DOKKU_ALT_MANAGER_REPOSITORY" "$APP_DIR"
+
+    info "Creating dokku-alt-manager databases..."
+    dokku mariadb:create "$DOKKU_ALT_MANAGER"
+    dokku mariadb:link "$DOKKU_ALT_MANAGER" "$DOKKU_ALT_MANAGER"
+
+    info "Building dokku-alt-manager application..."
+    dokku rebuild "$DOKKU_ALT_MANAGER" "$DOKKU_ALT_MANAGER_BRANCH"
+
+    info "Generating ssh access key..."
+    ssh-keygen -t rsa -P '' -f "$APP_DIR/$DOKKU_ALT_MANAGER_SSH_KEY"
+    dokku access:add < "$APP_DIR/$DOKKU_ALT_MANAGER_SSH_PUB_KEY"
+
+    info "Bootstraping dokku-alt-manager..."
+    SERVER_HOSTNAME=$(hostname)
+    SERVER_KEY="$(cat "$APP_DIR/$DOKKU_ALT_MANAGER_SSH_KEY")"
+    SERVER_IP="\$(ip route show | grep 'default' | awk '{print \$3}')"
+    dokku exec "$DOKKU_ALT_MANAGER" \
+        /bin/bash -c \
+        "echo \"$SERVER_KEY\" > /tmp/server_key;
+        $DOKKU_ALT_MANAGER_BOOTSTRAP -a $SERVER_IP -k /tmp/server_key -n '$SERVER_HOSTNAME';
+        rm /tmp/server_key"
+
+    trap - EXIT
+    info "Everything is done!"
+    ;;
+
+  manager:uninstall)
+    set +e
+    uninstall
+    info "dokku-alt-manager uninstalled"
+    ;;
+
+  manager:enable)
+    dokku enable "$DOKKU_ALT_MANAGER"
+    ;;
+
+  manager:disable)
+    dokku disable "$DOKKU_ALT_MANAGER"
+    ;;
+
+  help)
+    cat && cat<<EOF
+manager:install  Install and configure dokku-alt-manager
+manager:uninstall  Uninstall and wipe dokku-alt-manager
+manager:enable  Enable dokku-alt-manager application
+manager:disable  Disable dokku-alt-manager application
+EOF
+    ;;
+esac
