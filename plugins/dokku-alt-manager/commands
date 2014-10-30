@@ -55,6 +55,7 @@ case "$1" in
     info "Building dokku-alt-manager application..."
     HEAD="$(git rev-parse "FETCH_HEAD")"
     dokku rebuild "$DOKKU_ALT_MANAGER" "$HEAD"
+    echo "$HEAD" > "refs/heads/master"
 
     info "Generating ssh access key..."
     ssh-keygen -t rsa -P '' -f "$APP_DIR/$DOKKU_ALT_MANAGER_SSH_KEY"
@@ -103,6 +104,7 @@ case "$1" in
     git fetch "$DOKKU_ALT_MANAGER_REPOSITORY" "$DOKKU_ALT_MANAGER_REVISION"
     HEAD="$(git rev-parse "FETCH_HEAD")"
     dokku rebuild "$DOKKU_ALT_MANAGER" "$HEAD"
+    echo "$HEAD" > "refs/heads/master"
     ;;
 
   help)
