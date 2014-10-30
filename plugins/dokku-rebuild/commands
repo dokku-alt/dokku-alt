@@ -100,9 +100,6 @@ dokku_build_app_from_git() {
 
     dokku release:locked "$APP"
     dokku deploy:locked "$APP"
-
-    # update head revision
-    echo "$REV" > "$APP_DIR/refs/heads/master"
 }
 
 case "$1" in
