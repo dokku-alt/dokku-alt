@@ -28,7 +28,7 @@ cleanup_install() {
 
 case "$1" in
   manager:install)
-    verify_max_args 2 "$@"
+    verify_max_args 3 "$@"
     check_app_name "$DOKKU_ALT_MANAGER"
 
     if [[ -d "$APP_DIR" ]]; then
@@ -37,17 +37,24 @@ case "$1" in
         exit 0
     fi
 
+    DOKKU_ALT_MANAGER_REVISION="${3:-$DOKKU_ALT_MANAGER_BRANCH}"
+
     trap cleanup_install EXIT
 
+    info "Creating dokku-alt-manager application..."
+    dokku create "$DOKKU_ALT_MANAGER"
+
     info "Clonning dokku-alt-manager sources into $APP_DIR..."
-    git clone --bare --branch "$DOKKU_ALT_MANAGER_BRANCH" "$DOKKU_ALT_MANAGER_REPOSITORY" "$APP_DIR"
+    cd "$APP_DIR"
+    git fetch "$DOKKU_ALT_MANAGER_REPOSITORY" "$DOKKU_ALT_MANAGER_REVISION"
 
     info "Creating dokku-alt-manager databases..."
     dokku mariadb:create "$DOKKU_ALT_MANAGER"
     dokku mariadb:link "$DOKKU_ALT_MANAGER" "$DOKKU_ALT_MANAGER"
 
     info "Building dokku-alt-manager application..."
-    dokku rebuild "$DOKKU_ALT_MANAGER" "$DOKKU_ALT_MANAGER_BRANCH"
+    HEAD="$(git rev-parse "FETCH_HEAD")"
+    dokku rebuild "$DOKKU_ALT_MANAGER" "$HEAD"
 
     info "Generating ssh access key..."
     ssh-keygen -t rsa -P '' -f "$APP_DIR/$DOKKU_ALT_MANAGER_SSH_KEY"
@@ -68,23 +75,41 @@ case "$1" in
     ;;
 
   manager:uninstall)
+    verify_max_args 2 "$@"
+    verify_app_name "$DOKKU_ALT_MANAGER"
     set +e
     uninstall
     info "dokku-alt-manager uninstalled"
     ;;
 
   manager:enable)
+    verify_max_args 2 "$@"
+    verify_app_name "$DOKKU_ALT_MANAGER"
     dokku enable "$DOKKU_ALT_MANAGER"
     ;;
 
   manager:disable)
+    verify_max_args 2 "$@"
+    verify_app_name "$DOKKU_ALT_MANAGER"
     dokku disable "$DOKKU_ALT_MANAGER"
+    ;;
+
+  manager:upgrade)
+    verify_max_args 3 "$@"
+    verify_app_name "$DOKKU_ALT_MANAGER"
+
+    cd "$APP_DIR"
+    DOKKU_ALT_MANAGER_REVISION="${3:-$DOKKU_ALT_MANAGER_BRANCH}"
+    git fetch "$DOKKU_ALT_MANAGER_REPOSITORY" "$DOKKU_ALT_MANAGER_REVISION"
+    HEAD="$(git rev-parse "FETCH_HEAD")"
+    dokku rebuild "$DOKKU_ALT_MANAGER" "$HEAD"
     ;;
 
   help)
     cat && cat<<EOF
-    manager:install  Install and configure dokku-alt-manager
+    manager:install [revision]  Install and configure dokku-alt-manager
     manager:uninstall  Uninstall and wipe dokku-alt-manager
+    manager:upgrade [revision]  Disable dokku-alt-manager application
     manager:enable  Enable dokku-alt-manager application
     manager:disable  Disable dokku-alt-manager application
 EOF
