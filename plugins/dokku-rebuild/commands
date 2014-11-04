@@ -35,7 +35,7 @@ dokku_build_app_from_git() {
 
     # delete directory on return
     TMP_WORK_DIR="$(mktemp -d)"
-    trap "rm -rf \"$TMP_WORK_DIR\"" RETURN
+    trap "popd > /dev/null; rm -rf \"$TMP_WORK_DIR\"" RETURN
 
     # clone git repository
     chmod 755 "$TMP_WORK_DIR"
