@@ -49,6 +49,9 @@ build:
         name: run php tests
         code: make docker_tests TESTS=apps/php
     - script:
+        name: run php-multi tests
+        code: make docker_tests TESTS=apps/php-multi
+    - script:
         name: run postgresql tests
         code: make docker_tests TESTS=apps/postgresql
     - script:
