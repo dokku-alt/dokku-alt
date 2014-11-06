@@ -124,7 +124,7 @@ server {
   listen      $DOKKU_LISTEN_IPV6:80;
   listen      $DOKKU_LISTEN_IPV4:80;
   server_name $@;
-  return 302 $WHERE;
+  return 301 $WHERE;
 }
 EOF
 }
