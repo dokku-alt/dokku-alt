@@ -147,7 +147,7 @@ if [[ "$hostname" != "" ]]; then
       http_host http ${hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
       http_redirect "https://$hostname\$request-uri" ${redirect_hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf # we prefer https over http
     else
-      http_redirect "https://\$host\$request_uri\$is_args\$args" ${hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
+      http_redirect "https://\$host\$request_uri" ${hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
       http_redirect "https://$hostname\$request-uri" ${redirect_hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
     fi
     http_host https ${hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
