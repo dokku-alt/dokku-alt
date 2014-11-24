@@ -156,7 +156,7 @@ if [[ "$hostname" != "" ]]; then
   else
     # default nginx.conf
     http_host http ${hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
-    http_redirect "https://$hostname\$request_uri" ${redirect_hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
+    http_redirect "http://$hostname\$request_uri" ${redirect_hostnames[@]} >> $DOKKU_ROOT/$APP/nginx.conf
 
     echo "http://$hostname" > "$DOKKU_ROOT/$APP/URL"
   fi
