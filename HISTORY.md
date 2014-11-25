@@ -1,8 +1,8 @@
 # History of Dokku-alt
 
-## BETA
+## 0.3.9 (BETA)
 
-* Merged dokku upstream: 7c2f21fd2a854e48cab2bae82477d04ebcbdd4ae
+* Merged dokku v.0.3.5 upstream: 7c2f21fd2a854e48cab2bae82477d04ebcbdd4ae
 
 ## 0.3.8
 
