@@ -56,7 +56,7 @@ case "$1" in
     git-shell -c "$args"
     ;;
 
-  create)
+  create|apps:create)
     check_app_name "$2"
     verify_max_args 2 "$@"
     [[ -d "$APP_DIR/refs" ]] && fail "$APP: already exist"

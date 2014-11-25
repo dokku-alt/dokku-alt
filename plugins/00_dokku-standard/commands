@@ -3,25 +3,6 @@
 source "$(dirname $0)/../dokku_common"
 
 case "$1" in
-  delete)
-    verify_app_name "$2"
-
-    if [[ ! -d "$APP_DIR" ]]; then
-        echo "App does not exist"
-        exit 1
-    fi
-
-    info "Deleting application $APP..."
-    pluginhook pre-delete $APP
-
-    stop_and_remove_app_containers
-    stop_and_remove_container $APP_PERSISTENT_NAMES
-    remove_image "$IMAGE"
-
-    pluginhook post-delete $APP
-    info "Application deleted: $APP"
-    ;;
-
   logs)
     verify_app_name "$2"
 

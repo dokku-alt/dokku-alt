@@ -49,4 +49,8 @@ case "$1" in
     htpasswd:disable <app>              Remove http-basic Auth
 EOF
     ;;
+
+  *)
+    exit $DOKKU_NOT_IMPLEMENTED_EXIT
+    ;;
 esac

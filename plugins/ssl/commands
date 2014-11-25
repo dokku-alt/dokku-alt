@@ -79,4 +79,8 @@ case "$1" in
     ssl:forget <app>        Wipes certificate for an APP
 EOF
     ;;
+
+  *)
+    exit $DOKKU_NOT_IMPLEMENTED_EXIT
+    ;;
 esac

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+source "$(dirname $0)/../dokku_common"
 
 case "$1" in
   apps)
@@ -7,57 +8,116 @@ case "$1" in
     find $DOKKU_ROOT -maxdepth 1 -type d  \( ! -iname ".*" \)  -not -path $DOKKU_ROOT/tls | sed 's|^\./||g' | sed 's|'$DOKKU_ROOT'\/||' | tail -n +2 | sort
     ;;
 
-  apps:create)
-    [[ -z $2 ]] && echo "Please specify an app to run the command on" && exit 1
-    [[ -d "$DOKKU_ROOT/$APP" ]] && echo " !    Name is already taken" && exit 1
-    APP="$2"
-
-    mkdir -p "$DOKKU_ROOT/$APP"
-    echo "Creating $APP... done"
+  apps:list|list)
+    verify_max_args 1 "$@"
+    for app in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
+      if [[ -f "$app/refs/heads/master" ]]; then
+        basename "$app"
+      fi
+    done
     ;;
 
-  apps:destroy)
-    [[ -z $2 ]] && echo "Please specify an app to run the command on" && exit 1
-    [[ ! -d "$DOKKU_ROOT/$2" ]] && echo "App $2 does not exist" && exit 1
-    [[ "$2" == "tls" ]] && echo "Unable to destroy tls directory" && exit 1
-    APP="$2"; IMAGE="dokku/$APP";
+  apps:status|status)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
 
-    echo " !    WARNING: Potentially Destructive Action"
-    echo " !    This command will destroy $APP (including all add-ons)."
-    echo " !    To proceed, type \"$APP\""
-    echo ""
+  	if docker port "$APP_NAME" "$APP_PORT" 1>/dev/null 2>/dev/null
+  	then
+  		echo "$APP is running."
+  	else
+  		echo "$APP is stopped."
+  	fi
+	;;
 
-    read -p "> " app_name
-    if [[ "$app_name" != "$APP" ]]; then
-      echo " !    Confirmation did not match $APP. Aborted."
-      exit 1
+  apps:start|start)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    
+    docker start "$APP_NAME"
+	;;
+
+  apps:stop|stop)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    
+    docker stop "$APP_NAME"
+	;;
+
+  apps:disable|disable)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    if [[ ! -f "$APP_DIR/DISABLED" ]]; then
+      touch "$APP_DIR/DISABLED"
+      deploy_app "$APP"
+    else
+      echo "$APP: Application is already disabled"
+    fi
+  ;;
+
+  apps:enable|enable)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    if [[ -f "$APP_DIR/DISABLED" ]]; then
+      rm -f "$APP_DIR/DISABLED"
+      deploy_app "$APP"
+    else
+      echo "$APP: Application is already enabled"
+    fi
+  ;;
+
+  apps:restart|restart)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    docker restart "$APP_NAME"
+    ;;
+
+  apps:top|top)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    
+    shift 2
+    docker top "$APP_NAME"
+    ;;
+
+  apps:destroy|delete)
+    verify_app_name "$2"
+
+    if [[ ! -d "$APP_DIR" ]]; then
+        echo "App does not exist"
+        exit 1
     fi
 
-    echo "Destroying $APP (including all add-ons)"
+    [[ "$APP" == "tls" ]] && fail "Unable to destroy tls directory"
+    [[ "$APP" == "ssl" ]] && fail "Unable to destroy tls directory"
 
+    info "Deleting application $APP..."
     pluginhook pre-delete $APP
-    if [[ -f "$DOKKU_ROOT/$APP/CONTAINER" ]]; then
-      ID=$(< "$DOKKU_ROOT/$APP/CONTAINER")
 
-      docker stop $ID > /dev/null || true
-      docker rm $ID  > /dev/null || true
-    fi
-
-    docker images | grep $IMAGE | awk '{print $3}' | xargs docker rmi &> /dev/null &
+    stop_and_remove_app_containers
+    stop_and_remove_container $APP_PERSISTENT_NAMES
+    remove_image "$IMAGE"
 
     pluginhook post-delete $APP
+    info "Application deleted: $APP"
     ;;
 
-  help | apps:help)
+  apps:create)
+    
+
+  help)
     cat && cat<<EOF
-    apps                                            List your apps
-    apps:create <app>                               Create a new app
-    apps:destroy <app>                              Permanently destroy an app
+    list                 List app
+    status <app>         Status of specific app
+    start <app>	        Stop specific app
+    stop <app>		        Stop specific app
+    restart <app>        Restart specific app (not-redeploy)
+    enable <app>         Re-enable specific app
+    disable <app>        Disable specific app
+    top <app> [args...]  Show running processes
 EOF
     ;;
 
   *)
     exit $DOKKU_NOT_IMPLEMENTED_EXIT
     ;;
-
 esac

@@ -116,4 +116,8 @@ case "$1" in
     manager:disable  Disable dokku-alt-manager application
 EOF
     ;;
+
+  *)
+    exit $DOKKU_NOT_IMPLEMENTED_EXIT
+    ;;
 esac

@@ -48,4 +48,8 @@ case "$1" in
     preboot:cooldown:time <app> <secs>  Re-enable specific app
 EOF
     ;;
+
+  *)
+    exit $DOKKU_NOT_IMPLEMENTED_EXIT
+    ;;
 esac

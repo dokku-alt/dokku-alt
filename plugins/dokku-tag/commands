@@ -38,4 +38,8 @@ case "$1" in
     tag:list <app>              List all image tags
 EOF
     ;;
+
+  *)
+    exit $DOKKU_NOT_IMPLEMENTED_EXIT
+    ;;
 esac

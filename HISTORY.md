@@ -1,5 +1,9 @@
 # History of Dokku-alt
 
+## BETA
+
+* Merged dokku upstream: 7c2f21fd2a854e48cab2bae82477d04ebcbdd4ae
+
 ## 0.3.8
 
 * Added `dokku rebuild:force myapp`, `dokku rebuild:all` and `dokku rebuild:all:force`

@@ -95,4 +95,8 @@ case "$1" in
     deploy:revoke <app> <fingerprint>   Revoke push-access for an application
 EOF
     ;;
+
+  *)
+    exit $DOKKU_NOT_IMPLEMENTED_EXIT
+    ;;
 esac
