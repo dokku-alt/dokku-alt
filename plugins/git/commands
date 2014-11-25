@@ -31,8 +31,14 @@ case "$1" in
         echo $'\e[1G\e[K'"-----> WARNING: deploy did not complete, you must push to master."
         echo $'\e[1G\e[K'"-----> for example, try 'git push <dokku> ${refname/refs\/heads\/}:master'"
       fi
-
     done
+    ;;
+
+  git-upload-pack)
+    APP="$(echo $2 | perl -pe 's/(?<!\\)'\''//g' | sed 's/\\'\''/'\''/g')"
+    pluginhook git-pre-pull $APP
+    cat | git-upload-pack "$DOKKU_ROOT/$APP"
+    pluginhook git-post-pull $APP
     ;;
 
   git-*)
@@ -58,10 +64,14 @@ case "$1" in
     info "Application $APP created!"
     ;;
 
-  help)
+  help | git:help)
     cat && cat <<EOF
     create <app>                 Create shallow app
 EOF
     ;;
-esac
 
+  *)
+    exit $DOKKU_NOT_IMPLEMENTED_EXIT
+    ;;
+
+esac

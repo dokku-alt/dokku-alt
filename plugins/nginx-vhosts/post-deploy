@@ -4,8 +4,10 @@ source "$(dirname $0)/vars"
 
 APP="$1"; PORT="$2"; INT_PORT="$3"; IP="${4:-127.0.0.1}"
 [[ "$INT_PORT" != "" ]] || INT_PORT="$APP_PORT"
-WILDCARD_SSL="$DOKKU_ROOT/ssl"
-SSL="$DOKKU_ROOT/$APP/ssl"
+WILDCARD_SSL_DIR="$DOKKU_ROOT/ssl"
+WILDCARD_TLS_DIR="$DOKKU_ROOT/tls"
+SSL_DIR="$DOKKU_ROOT/$APP/ssl"
+TLS_DIR="$DOKKU_ROOT/$APP/tls"
 
 if [[ "$PORT" == "" ]] || [[ -f "$DOKKU_ROOT/$APP/NO_VHOST" ]]; then
   rm -f "$DOKKU_ROOT/$APP/nginx.conf"
@@ -106,6 +108,7 @@ EOF
 
   cat <<EOF
   }
+  include $DOKKU_ROOT/$APP/nginx.conf.d/*.conf;
 }
 EOF
 }
@@ -134,10 +137,14 @@ upstream $APP { server $IP:$PORT; }
 EOF
 
 if [[ "$hostname" != "" ]]; then
-  if [[ -f "$SSL/server.crt" ]] && [[ -f "$SSL/server.key" ]]; then
-    SSL_INUSE="$SSL"
-  elif  [[ -f "$WILDCARD_SSL/server.crt" ]] && [[ -f "$WILDCARD_SSL/server.key" ]] && [[ $hostname = `openssl x509 -in $WILDCARD_SSL/server.crt -noout -subject | tr '/' '\n' | grep CN= | cut -c4-` ]]; then
-    SSL_INUSE="$WILDCARD_SSL"
+  if [[ -f "$SSL_DIR/server.crt" ]] && [[ -f "$SSL_DIR/server.key" ]]; then
+    SSL_INUSE="$SSL_DIR"
+  elif [[ -f "$TLS_DIR/server.crt" ]] && [[ -f "$TLS_DIR/server.key" ]]; then
+    SSL_INUSE="$TLS_DIR"
+  elif  [[ -f "$WILDCARD_SSL_DIR/server.crt" ]] && [[ -f "$WILDCARD_SSL_DIR/server.key" ]] && [[ $hostname = `openssl x509 -in $WILDCARD_SSL_DIR/server.crt -noout -subject | tr '/' '\n' | grep CN= | cut -c4-` ]]; then
+    SSL_INUSE="$WILDCARD_SSL_DIR"
+  elif  [[ -f "$WILDCARD_TLS_DIR/server.crt" ]] && [[ -f "$WILDCARD_TLS_DIR/server.key" ]] && [[ $hostname = `openssl x509 -in $WILDCARD_TLS_DIR/server.crt -noout -subject | tr '/' '\n' | grep CN= | cut -c4-` ]]; then
+    SSL_INUSE="$WILDCARD_TLS_DIR"
   fi
 
   # ssl based nginx.conf

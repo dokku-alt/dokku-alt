@@ -116,5 +116,8 @@ case "$1" in
 EOF
     ;;
 
-esac
+  *)
+    exit $DOKKU_NOT_IMPLEMENTED_EXIT
+    ;;
 
+esac

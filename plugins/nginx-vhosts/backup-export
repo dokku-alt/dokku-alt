@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
 shopt -s nullglob
 VERSION="$1"
 BASE_DIR="$2"
 
 cat; for i in $BASE_DIR/*/ssl/server.*; do echo $i; done
+cat; for i in $BASE_DIR/*/tls/server.*; do echo $i; done
 for i in $BASE_DIR/*/HOSTNAME; do echo $i; done
 for i in $BASE_DIR/*/REDIRECT_HOSTNAME; do echo $i; done
