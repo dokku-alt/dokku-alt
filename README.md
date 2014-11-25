@@ -414,8 +414,8 @@ These parameters should only be changed when you are using a PostgreSQL image th
 
 These parameters should only be changed when you are using a Redis image that has a different setup.
 
-* `REDIS_PORT` - PostgreSQL listen port, defaults to `6379`
-* `REDIS_COMMAND` - PostgreSQL startup command for Docker, defaults to `/usr/bin/start_redis.sh`
+* `REDIS_PORT` - Redis listen port, defaults to `6379`
+* `REDIS_COMMAND` - Redis startup command for Docker, defaults to `/usr/bin/start_redis.sh`
 * `REDIS_CONTAINER_VOLUME` - Where the data volume gets mounted in the Redis container, defaults to `/var/lib/redis`
 
 ## Help
