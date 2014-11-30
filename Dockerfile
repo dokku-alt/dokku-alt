@@ -21,6 +21,9 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D78692
 	apt-get update && \
 	apt-get install -y lxc-docker
 
+# Install forego
+RUN curl -o /usr/bin/forego https://godist.herokuapp.com/projects/ddollar/forego/releases/current/linux-amd64/forego && chmod +x /usr/bin/forego
+
 # Configure ssh daemon
 RUN sed -i 's/^PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config
 
@@ -37,4 +40,4 @@ RUN make install
 EXPOSE 22 80 443
 
 # Start all services
-CMD ["/srv/dokku-alt/start-services.sh"]
+CMD ["forego", "start"]
