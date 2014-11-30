@@ -19,6 +19,18 @@ source "$PLUGIN_PATH/dokku_common"
 
 echo "Starting dokku daemon..."
 
+# hook to some signals
+terminate() {
+	exit 1
+}
+
+cleanup() {
+	echo "Dokku daemon cleaned up!"
+}
+
+trap terminate TERM INT
+trap cleanup EXIT
+
 # run daemon-tick: in the future there maybe even more
 while true
 do
