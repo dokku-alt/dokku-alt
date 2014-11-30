@@ -101,9 +101,6 @@ case "$1" in
     info "Application deleted: $APP"
     ;;
 
-  apps:create)
-    
-
   help)
     cat && cat<<EOF
     list                 List app
