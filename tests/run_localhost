@@ -10,6 +10,7 @@ sudo service nginx start
 sudo service docker start
 sudo service ssh start
 sudo service rsyslog start
+/srv/dokku-alt/start-dokku.sh exit
 
 echo "Removing old containers..."
 docker ps -a -q | xargs --no-run-if-empty docker rm -f
@@ -20,9 +21,7 @@ cat <<EOF > ~/.ssh/config
 Host *
     StrictHostKeyChecking no
 EOF
-sudo sshcommand create dokku /usr/local/bin/dokku
 cat ~/.ssh/id_rsa.pub | sudo dokku access:add
-sudo dokku plugins-install
 ssh dokku@localhost version
 
 TESTS="$@"

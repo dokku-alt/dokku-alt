@@ -24,4 +24,6 @@ echo "  user: root"
 echo "  password: $PASSWORD"
 echo "  ip: $(hostname -I)"
 
+[[ "$1" == "exit" ]] && exit
+
 exec dokku-daemon

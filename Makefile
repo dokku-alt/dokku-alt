@@ -90,8 +90,6 @@ dpkg_beta:
 	make dpkg_commit DEB_NAME=dokku-alt-beta
 
 docker_build: FORCE
-	echo $(DEB_VERSION) > VERSION
-	echo $(DEB_REVISION) > REVISION
 	docker build -t ayufan/dokku-alt .
 
 docker_run: docker_build
