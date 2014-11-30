@@ -3,8 +3,9 @@ DOKKU_ROOT ?= /home/dokku
 PLUGINHOOK_URL ?= https://s3.amazonaws.com/progrium-pluginhook/pluginhook_0.1.0_amd64.deb
 SIGN_KEY ?= EAD883AF
 
-DEB_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
-DEB_VERSION := $(shell git describe --tags)
+DEB_BRANCH := $(shell if [[ -e .git/config ]]; then git rev-parse --abbrev-ref HEAD; else echo master; fi)
+DEB_VERSION := $(shell if [[ -e .git/config ]]; then git describe --tags; else cat VERSION; fi)
+DEB_REVISION := $(shell if [[ -e .git/config ]]; then git rev-parse HEAD; else cat REVISION; fi)
 DEB_ARCH := amd64
 DEB_NAME ?= dokku-alt
 DEB_PKG := $(DEB_NAME)-$(DEB_VERSION)-$(DEB_ARCH).deb
@@ -38,9 +39,9 @@ dpkg:
 	cp -r plugins deb-tmp/dokku-alt/var/lib/dokku-alt
 	cp dokku.1 deb-tmp/dokku-alt/usr/local/share/man/man1/dokku.1
 	cp contrib/dokku-installer.rb deb-tmp/dokku-alt/usr/local/share/dokku-alt/contrib
-	git describe --tags > deb-tmp/dokku-alt/var/lib/dokku-alt/VERSION
-	git rev-parse HEAD > deb-tmp/dokku-alt/var/lib/dokku-alt/GIT_REV
-	sed -i "s/^Version: .*/Version: $(shell git describe --tags)/g" deb-tmp/dokku-alt/DEBIAN/control
+	echo $(DEB_VERSION) > deb-tmp/dokku-alt/var/lib/dokku-alt/VERSION
+	echo $(DEB_REVISION) > deb-tmp/dokku-alt/var/lib/dokku-alt/GIT_REV
+	sed -i "s/^Version: .*/Version: $(DEB_VERSION)/g" deb-tmp/dokku-alt/DEBIAN/control
 	sed -i "s/^Package: .*/Package: $(DEB_NAME)/g" deb-tmp/dokku-alt/DEBIAN/control
 ifeq ($(DEB_NAME), dokku-alt)
 	echo "Conflicts: pluginhook, dokku-alt-beta" >> deb-tmp/dokku-alt/DEBIAN/control
@@ -88,6 +89,8 @@ dpkg_beta:
 	make dpkg_commit DEB_NAME=dokku-alt-beta
 
 docker_build: FORCE
+	echo $(DEB_VERSION) > VERSION
+	echo $(DEB_REVISION) > REVISION
 	docker build -t ayufan/dokku-alt .
 
 docker_run: docker_build
