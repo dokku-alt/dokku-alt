@@ -36,6 +36,7 @@ dpkg:
 	cp gitreceive/gitreceive deb-tmp/dokku-alt/usr/local/bin/gitreceive
 	cp pluginhook/pluginhook deb-tmp/dokku-alt/usr/local/bin/pluginhook
 	cp dokku deb-tmp/dokku-alt/usr/local/bin
+	cp dokku-daemon deb-tmp/dokku-alt/usr/local/bin
 	cp -r plugins deb-tmp/dokku-alt/var/lib/dokku-alt
 	cp dokku.1 deb-tmp/dokku-alt/usr/local/share/man/man1/dokku.1
 	cp contrib/dokku-installer.rb deb-tmp/dokku-alt/usr/local/share/dokku-alt/contrib
