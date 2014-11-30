@@ -1,11 +1,9 @@
-DOKKU_VERSION ?= 0.3.0
 DOKKU_ROOT ?= /home/dokku
-PLUGINHOOK_URL ?= https://s3.amazonaws.com/progrium-pluginhook/pluginhook_0.1.0_amd64.deb
 SIGN_KEY ?= EAD883AF
 
-DEB_BRANCH := $(shell if [[ -e .git/config ]]; then git rev-parse --abbrev-ref HEAD; else echo master; fi)
-DEB_VERSION := $(shell if [[ -e .git/config ]]; then git describe --tags; else cat VERSION; fi)
-DEB_REVISION := $(shell if [[ -e .git/config ]]; then git rev-parse HEAD; else cat REVISION; fi)
+DEB_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+DEB_VERSION := $(shell git describe --tags)
+DEB_REVISION := $(shell git rev-parse HEAD)
 DEB_ARCH := amd64
 DEB_NAME ?= dokku-alt
 DEB_PKG := $(DEB_NAME)-$(DEB_VERSION)-$(DEB_ARCH).deb
