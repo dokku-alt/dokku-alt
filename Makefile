@@ -1,9 +1,9 @@
 DOKKU_ROOT ?= /home/dokku
 SIGN_KEY ?= EAD883AF
 
-DEB_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
-DEB_VERSION := $(shell git describe --tags)
-DEB_REVISION := $(shell git rev-parse HEAD)
+DEB_BRANCH := $(shell git rev-parse --abbrev-ref HEAD || cat BRANCH || echo master)
+DEB_VERSION := $(shell git describe --tags || cat VERSION || echo 0.0)
+DEB_REVISION := $(shell git rev-parse HEAD || cat REVISION || echo unknown)
 DEB_ARCH := amd64
 DEB_NAME ?= dokku-alt
 DEB_PKG := $(DEB_NAME)-$(DEB_VERSION)-$(DEB_ARCH).deb
