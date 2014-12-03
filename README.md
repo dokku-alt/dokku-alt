@@ -496,9 +496,56 @@ These parameters should only be changed when you are using a Redis image that ha
     volume:list                                     List volumes
     volume:unlink <app> <name>                      Unlink volume from app
 
-## Support
+### Additional Help
+
+    dokku volume:help
+
+It works for all ranges :)
+
+    dokku mariadb:help
+    dokku ssl:help
+
+## FAQ / Support
 
 You can use [Github Issues](https://github.com/dokku-alt/dokku-alt/issues).
+
+### How can I use custom domains as www.myapp.com?
+
+    dokku domains:set myapp www.myapp.com
+
+### How do I connect my app to access an external database server?
+
+"I deployed my Rails application on a fresh new machine using dokku-alt but I already own a bare metal, replicated PostgreSQL server that's reachable from the dokku host as it's on the same network. How do I connect?"
+
+Run the follwing:
+
+    dokku config:set <app> DATABASE_URL=postgresql://user:password@dbserver-ip:5432/DBNAME
+        
+You have to feed application with your DATABASE_URL. You can even use databases from heroku.
+
+### Linking to other containers
+
+You can create file: ```/home/dokku/APPNAME/DOCKER_ARGS``` and fill it with additional arguments as described in http://docs.docker.com/reference/run/. These arguments will be injected when deploying the application or invoking ```dokku run```.
+
+### Out of memory
+
+The following error typically occurs on boxes with 512MB of memory:
+
+    runtime: panic before malloc heap initialized
+    fatal error: runtime: cannot allocate heap metadata
+
+Run the following (it will create 512MB swap file, you can adjust it for your needs):
+
+    dd if=/dev/zero of=/extraswap bs=1M count=512
+    mkswap /extraswap
+
+Add it to /etc/fstab:
+
+    /extraswap         none            swap    sw                0       0
+
+Turn it on:
+
+    swapon -a
 
 ### Fix Shellshock vulnerability
 
