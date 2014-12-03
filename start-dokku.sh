@@ -12,6 +12,9 @@ do
 	sleep 3s
 done
 
+echo "Checking docker..."
+docker run hello-world
+
 echo "Configuring dokku..."
 sshcommand create dokku /usr/local/bin/dokku
 dokku plugins-install
