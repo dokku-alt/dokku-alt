@@ -27,10 +27,10 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. I
 * Support better image tagging (BETA) (yet compatible with dokku)
 * Support for running buildstep-based applications as non-root user (BETA - using custom buildstep image)
 * Integration with dokku-alt-manager (BETA) (https://github.com/romaninsh/dokku-alt-manager)
+* Run dokku-alt in service in docker container (BETA)
 
 ### Planned features:
 
-* Dokku-alt as service in container
 * Nginx proxy in container with automatic service reload
 * Support for RabbitMQ and Memcached
 * Support for custom nginx templates
@@ -118,6 +118,48 @@ Anytime you can enable or disable it:
 Or even uninstall if you prefer command line access (it will also wipe used database):
 
     dokku manager:uninstall
+    
+## Dokku-alt as service in Docker container (BETA)
+
+Dokku-alt can be run using Docker-in-Docker approach (https://github.com/jpetazzo/dind). It requires to run dokku-alt container in privileged mode (with full access to host), because dokku-alt uses it's own Docker daemon to serve applications. It's still considered beta, but should be pretty safe solution and robust. It's best to use for play with dokku-alt on other not-supported systems (CentOS, RedHat, Debian) or by simply trying how it works.
+
+All dokku-alt services (SSH, Nginx, Dokku daemon) are run in container.
+
+### Create persistent data storage
+
+    docker run --volume=/home/dokku --volume=/var/lib/docker --name=dokku-alt-data busybox:latest
+
+### Start `dokku-alt` service in container
+
+    docker run -d --name=dokku-alt --hostname=my-domain.com --volumes-from=dokku-alt-data --publish=22:22 --publish=80:80 --publish=443:443 --privileged ayufan/dokku-alt:latest
+    
+You can adjust exposed ports as described in Docker documentation.
+
+### Check `dokku-alt` logs to see if anything started correctly:
+
+    docker lgos dokku-alt-demo
+    
+At the end you should see something like this:
+
+    dokku.1 | SSH Login:
+    dokku.1 |   user: root
+    dokku.1 |   password: lfMUjxYEvqpRRLY6
+    dokku.1 |   ip: 10.0.42.1 172.17.2.213 
+    dokku.1 | Starting dokku daemon...
+
+This is temporary `root` password to access container and add you access keys (using `dokku access:add` as described). This password changes every container restart.
+
+To enter container shell from server's terminal (the same which is running `docker` with `dokku-alt`) run ssh:
+
+    ssh root@172.17.2.213
+
+If everything were done right you should see container's prompt. By exposing ports in `docker run` to outside world you can also access `dokku-alt` from external.
+
+### To upgrade container to newer version simply kill old container and rerun your `docker run` command:
+
+    docker kill dokku-alt
+    docker pull ayufan/dokku-alt:latest
+    docker run -d --name=dokku-alt --hostname=my-domain.com --volumes-from=dokku-alt-data --publish=22:22 --publish=80:80 --publish=443:443 --privileged ayufan/dokku-alt:latest
 
 ## Dockerfile images
 
