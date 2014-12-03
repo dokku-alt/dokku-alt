@@ -5,7 +5,7 @@ source "$(dirname $0)/../dokku_common"
 DOKKU_ALT_MANAGER="dam"
 DOKKU_ALT_MANAGER_SSH_KEY="dam-access-key"
 DOKKU_ALT_MANAGER_SSH_PUB_KEY="dam-access-key.pub"
-DOKKU_ALT_MANAGER_REPOSITORY="https://github.com/romaninsh/dokku-alt-manager"
+DOKKU_ALT_MANAGER_REPOSITORY="https://github.com/dokku-alt/dokku-alt-manager"
 DOKKU_ALT_MANAGER_BRANCH="master"
 DOKKU_ALT_MANAGER_BOOTSTRAP="php /app/bootstrap.php"
 
@@ -104,6 +104,12 @@ case "$1" in
     git fetch "$DOKKU_ALT_MANAGER_REPOSITORY" "$DOKKU_ALT_MANAGER_REVISION"
     HEAD="$(git rev-parse "FETCH_HEAD")"
     dokku rebuild "$DOKKU_ALT_MANAGER" "$HEAD"
+
+    # do database migrations if needed
+    dokku exec "$DOKKU_ALT_MANAGER" \
+        /bin/bash -c \
+        "$DOKKU_ALT_MANAGER_BOOTSTRAP"
+
     echo "$HEAD" > "refs/heads/master"
     ;;
 
