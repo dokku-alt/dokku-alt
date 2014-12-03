@@ -21,15 +21,15 @@ function hostnames_for_app() {
 		fi
 	fi
 
-	if [[ -f "$DOKKU_ROOT/VHOST" ]]; then
-		VHOST=$(< "$DOKKU_ROOT/VHOST")
-		SUBDOMAIN="${APP/%\.${VHOST}/}"
-		if [[ "$APP" == *.* ]] && [[ "$SUBDOMAIN" == "$APP" ]]; then
-			hostname="${APP/\//-}"
-		else
-			hostname="${APP/\//-}.$VHOST"
-		fi
+	VHOST="$(hostname)"
+	[[ -f "$DOKKU_ROOT/VHOST" ]] && VHOST=$(< "$DOKKU_ROOT/VHOST")
 
-		hostnames="$hostname"
+	SUBDOMAIN="${APP/%\.${VHOST}/}"
+	if [[ "$APP" == *.* ]] && [[ "$SUBDOMAIN" == "$APP" ]]; then
+		hostname="${APP/\//-}"
+	else
+		hostname="${APP/\//-}.$VHOST"
 	fi
+
+	hostnames="$hostname"
 }

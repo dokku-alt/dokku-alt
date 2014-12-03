@@ -169,7 +169,7 @@ case "$1" in
           fi
         fi
 
-        echo "http://$EXT_IP:$EXT_PORT" > "$DOKKU_ROOT/$APP/URL"
+        echo -n > "$DOKKU_ROOT/$APP/URL"
         pluginhook post-deploy "$APP" "$EXT_PORT" "$INT_PORT" "$EXT_IP"
         info2 "Application deployed:"
         verbose "$(dokku url $APP)"
