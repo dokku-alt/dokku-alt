@@ -58,6 +58,6 @@ build:
         name: run python-flask tests
         code: make docker_tests TESTS=apps/python-flask
     - script:
-        name: run static tests
-        code: make docker_tests TESTS=apps/static
+        name: run buildstep-image tests
+        code: make docker_tests TESTS=apps/buildstep-image
 

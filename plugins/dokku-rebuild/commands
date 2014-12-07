@@ -74,7 +74,7 @@ dokku_build_app_from_git() {
       fi
 
       find -name .git -prune -exec rm -rf {} \; > /dev/null
-      tar c . | docker run -i -a stdin "$BUILDSTEP_IMAGE" /bin/bash \
+      tar c . | docker run -i -a stdin "$DOKKU_BUILDSTEP_IMAGE" /bin/bash \
                         -c "mkdir -p /app && tar -xC /app" | commit_image "$IMAGE"
 
       pluginhook pre-build "$APP" "$REV" "buildstep"

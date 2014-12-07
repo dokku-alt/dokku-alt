@@ -1,0 +1,4 @@
+#!/bin/bash
+
+ssh $1 create $2
+ssh $1 config:set $2 DOKKU_BUILDSTEP_IMAGE=ayufan/dokku-alt-buildstep:foreman || true
