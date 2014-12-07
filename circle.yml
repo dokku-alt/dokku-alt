@@ -1,0 +1,27 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  override:
+    - docker info
+    - make docker_build
+
+test:
+  override:
+  - make docker_tests TESTS=apps/acl
+  - make docker_tests TESTS=apps/config
+  - make docker_tests TESTS=apps/dockerfile
+  - make docker_tests TESTS=apps/gitsubmodules
+  - make docker_tests TESTS=apps/go
+  - make docker_tests TESTS=apps/htpasswd
+  - make docker_tests TESTS=apps/java
+  - make docker_tests TESTS=apps/mariadb
+  - make docker_tests TESTS=apps/mongodb
+  - make docker_tests TESTS=apps/multi
+  - make docker_tests TESTS=apps/nodejs-express
+  - make docker_tests TESTS=apps/php
+  - make docker_tests TESTS=apps/php-multi
+  - make docker_tests TESTS=apps/postgresql
+  - make docker_tests TESTS=apps/python-flask
+  - make docker_tests TESTS=apps/static
