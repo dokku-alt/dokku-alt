@@ -137,7 +137,7 @@ You can adjust exposed ports as described in Docker documentation.
 
 ### Check `dokku-alt` logs to see if anything started correctly:
 
-    docker lgos dokku-alt-demo
+    docker logs dokku-alt-demo
     
 At the end you should see something like this:
 
