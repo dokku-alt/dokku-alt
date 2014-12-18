@@ -1,9 +1,25 @@
 # History of Dokku-alt
 
-## 0.3.9 (BETA)
+## 0.3.10
 
+* Added dokku-alt-manager
+* Added self-signed certificates
+* Added DOKKU_NGINX_READ_TIMEOUT
+* Added shortened commands in apps namespace: list, status, start, stop, disable, enable, restart
+* Allow to specify per-app custom buildstep image with config DOKKU_BUILDSTEP_IMAGE
+* Support running docker in dind configuration - it's still BETA and can disappear in one of future releases
+* Don't expose ports of anything by default: it greatly enhances security of dokku-alt
+* Trigger ONBUILD commands on application rebuild even if it's cached - this allows to update container content which can change over time
+* Use new method of storing container images, make it safe to simulatenously receive multiple pushes
+* Use 301 for nginx redirects
+* Use cedar-14 stack as default
+* Use server's hostname if no VHOST is found
 * Merged dokku v.0.3.5 upstream: 7c2f21fd2a854e48cab2bae82477d04ebcbdd4ae
 * Merged dokku v.0.3.8 upstream: ad030b21d43cf7428f57d6208f3e4d63ba0014ba
+
+## 0.3.9
+
+* Internal release
 
 ## 0.3.8
 
