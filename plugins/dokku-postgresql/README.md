@@ -63,6 +63,7 @@ GRANT
 -----> Shutting down old containers
 =====> Application deployed:
        http://myapp.server
+```
 
 Advanced usage
 --------------
