@@ -5,11 +5,6 @@ export PLUGIN_PATH=${PLUGIN_PATH:="/var/lib/dokku-alt/plugins"}
 export DOKKU_NOT_IMPLEMENTED_EXIT=10
 export DOKKU_VALID_EXIT=0
 
-if [[ $(id -un) != "dokku" && $1 != "plugins-install" ]]; then
-  sudo -u dokku -H NAME="$(id -un)" FINGERPRINT="shell" $0 "$@"
-  exit
-fi
-
 if [[ $(id -un) != "dokku" && $1 != plugins-install* && $1 != "plugins-update" ]]; then
   sudo -u dokku -E -H NAME="$(id -un)" FINGERPRINT="shell" $0 "$@"
   exit
@@ -32,6 +27,7 @@ export LC_ALL=${LC_ALL:-en_US.UTF-8}
 source "$PLUGIN_PATH/dokku_common"
 
 [[ -f $DOKKU_ROOT/dokkurc ]] && source $DOKKU_ROOT/dokkurc
+[[ -d $DOKKU_ROOT/.dokkurc ]] && for f in $DOKKU_ROOT/.dokkurc/*; do source $f; done
 
 if [[ "$1" == "" ]]; then
   dokku help
