@@ -14,6 +14,7 @@
 * Use 301 for nginx redirects
 * Use cedar-14 stack as default
 * Use server's hostname if no VHOST is found
+* Fixed host-based volumes
 * Merged dokku v.0.3.5 upstream: 7c2f21fd2a854e48cab2bae82477d04ebcbdd4ae
 * Merged dokku v.0.3.8 upstream: ad030b21d43cf7428f57d6208f3e4d63ba0014ba
 
