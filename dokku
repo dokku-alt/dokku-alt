@@ -128,8 +128,10 @@ case "$1" in
       else
         START_CMD=""
       fi
-      
-      id=$(docker run --cidfile="$(get_cid_file_name app)" -d --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG" $START_CMD)
+
+      START_ARGS="$(: | pluginhook start-args "$APP")"
+
+      id=$(docker run --cidfile="$(get_cid_file_name app)" -d --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG" $START_CMD $START_ARGS)
 
       EXT_IP="$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' "$id")"
       EXT_PORT=""
