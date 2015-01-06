@@ -124,11 +124,13 @@ case "$1" in
 
       # start the app
       if is_image_buildstep_based "$IMAGE_GENERIC:$TAG"; then
-        START_CMD="/start"
+        DEFAULT_START_CMD="/start"
       else
-        START_CMD=""
+        DEFAULT_START_CMD=""
       fi
-      
+
+      START_CMD=$(config_get DOKKU_START_CMD || echo "$DEFAULT_START_CMD")
+
       id=$(docker run --cidfile="$(get_cid_file_name app)" -d --name="$(get_app_container_name app)" $DOCKER_ARGS "$IMAGE_GENERIC:$TAG" $START_CMD)
 
       EXT_IP="$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' "$id")"
