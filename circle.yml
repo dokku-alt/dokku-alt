@@ -25,3 +25,4 @@ test:
   - make docker_tests TESTS=apps/postgresql
   - make docker_tests TESTS=apps/python-flask
   - make docker_tests TESTS=apps/buildstep-image
+
