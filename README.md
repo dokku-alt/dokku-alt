@@ -79,7 +79,7 @@ It should be possible, it should mostly work, but it's not tested and advised. V
 
 ## Deploy an App
 
-Now you can deploy apps on your Dokku. Let's deploy the [Heroku Node.js sample app](https://github.com/heroku/node-js-sample). All you have to do is add a remote to name the app. It's created on-the-fly.
+Now you can deploy apps on your Dokku. Let's deploy the [Heroku Node.js sample app](https://github.com/heroku/node-js-sample). All you have to do is add a remote to name the app. It's created on-the-fly. Note that you must use the username **dokku**@yourhostname.com:your-repository-name if you used the boostrap.sh script to install dokku-alt.
 
     $ git clone https://github.com/heroku/node-js-sample
     $ cd node-js-sample
