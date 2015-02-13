@@ -6,11 +6,12 @@ pushd $(dirname $0)
 export HOME=/root
 
 echo "Starting services..."
+sudo service nginx stop || true
 sudo service nginx start
 sudo service docker start
-sudo service ssh start
-sudo service rsyslog start
-/srv/dokku-alt/start-dokku.sh exit
+sudo service ssh start || true
+sudo service rsyslog start || true
+../start-dokku.sh exit
 
 echo "Removing old containers..."
 docker ps -a -q | xargs --no-run-if-empty docker rm -f
