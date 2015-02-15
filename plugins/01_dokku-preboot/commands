@@ -44,8 +44,8 @@ case "$1" in
     preboot:status <app>                Status of specific app
     preboot:enable <app>                Enable specific app
     preboot:disable <app>               Stop specific app
-    preboot:wait:time <app> <secs>      Restart specific app (not-redeploy)
-    preboot:cooldown:time <app> <secs>  Re-enable specific app
+    preboot:wait:time <app> <secs>      Set the wait time
+    preboot:cooldown:time <app> <secs>  Set the cooldown time
 EOF
     ;;
 
