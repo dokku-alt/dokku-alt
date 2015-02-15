@@ -1,5 +1,7 @@
 # Dokku Alternative
 
+[![Join the chat at https://gitter.im/dokku-alt/dokku-alt](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dokku-alt/dokku-alt?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. It's fork of original [dokku](https://github.com/progrium/dokku). The idea behind this fork is to provide complete solution with plugins covering most of use-cases which are stable and well tested.
 
 ## Features
@@ -79,7 +81,7 @@ It should be possible, it should mostly work, but it's not tested and advised. V
 
 ## Deploy an App
 
-Now you can deploy apps on your Dokku. Let's deploy the [Heroku Node.js sample app](https://github.com/heroku/node-js-sample). All you have to do is add a remote to name the app. It's created on-the-fly.
+Now you can deploy apps on your Dokku. Let's deploy the [Heroku Node.js sample app](https://github.com/heroku/node-js-sample). All you have to do is add a remote to name the app. It's created on-the-fly. Note that you must use the username **dokku**@yourhostname.com:your-repository-name if you used the boostrap.sh script to install dokku-alt.
 
     $ git clone https://github.com/heroku/node-js-sample
     $ cd node-js-sample
@@ -118,7 +120,7 @@ Anytime you can enable or disable it:
 Or even uninstall if you prefer command line access (it will also wipe used database):
 
     dokku manager:uninstall
-    
+
 ## Dokku-alt as service in Docker container (BETA)
 
 Dokku-alt can be run using Docker-in-Docker approach (https://github.com/jpetazzo/dind). It requires to run dokku-alt container in privileged mode (with full access to host), because dokku-alt uses it's own Docker daemon to serve applications. It's still considered beta, but should be pretty safe solution and robust. It's best to use for play with dokku-alt on other not-supported systems (CentOS, RedHat, Debian) or by simply trying how it works.
@@ -132,19 +134,19 @@ All dokku-alt services (SSH, Nginx, Dokku daemon) are run in container.
 ### Start `dokku-alt` service in container
 
     docker run -d --name=dokku-alt --hostname=my-domain.com --volumes-from=dokku-alt-data --publish=22:22 --publish=80:80 --publish=443:443 --privileged ayufan/dokku-alt:latest
-    
+
 You can adjust exposed ports as described in Docker documentation.
 
 ### Check `dokku-alt` logs to see if anything started correctly:
 
     docker logs dokku-alt-demo
-    
+
 At the end you should see something like this:
 
     dokku.1 | SSH Login:
     dokku.1 |   user: root
     dokku.1 |   password: lfMUjxYEvqpRRLY6
-    dokku.1 |   ip: 10.0.42.1 172.17.2.213 
+    dokku.1 |   ip: 10.0.42.1 172.17.2.213
     dokku.1 | Starting dokku daemon...
 
 This is temporary `root` password to access container and add you access keys (using `dokku access:add` as described). This password changes every container restart.
@@ -255,6 +257,7 @@ config:unset <app> KEY1 [KEY2 ...] - unset one or more config vars
 * `DOKKU_NGINX_PROXY_READ_TIMEOUT` - allows to override `nginx proxy_read_timeout`. Default value is set to '60s'. For more info please refer to: http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_read_timeout.
 * `DOKKU_ENABLE_HTTP_HOST` - when set to 1 application will also serve content on HTTP if HTTPS is enabled
 * `DOKKU_BUILDSTEP_IMAGE` - allows you to set custom buildstep image on per app basis. Image has to be compatible with https://github.com/progrium/buildstep or https://github.com/dokku-alt/progrium-buildstep-dockerfiles. In case of image forked from https://github.com/progrium/buildstep there might be small incompatibility: image is run with `/start` instead of `/start web` as in orginal `dokku`.
+* `DOKKU_START_CMD` - allows you to set a custom start command. The default value is `/start` for buildstep images and ` ` otherwise.
 
 ## Image tagging
 
@@ -562,7 +565,7 @@ You can use [Github Issues](https://github.com/dokku-alt/dokku-alt/issues).
 Run the follwing:
 
     dokku config:set <app> DATABASE_URL=postgresql://user:password@dbserver-ip:5432/DBNAME
-        
+
 You have to feed application with your DATABASE_URL. You can even use databases from heroku.
 
 ### Linking to other containers

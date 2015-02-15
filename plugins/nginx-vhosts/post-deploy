@@ -39,6 +39,9 @@ EOF
   keepalive_timeout   70;
   add_header Alternate-Protocol 443:npn-spdy/2;
 
+  underscores_in_headers on;
+  ignore_invalid_headers off;
+   
   ssl on;
   ssl_certificate     $SSL_INUSE/server.crt;
   ssl_certificate_key $SSL_INUSE/server.key;
@@ -83,8 +86,8 @@ EOF
 
   for host in "$@";
   do
-    echo "proxy_redirect http://$host:$INT_PORT/ $SCHEME://$host/;"
-    [[ "$SCHEME" == "https" ]] && echo "proxy_redirect https://$host:$INT_PORT/ $SCHEME://$host/;"
+    echo "    proxy_redirect http://$host:$INT_PORT/ $SCHEME://$host/;"
+    [[ "$SCHEME" == "https" ]] && echo "    proxy_redirect https://$host:$INT_PORT/ $SCHEME://$host/;"
   done
 
   cat <<EOF
@@ -92,6 +95,7 @@ EOF
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection "upgrade";
     proxy_set_header Host \$http_host;
+    proxy_pass_request_headers on;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
 EOF
 

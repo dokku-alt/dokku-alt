@@ -2,8 +2,7 @@
 
 source "$(dirname $0)/../dokku_common"
 
-create_bare_repository() {
-    git init --bare "$2" > /dev/null
+create_pre_receive_hook() {
     PRERECEIVE_HOOK="$2/hooks/pre-receive"
     cat > "$PRERECEIVE_HOOK" <<EOF
 #!/usr/bin/env bash
@@ -11,6 +10,11 @@ set -e; set -o pipefail;
 cat | DOKKU_ROOT="$DOKKU_ROOT" dokku git-hook "$1"
 EOF
     chmod +x "$PRERECEIVE_HOOK"
+}
+
+create_bare_repository() {
+    git init --bare "$2" > /dev/null
+    create_pre_receive_hook "$@"
 }
 
 case "$1" in
@@ -64,9 +68,28 @@ case "$1" in
     info "Application $APP created!"
     ;;
 
+  clone)
+    cleanup_clone() {
+      dokku delete "$APP"
+    }
+    check_app_name "$2"
+    verify_max_args 4 "$@"
+    [[ -d "$APP_DIR/refs" ]] && fail "$APP: already exist"
+    info "Cloning $APP repository from $3..."
+    git clone --bare -b "${4:-master}" "$3" "$APP_DIR"
+    cd "$APP_DIR"
+    HEAD="$(git rev-parse "${4:-master}")"
+    trap cleanup_clone EXIT
+    create_pre_receive_hook "$APP" "$APP_DIR"
+    dokku rebuild "$APP" "$HEAD"
+    echo "$HEAD" > "refs/heads/master"
+    trap - EXIT
+    ;;
+
   help | git:help)
     cat && cat <<EOF
-    create <app>                 Create shallow app
+    create <app>                       Create shallow app
+    clone <app> <repository> [branch]  Create application by cloning git repository
 EOF
     ;;
 
