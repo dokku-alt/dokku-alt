@@ -3,7 +3,7 @@
 set -e
 pushd $(dirname $0)
 
-export HOME=/root
+# export HOME=/root
 
 echo "Starting services..."
 sudo service nginx stop || true
@@ -17,7 +17,12 @@ echo "Removing old containers..."
 docker ps -a -q | xargs --no-run-if-empty docker rm -f
 
 echo "Configuring dokku..."
-[[ -f ~/.ssh/id_rsa ]] || ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa
+if [[ ! -e ~/.ssh/id_rsa ]]; then
+    ssh-keygen -q -t rsa -N "" -f ~/.ssh/id_rsa
+elif [[ ! -e ~/.ssh/id_rsa.pub ]]; then
+    ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+fi
+
 cat <<EOF > ~/.ssh/config
 Host *
     StrictHostKeyChecking no
