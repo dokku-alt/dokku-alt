@@ -1,4 +1,4 @@
-image: dokku-alt/base
+image: ayufan/dokku-alt-base:latest
 
 script:
 - sed -i 's/linux-image-extra-virtual, //g' deb/dokku-alt/DEBIAN/control
