@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+source "$(dirname $0)/../dokku_common"
+
+verify_app_name "$1"
+
+if [[ "$3" != "buildstep" ]]; then
+	exit 0;
+fi
+
+SSH_KEY_INSTALL=1
+source "$(dirname $0)/create-ssh-keys"
+
+info "Installing ssh keys in build environment ..."
+ssh-keygen -l -f "$SSH_PUB_KEY"
+
+cd "$SSH_DIR"
+tar c * --owner=0 --group=0 | docker run -i -a stdin "$IMAGE" /bin/bash -c "mkdir -p /app/.ssh && tar -xC /app/.ssh" | commit_image "$IMAGE"

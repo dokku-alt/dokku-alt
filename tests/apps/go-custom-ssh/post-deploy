@@ -1,0 +1,15 @@
+#!/bin/bash
+
+REMOTE=$1
+REPO=$2
+
+set -xe
+
+echo "Removing SSH key..."
+ssh $1 ssh:remove $2
+
+echo "SSH key shouldn't exist"
+ssh $1 ssh:info $2 && exit 1
+
+echo "Rebuild should fail too"
+ssh $1 rebuild $2 && exit 1

@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+if [[ -z "$APP" ]] || [[ -z "$APP_DIR" ]]; then
+	echo "Missing APP or APP_DIR"
+	exit 1
+fi
+
+SSH_DIR="$APP_DIR/ssh"
+SSH_KEY="$SSH_DIR/id_rsa"
+SSH_PUB_KEY="$SSH_DIR/id_rsa.pub"
+SSH_CONFIG="$SSH_DIR/config"
+SSH_NAME="$(id -u -n)@$APP"
+
+mkdir -p "$SSH_DIR"
+
+if [[ -n "$SSH_KEY_INSTALL" ]]; then
+	if [[ ! -f "$SSH_KEY" ]]; then
+		ssh-keygen -q -t rsa -N "" -n "$SSH_NAME" -f "$SSH_KEY"
+	fi
+
+	if [[ ! -f "$SSH_PUB_KEY" ]]; then
+		ssh-keygen -y -n "$SSH_NAME" -f "$SSH_KEY" > "$SSH_PUB_KEY"
+	fi
+fi
+
+if [[ ! -f "$SSH_CONFIG" ]]; then
+	cat <<EOF > "$SSH_CONFIG"
+Host *
+    StrictHostKeyChecking no
+EOF
+fi
+
+chmod -R go-rwx "$SSH_DIR"

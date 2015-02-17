@@ -1,5 +1,9 @@
 # History of Dokku-alt
 
+## WIP
+
+* Added SSH key to buildstep images
+
 ## 0.3.11 (BETA)
 
 * Merged dokku v.0.3.9 upstream: af671b2abaa506a5de320e30d033fc0e51e33221

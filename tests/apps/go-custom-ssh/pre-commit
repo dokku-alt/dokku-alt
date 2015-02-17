@@ -1,0 +1,16 @@
+#!/bin/bash
+
+ssh $1 create $2
+
+echo "Checking if SSH key exists..."
+ssh $1 ssh:info $2 && exit 1
+
+echo "Installing SSH key..."
+ssh $1 ssh:install $2 < id_rsa
+ssh $1 ssh:info $2
+
+echo "Veryfing SSH key..."
+ssh $1 ssh:info $2 | grep 35:26:1f:9c:8d:57:b1:1b:3a:f4:9b:67:f7:47:af:9c
+
+echo "Setting custom buildpack..."
+ssh $1 config:set $2 BUILDPACK_URL=git@github.com:heroku/heroku-buildpack-go.git || true

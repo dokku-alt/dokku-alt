@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+source "$(dirname $0)/../dokku_common"
+
+cleanup() {
+	rm -f "$TEMP_SSH_PUB_KEY" "$TEMP_SSH_KEY"
+}
+
+case "$1" in
+  ssh:info)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    source "$(dirname $0)/create-ssh-keys"
+    [[ ! -e "$SSH_PUB_KEY" ]] && fail "No SSH key is installed"
+	ssh-keygen -l -f "$SSH_PUB_KEY"
+    ;;
+
+  ssh:public)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    source "$(dirname $0)/create-ssh-keys"
+    [[ ! -e "$SSH_PUB_KEY" ]] && fail "No SSH key is installed"
+    ssh-keygen -y -n "$SSH_NAME" -f "$SSH_KEY"
+    ;;
+
+  ssh:install)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    set -xe
+    source "$(dirname $0)/create-ssh-keys"
+    TEMP_SSH_KEY=$(mktemp)
+    TEMP_SSH_PUB_KEY=$(mktemp)
+    trap cleanup EXIT
+    cat > "$TEMP_SSH_KEY"
+	if ! ssh-keygen -y -n "$SSH_NAME" -f "$TEMP_SSH_KEY" > "$TEMP_SSH_PUB_KEY"; then
+		fail "Invalid SSH private key"
+	fi
+	mv "$TEMP_SSH_KEY" "$SSH_KEY"
+	mv "$TEMP_SSH_PUB_KEY" "$SSH_PUB_KEY"
+    trap - EXIT
+    source "$(dirname $0)/create-ssh-keys"
+    dokku rebuild "$APP"
+    ;;
+
+  ssh:remove)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    source "$(dirname $0)/create-ssh-keys"
+    rm -rf "$SSH_KEY" "$SSH_PUB_KEY"
+    info "SSH key removed"
+	;;
+
+  help)
+    cat && cat<<EOF
+    ssh:install <app>       Pipe custom private key
+    ssh:remove <app>        Remove SSH private key
+    ssl:info <app>          Show info about SSH key
+    ssl:public <app>        Show SSH public key
+EOF
+    ;;
+
+  *)
+    exit $DOKKU_NOT_IMPLEMENTED_EXIT
+    ;;
+esac
