@@ -8,4 +8,4 @@ if [[ "$3" != "buildstep" ]]; then
 	exit 0;
 fi
 
-docker run "$IMAGE" /bin/bash -c "rm -rf /app/.ssh" | commit_image "$IMAGE"
+docker run -d "$IMAGE" /bin/bash -c "rm -rf /app/.ssh" | commit_image "$IMAGE"
