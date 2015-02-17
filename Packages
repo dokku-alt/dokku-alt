@@ -3,6 +3,23 @@ Priority: optional
 Section: base
 Maintainer: Kamil Trzciński <ayufan@ayufan.eu>
 Architecture: amd64
+Version: 0.3.10-112-gee87933
+Provides: dokku-alt
+Depends: locales, git, make, curl, software-properties-common, man-db, lxc-docker (>= 1.3.0), nginx, dnsutils, linux-image-extra-virtual, aufs-tools, apache2-utils
+Conflicts: pluginhook, dokku-alt
+Filename: ./dokku-alt-beta-0.3.10-112-gee87933-amd64.deb
+Size: 445522
+MD5sum: 3e766fd662b7ff7cd73e7748fcabfdbc
+SHA1: 4cb3ea4837192a2413a9e981a2995f90551d3bc4
+SHA256: 96ce8a0c012d059e0358c9c0e66502b1ba4f81a53f068b28d8f63b9dc3fa862e
+SHA512: 01a31d2b09c2a46aad3aef9d5ded1b70002fb1b92c4192520a598d5d8e2f74de8a5e2a0c28ce88bdaa55f4161421304db76152736386e468cc1b745a7dbf4dbe
+Description: Docker powered mini-Heroku an fork of Dokku the Dokku Alternative.
+
+Package: dokku-alt-beta
+Priority: optional
+Section: base
+Maintainer: Kamil Trzciński <ayufan@ayufan.eu>
+Architecture: amd64
 Version: 0.3.10
 Provides: dokku-alt
 Depends: locales, git, make, curl, software-properties-common, man-db, lxc-docker (>= 1.3.0), nginx, dnsutils, linux-image-extra-virtual, aufs-tools, apache2-utils
