@@ -1,0 +1,54 @@
+#!/bin/bash
+
+REMOTE=$1
+REPO=$2
+
+custom_check_deploy() {
+	output="$(curl --verbose --fail -x "$PROXY_URL" $URL)";
+	echo $output;
+	test "$output" == "$1"
+}
+
+HOST_DIR=$(mktemp -d)
+chmod 755 $HOST_DIR
+
+cleanup() {
+	[[ -n "$HOST_DIR" ]] && rm -rf "$HOST_DIR"
+}
+
+trap cleanup EXIT
+
+set -xe
+
+echo Creating host-based volume...
+dokku volume:create $2 $HOST_DIR:/usr/share/nginx/html
+dokku volume:link $2 $2
+dokku volume:info $2
+dokku volume:list:apps $2
+
+echo Checking if persistent volume works
+echo persistent-volume > $HOST_DIR/index.html
+custom_check_deploy persistent-volume
+echo persistent-volume-2 > $HOST_DIR/index.html
+custom_check_deploy persistent-volume-2
+
+echo Rebuilding app and checking if volume works
+dokku rebuild $2
+custom_check_deploy persistent-volume-2
+
+echo Unlinking volume...
+dokku volume:unlink $2 $2
+custom_check_deploy volumes-test
+
+echo Relinking volume...
+dokku volume:link $2 $2
+custom_check_deploy persistent-volume-2
+
+echo Creating volume once again...
+! dokku volume:create $2 /usr/share/nginx/html
+
+echo Destroying volume...
+dokku volume:destroy $2
+
+echo Rebuild app, because its still linked to volume...
+dokku rebuild $2
