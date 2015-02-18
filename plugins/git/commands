@@ -86,10 +86,40 @@ case "$1" in
     trap - EXIT
     ;;
 
+  import:docker)
+    cleanup() {
+      dokku delete "$APP"
+      [[ -n "$TMP_WORK_DIR" ]] && rm -rf "$TMP_WORK_DIR"
+    }
+    check_app_name "$2"
+    verify_max_args 3 "$@"
+    dokku create "$2"
+    trap cleanup EXIT
+
+    TMP_WORK_DIR="$(mktemp -d)"
+    echo "$3"
+    # clone git repository
+    chmod 755 "$TMP_WORK_DIR"
+    unset GIT_DIR GIT_WORK_TREE
+    pushd "$TMP_WORK_DIR" > /dev/null
+    git clone "$APP_DIR" "$TMP_WORK_DIR" > /dev/null
+    git config advice.detachedHead false
+    git config user.email "$(id -u -n)@$(hostname)"
+    git config user.name "$(id -u -n)"
+    cat <<EOF > Dockerfile
+FROM $3
+EOF
+    git add Dockerfile
+    git commit -am "Created application with Docker FROM $3"
+    git push origin master
+    trap - EXIT
+    ;;
+
   help | git:help)
     cat && cat <<EOF
-    create <app>                       Create shallow app
-    clone <app> <repository> [branch]  Create application by cloning git repository
+    create <app>                                Create shallow app
+    clone <app> <repository> [branch]           Create application by cloning git repository
+    import:docker <app> <docker-image-from>     Create application from Docker image
 EOF
     ;;
 

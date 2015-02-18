@@ -13,7 +13,7 @@ if [[ "$2" == "web" ]] || [[ "$2" == "run" ]]; then
 		VOLUME="$VOLUME_CONTAINER_PREFIX$(basename "$(dirname "$VOLUME_APP")")"
 		echo "--volumes-from $VOLUME "
 		docker inspect \
-			--format='{{range $container, $host := .Volumes}}{{printf "--volume=%q\n" (printf "%s:%s" $container $host)}}{{end}}' \
+			--format='{{range $container, $host := .Volumes}}{{printf "--volume=%q\n" (printf "%s:%s" $host $container)}}{{end}}' \
 			"$VOLUME"
 	done < <(find "$VOLUME_ROOT" -type f -name "$APP")
 fi
