@@ -154,6 +154,7 @@ server {
   ssl on;
   ssl_certificate     $SSL_INUSE/server.crt;
   ssl_certificate_key $SSL_INUSE/server.key;
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
   return 301 $WHERE;
 }
 EOF
