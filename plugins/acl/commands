@@ -33,7 +33,7 @@ case "$1" in
   access:list)
     verify_max_args 1 "$@"
 
-    sed -n -e 's/^command="FINGERPRINT=\(.*\) NAME=\(.*\) `.*ssh-\(rsa\|dsa\).*$/\2\t\1/p' "$AUTHORIZED_KEYS"
+    sed -n -e 's/^command="FINGERPRINT=\(.*\) NAME=\(.*\) `.*ssh-\(rsa\|dsa\|dss\).*$/\2\t\1/p' "$AUTHORIZED_KEYS"
     ;;
 
   access:info)

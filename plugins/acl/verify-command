@@ -4,7 +4,7 @@ source "$(dirname $0)/vars"
 
 cat
 
-[[ -z "$NAME" ]] && [[ $(id -un) != "root" ]] && fail "Access denied. No user supplied."
+[[ -z "$NAME" ]] && [[ $(id -un) != "root" ]] && [[ $(id -un) != "dokku" ]] && fail "Access denied. No user supplied."
 
 # http://unix.stackexchange.com/a/67900
 if [[ "$NAME" != "developer" ]] && [[ "$NAME" != "deploy" ]]; then
