@@ -84,6 +84,41 @@ case "$1" in
     fi
     ;;
 
+  developer:allow)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+
+    add_ssh_key "developer" "developer"
+    if !  is_fingerprint_allowed "$FINGERPRINT"
+    then
+        echo "$FINGERPRINT" >> "$APP_DIR/$DEVELOPER_ALLOWED"
+        info "$FINGERPRINT added to $APP as an developer key"
+    else
+        info "$FINGERPRINT is already added to $APP as an developer key"
+    fi
+    ;;
+
+  developer:list)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+
+    cat "$APP_DIR/$DEVELOPER_ALLOWED" 2>/dev/null || true
+    ;;
+
+  developer:revoke)
+    verify_app_name "$2"
+    verify_fingerprint "$3"
+    verify_max_args 3 "$@"
+
+    if  is_fingerprint_allowed "$FINGERPRINT"
+    then
+        sed --in-place "/^$FINGERPRINT\$/d" "$APP_DIR/$DEVELOPER_ALLOWED"
+        info "$FINGERPRINT removed from an $APP as an developer key"
+    else
+        info "$FINGERPRINT is not added to $APP as an developer key"
+    fi
+    ;;
+
   help)
     cat && cat<<EOF
     access:add                          Add admin user
@@ -93,6 +128,9 @@ case "$1" in
     deploy:allow <app>                  Allow push-access (aka. deployment) to an app
     deploy:list <app>                   List all push-acccesses for an application
     deploy:revoke <app> <fingerprint>   Revoke push-access for an application
+    developer:allow <app>                  Allow developer-access to an app
+    developer:list <app>                   List all developer-acccesses for an application
+    developer:revoke <app> <fingerprint>   Revoke developer-access for an application
 EOF
     ;;
 esac
