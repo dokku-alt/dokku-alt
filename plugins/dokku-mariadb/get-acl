@@ -2,6 +2,8 @@
 
 source "$(dirname $0)/vars"
 
+cat
+
 case "$1" in
   mariadb:create)
     verify_db_name "$2"

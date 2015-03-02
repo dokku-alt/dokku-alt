@@ -2,6 +2,8 @@
 
 source "$(dirname $0)/vars"
 
+cat
+
 case "$1" in
   volume:create)
     volume_info "$2"

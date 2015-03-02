@@ -2,6 +2,8 @@
 
 source "$(dirname $0)/vars"
 
+cat
+
 case "$1" in
   ssl:generate)
     verify_app_name "$2"

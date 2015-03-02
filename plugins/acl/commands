@@ -50,12 +50,9 @@ case "$1" in
       then
         echo "Developer access to $APP."
       fi
+      if is_fingerprint_allowed "$1" "deploy"
       then
         echo "Push-access to $APP."
-      fi
-      if  is_fingerprint_allowed "$1" "deploy"
-      then
-        echo "Developer-access to $APP."
       fi
     done
     ;;

@@ -2,6 +2,8 @@
 
 source "$(dirname $0)/vars"
 
+cat
+
 case "$1" in
   redis:create)
     redis_for_app "$2"

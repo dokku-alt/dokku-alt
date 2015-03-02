@@ -2,6 +2,8 @@
 
 source "$(dirname $0)/../dokku_common"
 
+cat
+
 case "$1" in
   tag:add)
     verify_app_name "$2"

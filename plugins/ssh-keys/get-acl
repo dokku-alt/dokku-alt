@@ -2,9 +2,7 @@
 
 source "$(dirname $0)/../dokku_common"
 
-cleanup() {
-	rm -f "$TEMP_SSH_PUB_KEY" "$TEMP_SSH_KEY"
-}
+cat
 
 case "$1" in
   ssh:info)
