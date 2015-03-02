@@ -17,9 +17,13 @@ case "$1" in
     remove_fingerprint "$FINGERPRINT"
 
     for APP in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
-      if is_fingerprint_allowed "$1"
+      if is_fingerprint_allowed "$1" "deploy"
       then
         sed --in-place "/^$FINGERPRINT\$/d" "$DOKKU_ROOT/$APP/$DEPLOY_ALLOWED"
+      fi
+      if is_fingerprint_allowed "$1" "developer"
+      then
+        sed --in-place "/^$FINGERPRINT\$/d" "$DOKKU_ROOT/$APP/$DEVELOPER_ALLOWED"
       fi
     done
 
@@ -42,9 +46,13 @@ case "$1" in
     fi
 
     for APP in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
-      if  is_fingerprint_allowed "$1"
+      if  is_fingerprint_allowed "$1" "deploy"
       then
         echo "Push-access to $APP."
+      fi
+      if  is_fingerprint_allowed "$1" "developer"
+      then
+        echo "Developer-access to $APP."
       fi
     done
     ;;
@@ -54,7 +62,7 @@ case "$1" in
     verify_max_args 2 "$@"
 
     add_ssh_key "deploy" "deploy"
-    if !  is_fingerprint_allowed "$FINGERPRINT"
+    if !  is_fingerprint_allowed "$FINGERPRINT" "deploy"
     then
         echo "$FINGERPRINT" >> "$APP_DIR/$DEPLOY_ALLOWED"
         info "$FINGERPRINT added to $APP as an deployment key"
@@ -75,7 +83,7 @@ case "$1" in
     verify_fingerprint "$3"
     verify_max_args 3 "$@"
 
-    if  is_fingerprint_allowed "$FINGERPRINT"
+    if  is_fingerprint_allowed "$FINGERPRINT" "deploy"
     then
         sed --in-place "/^$FINGERPRINT\$/d" "$APP_DIR/$DEPLOY_ALLOWED"
         info "$FINGERPRINT removed from an $APP as an deployment key"
@@ -89,7 +97,7 @@ case "$1" in
     verify_max_args 2 "$@"
 
     add_ssh_key "developer" "developer"
-    if !  is_fingerprint_allowed "$FINGERPRINT"
+    if !  is_fingerprint_allowed "$FINGERPRINT" "developer"
     then
         echo "$FINGERPRINT" >> "$APP_DIR/$DEVELOPER_ALLOWED"
         info "$FINGERPRINT added to $APP as an developer key"
@@ -110,7 +118,7 @@ case "$1" in
     verify_fingerprint "$3"
     verify_max_args 3 "$@"
 
-    if  is_fingerprint_allowed "$FINGERPRINT"
+    if  is_fingerprint_allowed "$FINGERPRINT" "developer"
     then
         sed --in-place "/^$FINGERPRINT\$/d" "$APP_DIR/$DEVELOPER_ALLOWED"
         info "$FINGERPRINT removed from an $APP as an developer key"
