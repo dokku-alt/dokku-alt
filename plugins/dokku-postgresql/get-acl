@@ -1,0 +1,73 @@
+#!/bin/bash
+
+source "$(dirname $0)/vars"
+
+verify_db_name() {
+    sanitize_name "$1" "database name"
+    DB_NAME="$1"
+}
+
+case "$1" in
+  postgresql:create)
+    verify_db_name "$2"
+    verify_max_args 2 "$@"
+    print_acl_access "developer" "$2"
+    ;;
+
+  postgresql:list)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    print_acl_access "developer" "$2"
+    ;;
+
+  postgresql:info)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+  postgresql:link)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+  postgresql:unlink)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+  postgresql:console)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+  postgresql:dump)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+esac

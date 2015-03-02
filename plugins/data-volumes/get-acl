@@ -1,0 +1,36 @@
+#!/bin/bash
+
+source "$(dirname $0)/vars"
+
+case "$1" in
+  volume:create)
+    volume_info "$2"
+    print_acl_access "developer" "$2"
+    ;;
+
+  volume:delete|volume:destroy)
+    volume_info "$2"
+    verify_max_args 2 "$@"
+    ;;
+
+  volume:info)
+    volume_info "$2"
+    verify_max_args 2 "$@"
+    print_acl_access "developer" "$2"
+    ;;
+
+  volume:link)
+    verify_max_args 3 "$@"
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+  volume:unlink)
+    verify_max_args 3 "$@"
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+esac

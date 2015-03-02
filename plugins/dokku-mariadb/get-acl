@@ -1,0 +1,63 @@
+#!/bin/bash
+
+source "$(dirname $0)/vars"
+
+case "$1" in
+  mariadb:create)
+    verify_db_name "$2"
+    verify_max_args 2 "$@"
+    print_acl_access "developer" "$2"
+    ;;
+
+  mariadb:list)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    print_acl_access "developer" "$2"
+    ;;
+
+  mariadb:info)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+  mariadb:link)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+  mariadb:unlink)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+  mariadb:console)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+  mariadb:dump)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+esac

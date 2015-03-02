@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+source "$(dirname $0)/../dokku_common"
+
+cleanup() {
+	rm -f "$TEMP_SSH_PUB_KEY" "$TEMP_SSH_KEY"
+}
+
+case "$1" in
+  ssh:info)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    print_acl_access "developer" "$2"
+    ;;
+
+  ssh:public)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    print_acl_access "developer" "$2"
+    ;;
+
+  ssh:install)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    print_acl_access "developer" "$2"
+    ;;
+
+  ssh:remove)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    print_acl_access "developer" "$2"
+	;;
+esac

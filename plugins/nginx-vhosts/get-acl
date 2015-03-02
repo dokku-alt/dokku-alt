@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+source "$(dirname $0)/vars"
+
+case "$1" in
+  domains:get)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    hostnames_for_app "$APP"
+    print_acl_access "developer" "$2"
+	;;
+
+  domains:set)
+    verify_app_name "$2"
+    print_acl_access "developer" "$2"
+    ;;
+
+  domains:redirect:get)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    print_acl_access "developer" "$2"
+    ;;
+
+  domains:redirect:set)
+    verify_app_name "$2"
+    print_acl_access "developer" "$2"
+    ;;
+
+  nginx:import-ssl)
+    [[ -z $2 ]] && echo "Please specify an app to run the command on" && exit 1
+    [[ ! -d "$DOKKU_ROOT/$2" ]] && echo "App $2 does not exist" && exit 1
+    [[ -t 0 ]] && echo "Tar archive containing server.crt and server.key expected on stdin" && exit 1
+    APP="$2"
+    print_acl_access "developer" "$2"
+    ;;
+esac

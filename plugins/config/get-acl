@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+source "$(dirname $0)/../dokku_common"
+
+case "$1" in
+  config)
+    print_acl_access "developer" "$2"
+  ;;
+
+  config:get)
+    print_acl_access "developer" "$2"
+  ;;
+
+  config:set)
+    print_acl_access "developer" "$2"
+  ;;
+
+  config:unset)
+    print_acl_access "developer" "$2"
+  ;;
+esac
