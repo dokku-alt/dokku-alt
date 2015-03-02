@@ -6,7 +6,8 @@ cat
 
 [[ -z "$NAME" ]] && [[ $(id -un) != "root" ]] && fail "Access denied. No user supplied."
 
-if [[ "$NAME" != "deploy" ]]; then
+# http://unix.stackexchange.com/a/67900
+if [[ "$NAME" != "developer" ]] && [[ "$NAME" != "deploy" ]]; then
     # Allow everything
     exit 0
 fi
@@ -23,17 +24,21 @@ check_app_name "$ACL_APPNAME"
 
 case "$ACL_APPNAME" in
     developer)
-        if is_developer_fingerprint_allowed "$FINGERPRINT"; then
-            exit 0
+        if [[ "$NAME" == "developer" ]]; then
+            if is_fingerprint_allowed "$FINGERPRINT" "developer"; then
+                exit 0
+            fi
         fi
         ;;
 
     deploy)
-        if is_fingerprint_allowed "$FINGERPRINT"; then
-            exit 0
-        fi
-        if is_developer_fingerprint_allowed "$FINGERPRINT"; then
-            exit 0
+        if [[ "$NAME" == "developer" ]] || [[ "$NAME" == "deploy" ]]; then
+            if is_fingerprint_allowed "$FINGERPRINT" "developer"; then
+                exit 0
+            fi
+            if is_fingerprint_allowed "$FINGERPRINT" "deploy"; then
+                exit 0
+            fi
         fi
         ;;
 esac

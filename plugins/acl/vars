@@ -5,6 +5,7 @@ source "$(dirname $0)/../dokku_common"
 AUTHORIZED_KEYS="$DOKKU_ROOT/.ssh/authorized_keys"
 DEVELOPER_ALLOWED="DEVELOPER_ALLOWED"
 DEPLOY_ALLOWED="DEPLOY_ALLOWED"
+DEVELOPER_ALLOWED="DEVELOPER_ALLOWED"
 
 add_ssh_key() {
     KEY_FILE=$(mktemp)
@@ -47,10 +48,22 @@ is_developer_fingerprint_allowed() {
 }
 
 is_fingerprint_allowed() {
-    if [[ -f "$DOKKU_ROOT/$APP/$DEPLOY_ALLOWED" ]] && grep -q "^$1\$" "$DOKKU_ROOT/$APP/$DEPLOY_ALLOWED"
-    then
-        return 0
-    else
-        return 1
-    fi
+  case "$2" in
+    deploy)
+      if [[ -f "$DOKKU_ROOT/$APP/$DEPLOY_ALLOWED" ]] && grep -q "^$1\$" "$DOKKU_ROOT/$APP/$DEPLOY_ALLOWED"
+      then
+          return 0
+      else
+          return 1
+      fi
+      ;;
+    developer)
+      if [[ -f "$DOKKU_ROOT/$APP/$DEVELOPER_ALLOWED" ]] && grep -q "^$1\$" "$DOKKU_ROOT/$APP/$DEVELOPER_ALLOWED"
+      then
+          return 0
+      else
+          return 1
+      fi
+      ;;
+  esac
 }

@@ -17,9 +17,13 @@ case "$1" in
     remove_fingerprint "$FINGERPRINT"
 
     for APP in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
-      if is_fingerprint_allowed "$1"
+      if is_fingerprint_allowed "$1" "deploy"
       then
         sed --in-place "/^$FINGERPRINT\$/d" "$DOKKU_ROOT/$APP/$DEPLOY_ALLOWED"
+      fi
+      if is_fingerprint_allowed "$1" "developer"
+      then
+        sed --in-place "/^$FINGERPRINT\$/d" "$DOKKU_ROOT/$APP/$DEVELOPER_ALLOWED"
       fi
     done
 
@@ -42,23 +46,61 @@ case "$1" in
     fi
 
     for APP in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
-      if is_developer_fingerprint_allowed "$1"
+      if is_fingerprint_allowed "$1" "developer"
       then
         echo "Developer access to $APP."
       fi
-      if is_fingerprint_allowed "$1"
       then
         echo "Push-access to $APP."
       fi
+      if  is_fingerprint_allowed "$1" "deploy"
+      then
+        echo "Developer-access to $APP."
+      fi
     done
+    ;;
+
+  deploy:allow)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+
+    add_ssh_key "deploy" "deploy"
+    if !  is_fingerprint_allowed "$FINGERPRINT" "deploy"
+    then
+        echo "$FINGERPRINT" >> "$APP_DIR/$DEPLOY_ALLOWED"
+        info "$FINGERPRINT added to $APP as an deployment key"
+    else
+        info "$FINGERPRINT is already added to $APP as an deployment key"
+    fi
+    ;;
+
+  deploy:list)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+
+    cat "$APP_DIR/$DEPLOY_ALLOWED" 2>/dev/null || true
+    ;;
+
+  deploy:revoke)
+    verify_app_name "$2"
+    verify_fingerprint "$3"
+    verify_max_args 3 "$@"
+
+    if is_fingerprint_allowed "$FINGERPRINT"
+    then
+        sed --in-place "/^$FINGERPRINT\$/d" "$APP_DIR/$DEPLOY_ALLOWED"
+        info "$FINGERPRINT removed from an $APP as an deployment key"
+    else
+        info "$FINGERPRINT is not added to $APP as an deployment key"
+    fi
     ;;
 
   developer:allow)
     verify_app_name "$2"
     verify_max_args 2 "$@"
 
-    add_ssh_key "deploy" "deploy"
-    if !  is_developer_fingerprint_allowed "$FINGERPRINT"
+    add_ssh_key "developer" "developer"
+    if !  is_fingerprint_allowed "$FINGERPRINT" "developer"
     then
         echo "$FINGERPRINT" >> "$APP_DIR/$DEVELOPER_ALLOWED"
         info "$FINGERPRINT added to $APP as an developer key"
@@ -79,54 +121,12 @@ case "$1" in
     verify_fingerprint "$3"
     verify_max_args 3 "$@"
 
-    if  is_fingerprint_allowed "$FINGERPRINT"
+    if  is_fingerprint_allowed "$FINGERPRINT" "developer"
     then
         sed --in-place "/^$FINGERPRINT\$/d" "$APP_DIR/$DEVELOPER_ALLOWED"
         info "$FINGERPRINT removed from an $APP as an developer key"
     else
         info "$FINGERPRINT is not added to $APP as an developer key"
-    fi
-    ;;
-
-  deploy:allow)
-    verify_app_name "$2"
-    verify_max_args 2 "$@"
-
-    add_ssh_key "deploy" "deploy"
-    if !  is_fingerprint_allowed "$FINGERPRINT"
-    then
-        echo "$FINGERPRINT" >> "$APP_DIR/$DEPLOY_ALLOWED"
-        info "$FINGERPRINT added to $APP as an deployment key"
-    else
-        info "$FINGERPRINT is already added to $APP as an deployment key"
-    fi
-    ;;
-
-  deploy:list)
-    verify_app_name "$2"
-    verify_max_args 2 "$@"
-
-    cat "$APP_DIR/$DEPLOY_ALLOWED" 2>/dev/null || true
-    ;;
-
-  deploy:revoke|developer:revoke)
-    verify_app_name "$2"
-    verify_fingerprint "$3"
-    verify_max_args 3 "$@"
-
-    if is_developer_fingerprint_allowed "$FINGERPRINT"
-    then
-        sed --in-place "/^$FINGERPRINT\$/d" "$APP_DIR/$DEVELOPER_ALLOWED"
-        info "$FINGERPRINT removed from an $APP as an developer key"
-    else
-        info "$FINGERPRINT is not added to $APP as an developer key"
-    fi
-    if is_fingerprint_allowed "$FINGERPRINT"
-    then
-        sed --in-place "/^$FINGERPRINT\$/d" "$APP_DIR/$DEPLOY_ALLOWED"
-        info "$FINGERPRINT removed from an $APP as an deployment key"
-    else
-        info "$FINGERPRINT is not added to $APP as an deployment key"
     fi
     ;;
 
@@ -136,12 +136,12 @@ case "$1" in
     access:list                         List all SSH keys: admins and deployments
     access:info <fingeprint>            Show information about the key
     access:remove <fingerprint>         Revoke all permissions for specific SSH key
-    developer:allow <app>                  Allow access commands specific for an app
-    developer:list <app>                   List all keys with developer access to an application
-    developer:revoke <app> <fingerprint>   Revoke developer access to an application
     deploy:allow <app>                  Allow push-access (aka. deployment) to an app
     deploy:list <app>                   List all push-acccesses for an application
     deploy:revoke <app> <fingerprint>   Revoke push-access for an application
+    developer:allow <app>                  Allow developer-access to an app
+    developer:list <app>                   List all developer-acccesses for an application
+    developer:revoke <app> <fingerprint>   Revoke developer-access for an application
 EOF
     ;;
 
