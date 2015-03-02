@@ -3,6 +3,7 @@
 source "$(dirname $0)/../dokku_common"
 
 AUTHORIZED_KEYS="$DOKKU_ROOT/.ssh/authorized_keys"
+DEVELOPER_ALLOWED="DEVELOPER_ALLOWED"
 DEPLOY_ALLOWED="DEPLOY_ALLOWED"
 
 add_ssh_key() {
@@ -34,6 +35,15 @@ remove_fingerprint() {
 verify_fingerprint() {
     FINGERPRINT="$1"
     [[ "$FINGERPRINT" =~ ^[0-9a-fA-F:]+$ ]] || fail "$FINGERPRINT: this is not fingerprint!"
+}
+
+is_developer_fingerprint_allowed() {
+    if [[ -f "$DOKKU_ROOT/$APP/$DEVELOPER_ALLOWED" ]] && grep -q "^$1\$" "$DOKKU_ROOT/$APP/$DEVELOPER_ALLOWED"
+    then
+        return 0
+    else
+        return 1
+    fi
 }
 
 is_fingerprint_allowed() {

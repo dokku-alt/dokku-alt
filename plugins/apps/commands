@@ -67,7 +67,7 @@ case "$1" in
   apps:restart|restart)
     verify_app_name "$2"
     verify_max_args 2 "$@"
-    docker restart "$APP_NAME"
+    deploy_app "$APP"
     ;;
 
   apps:top|top)

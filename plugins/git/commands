@@ -2,129 +2,19 @@
 
 source "$(dirname $0)/../dokku_common"
 
-create_pre_receive_hook() {
-    PRERECEIVE_HOOK="$2/hooks/pre-receive"
-    cat > "$PRERECEIVE_HOOK" <<EOF
-#!/usr/bin/env bash
-set -e; set -o pipefail;
-cat | DOKKU_ROOT="$DOKKU_ROOT" dokku git-hook "$1"
-EOF
-    chmod +x "$PRERECEIVE_HOOK"
-}
-
-create_bare_repository() {
-    git init --bare "$2" > /dev/null
-    create_pre_receive_hook "$@"
-}
+cat
 
 case "$1" in
   git-hook)
-    verify_app_name "$2"
-
-    # if we got here we have full access
-    export NAME="dokku"
-    export FINGERPRINT=""
-
-    while read oldrev newrev refname
-    do
-      # Only run this script for the master branch. You can remove this
-      # if block if you wish to run it for others as well.
-      if [[ $refname = "refs/heads/master" ]] ; then
-        dokku rebuild "$APP" "$newrev"
-      else
-        echo $'\e[1G\e[K'"-----> WARNING: deploy did not complete, you must push to master."
-        echo $'\e[1G\e[K'"-----> for example, try 'git push <dokku> ${refname/refs\/heads\/}:master'"
-      fi
-    done
-    ;;
-
-  git-upload-pack)
-    APP="$(echo $2 | perl -pe 's/(?<!\\)'\''//g' | sed 's/\\'\''/'\''/g')"
-    pluginhook git-pre-pull $APP
-    cat | git-upload-pack "$DOKKU_ROOT/$APP"
-    pluginhook git-post-pull $APP
+    check_app_name "$2"
+    echo "deploy"
+    echo "$APP"
     ;;
 
   git-*)
     APP="$(echo "$2" | perl -pe 's/(?<!\\)'\''//g' | sed 's/\\'\''/'\''/g')"
     check_app_name "$APP"
-
-    if [[ $1 == "git-receive-pack" && ! -d "$APP_DIR/refs" ]]; then
-      [[ "$DOKKU_DISABLE_AUTO_APP_CREATE" == "1" ]] && fail "$APP: application doesn't exit, please create it with: dokku create $APP"
-      create_bare_repository "$APP" "$APP_DIR"
-    fi
-
-    verify_app_name "$APP"
-
-    args=$@
-    git-shell -c "$args"
+    echo "deploy"
+    echo "$APP"
     ;;
-
-  create|apps:create)
-    check_app_name "$2"
-    verify_max_args 2 "$@"
-    [[ -d "$APP_DIR/refs" ]] && fail "$APP: already exist"
-    create_bare_repository "$APP" "$APP_DIR"
-    info "Application $APP created!"
-    ;;
-
-  clone)
-    cleanup_clone() {
-      dokku delete "$APP"
-    }
-    check_app_name "$2"
-    verify_max_args 4 "$@"
-    [[ -d "$APP_DIR/refs" ]] && fail "$APP: already exist"
-    info "Cloning $APP repository from $3..."
-    git clone --bare -b "${4:-master}" "$3" "$APP_DIR"
-    cd "$APP_DIR"
-    HEAD="$(git rev-parse "${4:-master}")"
-    trap cleanup_clone EXIT
-    create_pre_receive_hook "$APP" "$APP_DIR"
-    dokku rebuild "$APP" "$HEAD"
-    echo "$HEAD" > "refs/heads/master"
-    trap - EXIT
-    ;;
-
-  import:docker)
-    cleanup() {
-      dokku delete "$APP"
-      [[ -n "$TMP_WORK_DIR" ]] && rm -rf "$TMP_WORK_DIR"
-    }
-    check_app_name "$2"
-    verify_max_args 3 "$@"
-    dokku create "$2"
-    trap cleanup EXIT
-
-    TMP_WORK_DIR="$(mktemp -d)"
-    echo "$3"
-    # clone git repository
-    chmod 755 "$TMP_WORK_DIR"
-    unset GIT_DIR GIT_WORK_TREE
-    pushd "$TMP_WORK_DIR" > /dev/null
-    git clone "$APP_DIR" "$TMP_WORK_DIR" > /dev/null
-    git config advice.detachedHead false
-    git config user.email "$(id -u -n)@$(hostname)"
-    git config user.name "$(id -u -n)"
-    cat <<EOF > Dockerfile
-FROM $3
-EOF
-    git add Dockerfile
-    git commit -am "Created application with Docker FROM $3"
-    git push origin master
-    trap - EXIT
-    ;;
-
-  help | git:help)
-    cat && cat <<EOF
-    create <app>                                Create shallow app
-    clone <app> <repository> [branch]           Create application by cloning git repository
-    import:docker <app> <docker-image-from>     Create application from Docker image
-EOF
-    ;;
-
-  *)
-    exit $DOKKU_NOT_IMPLEMENTED_EXIT
-    ;;
-
 esac
