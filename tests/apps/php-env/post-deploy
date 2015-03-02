@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -xe
+ssh $1 rebuild $2
+git rm .env
+git commit -m "Removed env"
+git push target master
+git revert HEAD
+git push target master
