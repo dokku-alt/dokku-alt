@@ -14,15 +14,17 @@ fi
 
 [[ -z "$FINGERPRINT" ]] && fail "Access denied. No fingerprint supplied."
 
-read ACL_LEVEL ACL_APPNAME < <(: | pluginhook get-acl "$@")
+readarray -t LINES < <(: | pluginhook get-acl "$@")
+ACL_LEVEL=${LINES[0]}
+ACL_APPNAME=${LINES[1]}
 
 if [[ -z "$ACL_LEVEL" ]] || [[ -z "$ACL_APPNAME" ]]; then
-    fail "Access denied. You don't have permission to access this app."
+    fail "Access denied. You don't have permission to access this command."
 fi
 
 check_app_name "$ACL_APPNAME"
 
-case "$ACL_APPNAME" in
+case "$ACL_LEVEL" in
     developer)
         if [[ "$NAME" == "developer" ]]; then
             if is_fingerprint_allowed "$FINGERPRINT" "developer"; then
