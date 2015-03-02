@@ -1,0 +1,18 @@
+#!/bin/bash
+
+source "$(dirname $0)/vars"
+
+case "$1" in
+  redis:create)
+    redis_for_app "$2"
+    verify_max_args 2 "$@"
+    print_acl_access "developer" "$2"
+    ;;
+
+  redis:info)
+    redis_for_app "$2"
+    verify_max_args 2 "$@"
+    print_acl_access "developer" "$2"
+    ;;
+
+esac

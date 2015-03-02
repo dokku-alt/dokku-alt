@@ -94,7 +94,7 @@ case "$1" in
     if app_volume_info "$2" "$3"; then
         rm -f "$VOLUME_APP_LINK"
         redeploy_app "$APP"
-        info "Volume $VOLUME_NAME linked from application: $APP"
+        info "Volume $VOLUME_NAME unlinked from application: $APP"
     elif [[ -d "$VOLUME_CONFIG_DIR" ]]; then
         info "Volume $VOLUME_NAME is not linked to application: $APP"
     else

@@ -1,9 +1,26 @@
 image: ayufan/dokku-alt-base:latest
 
 script:
-- sed -i 's/linux-image-extra-virtual, //g' deb/dokku-alt/DEBIAN/control
+- "sed -i 's/linux-image-extra-virtual, //g' deb/dokku-alt/DEBIAN/control"
 - make install
 - tests/run_localhost
+
+deploy:
+  bash:
+    script:
+    - apt-get install -y dpkg-sig
+    - git checkout .
+    - git remote add deploy git@github.com:dokku-alt/dokku-alt.git
+    - git fetch deploy gh-pages:gh-pages
+    - git config user.email "drone@ayufan.eu"
+    - git config user.name "Drone"
+    - 'echo "$GPG_KEY" | base64 -d | gpg --allow-secret-key-import --import -'
+    - '[[ "$CI_BRANCH" == "master" ]] && make dpkg_beta'
+    - '[[ "$CI_BRANCH" == "stable" ]] && make dpkg_stable'
+    - git push deploy gh-pages
+    condition:
+      owner: dokku-alt
+      branch: '[ms][at][sa][tb][el][re]'
 
 notify:
   email:

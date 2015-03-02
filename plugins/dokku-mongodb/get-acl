@@ -1,0 +1,99 @@
+#!/bin/bash
+
+source "$(dirname $0)/vars"
+
+verify_db_name() {
+    sanitize_name "$1" "database name"
+    DB_NAME="$1"
+}
+
+case "$1" in
+  mongodb:create)
+    verify_db_name "$2"
+    verify_max_args 2 "$@"
+    print_acl_access "developer" "$2"
+    ;;
+
+  mongodb:delete|mongodb:destroy)
+    verify_db_name "$2"
+    verify_max_args 2 "$@"
+    print_acl_access "developer" "$2"
+    ;;
+
+  mongodb:list)
+    verify_app_name "$2"
+    verify_max_args 2 "$@"
+    print_acl_access "developer" "$2"
+    ;;
+
+  mongodb:info)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+  mongodb:link)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+  mongodb:unlink)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+  mongodb:console)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 3 "$@"
+
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+  mongodb:import)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 4 "$@"
+
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+  mongodb:export)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 4 "$@"
+
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+  mongodb:dump)
+    verify_app_name "$2"
+    verify_db_name "$3"
+    verify_max_args 4 "$@"
+
+    if [[ "$2" == "$3" ]]; then
+        print_acl_access "developer" "$2"
+    fi
+    ;;
+
+esac

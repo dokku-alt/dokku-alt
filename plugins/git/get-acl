@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+source "$(dirname $0)/../dokku_common"
+
+create_pre_receive_hook() {
+    PRERECEIVE_HOOK="$2/hooks/pre-receive"
+    cat > "$PRERECEIVE_HOOK" <<EOF
+#!/usr/bin/env bash
+set -e; set -o pipefail;
+cat | DOKKU_ROOT="$DOKKU_ROOT" dokku git-hook "$1"
+EOF
+    chmod +x "$PRERECEIVE_HOOK"
+}
+
+create_bare_repository() {
+    git init --bare "$2" > /dev/null
+    create_pre_receive_hook "$@"
+}
+
+case "$1" in
+  git-hook)
+    verify_app_name "$2"
+    print_acl_access "deploy" "$APP"
+    ;;
+
+  git-*)
+    APP="$(echo "$2" | perl -pe 's/(?<!\\)'\''//g' | sed 's/\\'\''/'\''/g')"
+    check_app_name "$APP"
+    print_acl_access "deploy" "$APP"
+    ;;
+esac

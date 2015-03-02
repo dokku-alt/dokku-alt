@@ -4,32 +4,43 @@ source "$(dirname $0)/vars"
 
 cat
 
-[[ -z "$NAME" ]] && [[ $(id -un) != "root" ]] && fail "Access denied. No user supplied."
+[[ -z "$NAME" ]] && [[ $(id -un) != "root" ]] && [[ $(id -un) != "dokku" ]] && fail "Access denied. No user supplied."
 
-if [[ "$NAME" != "deploy" ]]; then
+# http://unix.stackexchange.com/a/67900
+if [[ "$NAME" != "developer" ]] && [[ "$NAME" != "deploy" ]]; then
     # Allow everything
     exit 0
 fi
 
 [[ -z "$FINGERPRINT" ]] && fail "Access denied. No fingerprint supplied."
 
-case "$1" in
-    git-hook)
-        APP="$2"
+read ACL_LEVEL ACL_APPNAME < <(: | pluginhook get-acl "$@")
+
+if [[ -z "$ACL_LEVEL" ]] || [[ -z "$ACL_APPNAME" ]]; then
+    fail "Access denied. You don't have permission to access this app."
+fi
+
+check_app_name "$ACL_APPNAME"
+
+case "$ACL_APPNAME" in
+    developer)
+        if [[ "$NAME" == "developer" ]]; then
+            if is_fingerprint_allowed "$FINGERPRINT" "developer"; then
+                exit 0
+            fi
+        fi
         ;;
 
-    git-*)
-        APP="$(echo "$2" | perl -pe 's/(?<!\\)'\''//g' | sed 's/\\'\''/'\''/g')"
-        ;;
-
-    *)
-        fail "Access denied. Please login as an admin."
+    deploy)
+        if [[ "$NAME" == "developer" ]] || [[ "$NAME" == "deploy" ]]; then
+            if is_fingerprint_allowed "$FINGERPRINT" "developer"; then
+                exit 0
+            fi
+            if is_fingerprint_allowed "$FINGERPRINT" "deploy"; then
+                exit 0
+            fi
+        fi
         ;;
 esac
 
-check_app_name "$APP"
-
-if ! is_fingerprint_allowed "$FINGERPRINT"
-then
-    fail "Access denied. You don't have permission to access this app."
-fi
+fail "Access denied. You don't have permission to access this app."

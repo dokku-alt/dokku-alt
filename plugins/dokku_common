@@ -212,6 +212,18 @@ function docker_image_exists() {
 	docker inspect "$@" >/dev/null 2>/dev/null
 }
 
+function print_acl_access() {
+	[[ -z "$1" ]] && fail "Missing ACL access mode"
+	[[ -z "$2" ]] && fail "Missing ACL parameter"
+	echo "$1"
+	echo "$2"
+}
+
+function print_app_acl_access() {
+	[[ -z "$APP" ]] && fail "No APP configured"
+	print_acl_access "$1" "$APP"
+}
+
 [[ -z "$DOKKU_ROOT" ]] && fail "DOKKU_ROOT not set"
 
 CWD="$(cd "$(dirname "$0")" && pwd)"

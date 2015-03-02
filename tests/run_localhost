@@ -14,7 +14,7 @@ sudo service rsyslog start || true
 ../start-dokku.sh exit
 
 echo "Removing old containers..."
-docker ps -a -q | xargs --no-run-if-empty docker rm -f
+docker ps -a -q | xargs --no-run-if-empty docker rm -f -v
 
 echo "Configuring dokku..."
 if [[ ! -e ~/.ssh/id_rsa ]]; then
