@@ -6,7 +6,8 @@ cat
 
 [[ -z "$NAME" ]] && [[ $(id -un) != "root" ]] && fail "Access denied. No user supplied."
 
-if [[ "$NAME" != "deploy" ]]; then
+# http://unix.stackexchange.com/a/67900
+if [ "$NAME" != "developer" ] && [ "$NAME" != "deploy" ]; then
     # Allow everything
     exit 0
 fi
@@ -23,13 +24,17 @@ case "$1" in
         ;;
 
     *)
-        fail "Access denied. Please login as an admin."
+        if [[ "$NAME" == "developer" ]]; then
+          APP="$2"
+        else
+          fail "Access denied. Please login as an admin."
+        fi
         ;;
 esac
 
 check_app_name "$APP"
 
-if ! is_fingerprint_allowed "$FINGERPRINT"
+if ! is_fingerprint_allowed "$FINGERPRINT" "$NAME"
 then
     fail "Access denied. You don't have permission to access this app."
 fi
