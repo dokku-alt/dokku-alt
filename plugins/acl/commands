@@ -17,11 +17,11 @@ case "$1" in
     remove_fingerprint "$FINGERPRINT"
 
     for APP in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
-      if is_fingerprint_allowed "$1" "deploy"
+      if is_fingerprint_allowed "$FINGERPRINT" "deploy"
       then
         sed --in-place "/^$FINGERPRINT\$/d" "$DOKKU_ROOT/$APP/$DEPLOY_ALLOWED"
       fi
-      if is_fingerprint_allowed "$1" "developer"
+      if is_fingerprint_allowed "$FINGERPRINT" "developer"
       then
         sed --in-place "/^$FINGERPRINT\$/d" "$DOKKU_ROOT/$APP/$DEVELOPER_ALLOWED"
       fi
@@ -46,11 +46,11 @@ case "$1" in
     fi
 
     for APP in $(ls -d $DOKKU_ROOT/*/ 2>/dev/null); do
-      if is_fingerprint_allowed "$1" "developer"
+      if is_fingerprint_allowed "$FINGERPRINT" "developer"
       then
         echo "Developer access to $APP."
       fi
-      if is_fingerprint_allowed "$1" "deploy"
+      if is_fingerprint_allowed "$FINGERPRINT" "deploy"
       then
         echo "Push-access to $APP."
       fi
