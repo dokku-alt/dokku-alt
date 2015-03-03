@@ -38,15 +38,6 @@ verify_fingerprint() {
     [[ "$FINGERPRINT" =~ ^[0-9a-fA-F:]+$ ]] || fail "$FINGERPRINT: this is not fingerprint!"
 }
 
-is_developer_fingerprint_allowed() {
-    if [[ -f "$DOKKU_ROOT/$APP/$DEVELOPER_ALLOWED" ]] && grep -q "^$1\$" "$DOKKU_ROOT/$APP/$DEVELOPER_ALLOWED"
-    then
-        return 0
-    else
-        return 1
-    fi
-}
-
 is_fingerprint_allowed() {
   case "$2" in
     deploy)
@@ -64,6 +55,9 @@ is_fingerprint_allowed() {
       else
           return 1
       fi
+      ;;
+    *)
+      return 1
       ;;
   esac
 }

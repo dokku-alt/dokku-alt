@@ -83,7 +83,7 @@ case "$1" in
     verify_fingerprint "$3"
     verify_max_args 3 "$@"
 
-    if is_fingerprint_allowed "$FINGERPRINT"
+    if is_fingerprint_allowed "$FINGERPRINT" "deploy"
     then
         sed --in-place "/^$FINGERPRINT\$/d" "$APP_DIR/$DEPLOY_ALLOWED"
         info "$FINGERPRINT removed from an $APP as an deployment key"
