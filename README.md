@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/dokku-alt/dokku-alt](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dokku-alt/dokku-alt?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. It's fork of original [dokku](https://github.com/progrium/dokku). The idea behind this fork is to provide complete solution with plugins covering most of use-cases which are stable and well tested.
+Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. It's a fork of the original [dokku](https://github.com/progrium/dokku). The idea behind this fork is to provide complete solution with plugins covering most use-cases which are stable and well tested.
 
 ## Features
 
@@ -43,7 +43,7 @@ Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. I
 
 ## Requirements
 
-Assumes that you use Ubuntu 14.04 LTS right now. Ideally have a domain ready to point to your host. It's designed for and is probably best to use a fresh VM. The debian package will install everything it needs.
+Assumes that you use Ubuntu 14.04 LTS right now. Ideally, you should have a domain ready to point to your host. It's designed for and is probably best to use a fresh VM. The debian package will install everything it needs.
 
 ## Installing
 
@@ -51,13 +51,13 @@ Assumes that you use Ubuntu 14.04 LTS right now. Ideally have a domain ready to 
 
 ## Installing (with force-yes)
 
-Sometimes you may want to install dokku-alt completely non-interactive way. Now you can do it. Simply boostrap.sh without terminal:
+Sometimes you may want to install dokku-alt in a completely non-interactive way. Now you can do it. Simply boostrap.sh without terminal:
 
     $ sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/dokku-alt/dokku-alt/master/bootstrap.sh)" < /dev/null
 
 ## Configuring
 
-If you use bootstrap script from above at the end it will fireup ruby installation script. Point your browser to `http://<ip>:2000/` and finish configuration.
+If you use the bootstrap script from above, at the end it will fireup ruby installation script. Point your browser to `http://<ip>:2000/` and finish configuration.
 
 That's it!
 
@@ -71,13 +71,13 @@ You'll have to add a public key associated with a username by doing something li
 
 ## Upgrade and beta releases
 
-Unlike `dokku` this script uses debian packaging system (deb). To upgrade to latest version simply execute: `sudo apt-get update && sudo apt-get install dokku-alt`.
+Unlike `dokku`, this script uses the debian packaging system (deb). To upgrade to the latest version, simply execute: `sudo apt-get update && sudo apt-get install dokku-alt`.
 
 Alongside the normal (stable) releases we distribute as well beta (bleeding edge). To switch to beta simply execute: `sudo apt-get update && sudo apt-get install dokku-alt-beta`. It will replace the stable dokku-alt and switch to beta.
 
 ## Migration from dokku
 
-It should be possible, it should mostly work, but it's not tested and advised. VPS are very cheap this days so fire-up new machine and setup `dokku-alt` from the scratch.
+It should be possible, it should mostly work, but it's not tested and advised. VPS's are very cheap this days so fire-up new machine and setup `dokku-alt` from scratch.
 
 ## Deploy an App
 
@@ -108,11 +108,11 @@ Please check the documentation for your particular build pack as you may need to
 
 ## Dokku-alt-manager
 
-It's web interface to easily manage your dokku-alt instance. Simply run to install manager:
+It's a web interface to easily manage your dokku-alt instance. To install manager, simply run:
 
     dokku manager:install
 
-Anytime you can enable or disable it:
+You can enable or disable it anytime:
 
     dokku manager:enable
     dokku manager:disable
@@ -123,7 +123,7 @@ Or even uninstall if you prefer command line access (it will also wipe used data
 
 ## Dokku-alt as service in Docker container (BETA)
 
-Dokku-alt can be run using Docker-in-Docker approach (https://github.com/jpetazzo/dind). It requires to run dokku-alt container in privileged mode (with full access to host), because dokku-alt uses it's own Docker daemon to serve applications. It's still considered beta, but should be pretty safe solution and robust. It's best to use for play with dokku-alt on other not-supported systems (CentOS, RedHat, Debian) or by simply trying how it works.
+Dokku-alt can be run using Docker-in-Docker approach (https://github.com/jpetazzo/dind). It requires you to run the dokku-alt container in privileged mode (with full access to host), because dokku-alt uses its own Docker daemon to serve applications. It's still considered beta, but should be pretty safe solution and robust. It's best to use for play with dokku-alt on other not-supported systems (CentOS, RedHat, Debian) or by simply trying how it works.
 
 All dokku-alt services (SSH, Nginx, Dokku daemon) are run in container.
 
@@ -135,13 +135,13 @@ All dokku-alt services (SSH, Nginx, Dokku daemon) are run in container.
 
     docker run -d --name=dokku-alt --hostname=my-domain.com --volumes-from=dokku-alt-data --publish=22:22 --publish=80:80 --publish=443:443 --privileged ayufan/dokku-alt:latest
 
-You can adjust exposed ports as described in Docker documentation.
+You can adjust the exposed ports as described in Docker documentation.
 
 ### Check `dokku-alt` logs to see if anything started correctly:
 
     docker logs dokku-alt-demo
 
-At the end you should see something like this:
+At the end, you should see something like this:
 
     dokku.1 | SSH Login:
     dokku.1 |   user: root
@@ -149,13 +149,13 @@ At the end you should see something like this:
     dokku.1 |   ip: 10.0.42.1 172.17.2.213
     dokku.1 | Starting dokku daemon...
 
-This is temporary `root` password to access container and add you access keys (using `dokku access:add` as described). This password changes every container restart.
+This is a temporary `root` password to access the container and add your access keys (using `dokku access:add` as described). This password changes every container restart.
 
-To enter container shell from server's terminal (the same which is running `docker` with `dokku-alt`) run ssh:
+To enter the container shell from the server's terminal (the same which is running `docker` with `dokku-alt`) run ssh:
 
     ssh root@172.17.2.213
 
-If everything were done right you should see container's prompt. By exposing ports in `docker run` to outside world you can also access `dokku-alt` from external.
+If everything was done right, you should see the container's prompt. By exposing ports in `docker run` to the outside world you can also access `dokku-alt` externally.
 
 ### To upgrade container to newer version simply kill old container and rerun your `docker run` command:
 
@@ -165,18 +165,18 @@ If everything were done right you should see container's prompt. By exposing por
 
 ## Dockerfile images
 
-The key feature of the `dokku-alt` is built-in support for Dockerfiles, the docker build process. It allows you to create more advanced and more repetitive application environments.
+The key feature of `dokku-alt` is built-in support for Dockerfiles, the docker build process. It allows you to create more advanced and more repetitive application environments.
 To use `Dockerfile` simply put `Dockerfile` in root of the application, `dokku-alt` will detect it and build application according to specification in `Dockerfile`.
 
-Dockerfile-based application can (but not required) to expose web-application port. `dokku-alt` will check if 80, 8080, 5000 is exposed. If it's it will update assign vhost and reconfigure nginx to forward all incoming traffic.
+Dockerfile-based application can (but not required) expose a web-application port. `dokku-alt` will check if port 80, 8080 or 5000 is exposed. If it is, it will update the assigned vhost and reconfigure nginx to forward all incoming traffic.
 
-Using dockerfile you can built service-only applications. Simply don't expose public facing ports.
+Using Dockerfile, you can build service-only applications. Simply don't expose any public facing ports.
 
 Example Dockerfile application: https://github.com/ayufan/dokku-alt-phpmyadmin
 
 ## Nginx and redirects
 
-Dokku-alt has built-in support for additional domains and url redirects. By specifying redirects any client using that address will automatically be redirected to first domain assigned to the application.
+Dokku-alt has built-in support for additional domains and url redirects. By specifying redirects, any client using that address will automatically be redirected to the first domain assigned to the application.
 
 ## Remote commands
 
@@ -202,19 +202,19 @@ SSH onto the server, then execute:
 
 ## Create-only application
 
-Dokku-alt allows you to create application before pushing it. It can be useful when you want to specify additional config variables or assign databases. Simply execute:
+Dokku-alt allows you to create an application before pushing it. It can be useful when you want to specify additional config variables or assign databases. Simply execute:
 
     $ dokku create mynewapp
 
-There's also possiblity to disable auto-application creation on push. Add to `~/dokkurc`:
+It's also possible to disable auto-application creation on push. Add to `~/dokkurc`:
 
     export DOKKU_DISABLE_AUTO_APP_CREATE=1
 
-From now on you will have to do `dokku create` at first.
+From now on you will have to do `dokku create` before pushing.
 
 ## Allowing push-access (deploy only) access for dokku
 
-Dokku-alt allows you to add additional public keys to applications. The specific case is to add special deploy-only key, used for example by Countinous Integration (ie. Jenkins). Key added as deploy-only can only be used to `git push` specific application. It will not allowed to execute any on `dokku` commands. You can add ssh key and allow it explicit access to one or many applications.
+Dokku-alt allows you to add additional public keys to applications. The specific case is to add special deploy-only key, used for example by Countinous Integration (ie. Jenkins). Key added as deploy-only can only be used to `git push` specific application. It will not allowed to execute any `dokku` commands. You can add an ssh key and give it explicit access to one or many applications.
 
 Add locally:
 
@@ -242,7 +242,7 @@ Revoke permissions for admin user:
 
 ## Environment variable management
 
-Typically an application will require some environment variables to run properly. Environment variables may contain private data, such as passwords or API keys, so it is not recommend to store them in your application's repository.
+Typically, an application will require some environment variables to run properly. Environment variables may contain private data, such as passwords or API keys, so it is not recommend to store them in your application's repository.
 
 The `config` plugin provides the following commands to manage your variables:
 ```
@@ -255,13 +255,13 @@ config:unset <app> KEY1 [KEY2 ...] - unset one or more config vars
 ### Available environment variables
 
 * `DOKKU_NGINX_PROXY_READ_TIMEOUT` - allows to override `nginx proxy_read_timeout`. Default value is set to '60s'. For more info please refer to: http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_read_timeout.
-* `DOKKU_ENABLE_HTTP_HOST` - when set to 1 application will also serve content on HTTP if HTTPS is enabled
-* `DOKKU_BUILDSTEP_IMAGE` - allows you to set custom buildstep image on per app basis. Image has to be compatible with https://github.com/progrium/buildstep or https://github.com/dokku-alt/progrium-buildstep-dockerfiles. In case of image forked from https://github.com/progrium/buildstep there might be small incompatibility: image is run with `/start` instead of `/start web` as in orginal `dokku`.
+* `DOKKU_ENABLE_HTTP_HOST` - when set to 1, the application will also serve content on HTTP if HTTPS is enabled
+* `DOKKU_BUILDSTEP_IMAGE` - allows you to set a custom buildstep image on per app basis. Image has to be compatible with https://github.com/progrium/buildstep or https://github.com/dokku-alt/progrium-buildstep-dockerfiles. If the images was forked from https://github.com/progrium/buildstep, there might be a small incompatibility: the image is run with `/start` instead of `/start web` as in orginal `dokku`.
 * `DOKKU_START_CMD` - allows you to set a custom start command. The default value is `/start` for buildstep images and ` ` otherwise.
 
 ## Image tagging
 
-When you successfully deploy an app, you can tag it with your name and later in case of failure quickly revert back to that image.
+When you successfully deploy an app, you can tag it with a name/version. This lets you quickly roll back to that image in the event of failure in a later deployment.
 
     $ dokku tag:add gitlab v6.9.0
     =====> Tagged latest image of dokku/gitlab as v6.9.0
@@ -278,12 +278,12 @@ When you successfully deploy an app, you can tag it with your name and later in 
 
 Dokku-alt has built-in support for all modern database engines: MariaDB (former MySQL), PostgreSQL and MongoDB. The database image will be downloaded and provisioned when first used.
 
-First create database:
+First create a database:
 
     $ dokku mariadb:create test-db
     -----> MariaDB database created: test-db
 
-Second link database to an app:
+Second link the database to an app:
 
     $ dokku mariadb:link node-js-sample test-db
     -----> Releasing node-js-sample ...
@@ -292,19 +292,19 @@ Second link database to an app:
     =====> Application deployed:
         http://node-js-sample.ayufan.eu
 
-Verify application env variables:
+Verify the application environment variables:
 
     $ dokku config node-js-sample
     === node-js-sample config vars ===
     DATABASE_URL:  mysql2://node-js-sample:random-password@mariadb:3306/test-db
 
-To use different database engine simple replace `mariadb` with `postgresql` or `mongodb`.
+To use a different database engine, simply replace `mariadb` with `postgresql` or `mongodb`.
 
 ## Preboot / zero-downtime boot
 
-Similar to functionality provided by https://devcenter.heroku.com/articles/labs-preboot `dokku-alt` supports zero-downtime. To enable zero-downtime deployment execute command: `dokku preboot:enable APP`. Alongside with preboot there's `checks` plugin based on https://labnotes.org/zero-downtime-deploy-with-dokku/. For now it simply checks if application started serving requests. If checks module fails it will not replace the application.
+Similar to functionality provided by https://devcenter.heroku.com/articles/labs-preboot `dokku-alt` supports zero-downtime. To enable zero-downtime deployment, execute command: `dokku preboot:enable APP`. Alongside with preboot, there's a `checks` plugin based on https://labnotes.org/zero-downtime-deploy-with-dokku/. For now, it simply checks if the application started serving requests. If the checks module fails, it will not replace the application.
 
-Preboot and checks can be configured using a few env variables:
+Preboot and checks can be configured using a few environment variables:
 
 * PREBOOT_WAIT_TIME - number of seconds to wait for container boot (default 5s)
 * PREBOOT_COOLDOWN_TIME - number of seconds to wait finish container request processing (default 30s)
@@ -314,14 +314,14 @@ Preboot and checks can be configured using a few env variables:
 
 ## Data volumes
 
-Docker allows you to have persistent data storage. Dokku-alt exposes this feature as Data Volumes. You can create unlimited number of data volumes, any data volume can be attached to unlimited number of apps. Simply create data volume and specify container paths which you want to be persistant.
+Docker allows you to have persistent data storage. Dokku-alt exposes this feature as Data Volumes. You can create unlimited number of data volumes and any data volume can be attached to unlimited number of apps. Simply create a data volume and specify container paths which you want to be persistant.
 
-First data volume:
+First, create a data volume:
 
     $ dokku volume:create shared-test-volume /app/logs /app/tmp /app/uploads
     -----> Volume created: volume_data_shared-test-volume
 
-Second link volume to an app:
+Second, link the volume to an app:
 
     $ dokku volume:link node-js-sample shared-test-volume
     -----> Volume shared-test-volume linked to an aplication: node-js-sample
@@ -335,7 +335,7 @@ It is just simple as this.
 
 ### Host-based volumes
 
-Dokku-alt allows you to bind host-based volumes in very simple manner. To use this feature you have to be logged as `root` and than simply type:
+Dokku-alt allows you to bind host-based volumes in a very simple manner. To use this feature, you have to be logged as `root` and then simply type:
 
     dokku volume:create host-based-volume /path/to/host/volume:/path/to/volume/in/container
 
@@ -347,11 +347,11 @@ Dokku-alt allows you to secure any application with HTTP-Basic Auth. There are a
     htpasswd:disable <app>                          Remove http-basic Auth
     htpasswd:remove <app> <user>                    Remove user
 
-If you want to enable and add a new user simply type command below and when prompted type your password twice:
+If you want to enable and add a new user, simply type the command below and when prompted, type your password twice:
 
     dokku htpasswd:add myapp myuser
 
-You can also pipe password:
+You can also pipe the password:
 
     echo mypass | dokku htpasswd:add myapp myuser
 
@@ -365,7 +365,7 @@ To remove HTTP-Basic Auth completely:
 
 ## TLS support
 
-Dokku provides easy TLS support from the box. To enable TLS connection to your application, copy the `.crt` and `.key` files into the `/home/dokku/:app/ssl` folder (notice, file names should be `server.crt` and `server.key`, respectively). Redeployment of the application will be needed to apply TLS configuration. Once it is redeployed, the application will be accessible by `https://` (redirection from `http://` is applied as well).
+Dokku provides easy TLS support out of the box. To enable TLS connection to your application, copy the `.crt` and `.key` files into the `/home/dokku/:app/ssl` folder (notice, file names should be `server.crt` and `server.key`, respectively). Redeployment of the application will be needed to apply TLS configuration. Once it's redeployed, the application will be accessible by `https://` (redirection from `http://` is applied as well).
 
 ## TLS support
 
@@ -562,7 +562,7 @@ You can use [Github Issues](https://github.com/dokku-alt/dokku-alt/issues).
 
 "I deployed my Rails application on a fresh new machine using dokku-alt but I already own a bare metal, replicated PostgreSQL server that's reachable from the dokku host as it's on the same network. How do I connect?"
 
-Run the follwing:
+Run the following:
 
     dokku config:set <app> DATABASE_URL=postgresql://user:password@dbserver-ip:5432/DBNAME
 
