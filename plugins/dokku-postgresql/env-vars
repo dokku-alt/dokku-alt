@@ -11,5 +11,9 @@ cat
 [[ ! -d "$DB_LINKS" ]] || ls -1 "$DB_LINKS" | while read DB_NAME; do
 	if db_info "$APP" "$DB_NAME"; then
 		echo "DATABASE_URL=$DB_URL"
+		
+		echo "DATABASE_URL_SHORT=$DB_PROTOCOL://$DB_HOST:$DB_PORT/$DB_NAME"
+                echo "DB_USER=$DB_USER"
+                echo "DB_PASS=$DB_PASSWORD"
 	fi
 done
