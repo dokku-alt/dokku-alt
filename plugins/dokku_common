@@ -2,6 +2,7 @@
 
 BUILDSTEP_IMAGE="${BUILDSTEP_IMAGE:=ayufan/dokku-alt-buildstep:cedar-14}"
 DOKKU_EXPOSED_PORTS="${DOKKU_EXPOSED_PORTS:=5000 8080 80}"
+DOKKU_BUILD_TIMEOUT="${DOKKU_BUILD_TIMEOUT:=60}"
 
 set -eo pipefail
 [[ $DOKKU_TRACE ]] && set -x
@@ -164,12 +165,13 @@ function tag_image() {
 }
 
 function wait_for_container() {
-	for i in 1 2 3 4 5 6 7 8 9 0; do
-		sleep 0.3s
-		if docker inspect "$1" > /dev/null; then
-			return 0
-		fi
-	done
+	timeout "${DOKKU_BUILD_TIMEOUT}m" docker wait $1
+	# for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 0; do
+	# 	sleep 0.3s
+	# 	if docker inspect "$1" > /dev/null; then
+	# 		return 0
+	# 	fi
+	# done
 	return 0
 }
 
