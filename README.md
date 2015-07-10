@@ -371,11 +371,11 @@ Dokku provides easy TLS support out of the box. To enable TLS connection to your
 
 Dokku-alt extends this even further by allowing you to use command line interface for certificates:
 
-    ssl:generate <app>                              Generate certificate signing request for an APP
-    ssl:certificate <app>                           Pipe signed certifcate with all intermediates for an APP
-    ssl:forget <app>                                Wipes certificate for an APP
-    ssl:info <app>                                  Show info about certifcate and certificate request
-    ssl:key <app>                                   Pipe private key for an APP
+    ssl:generate <app>          Generate certificate signing request for an APP
+    ssl:certificate <app>       Pipe signed certifcate with all intermediates for an APP
+    ssl:forget <app>            Wipes certificate for an APP
+    ssl:info <app>              Show info about certifcate and certificate request
+    ssl:key <app>               Pipe private key for an APP
 
 First use: `dokku ssl:generate myapp` to generate certificate signing request (CSR). At the end of process you will receive `BEGIN CERTIFICATE REQUEST` which you can ten copy-n-paste to your SSL signer (ie. http://startssl.com).
 
