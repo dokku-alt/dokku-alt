@@ -104,7 +104,7 @@ case "$1" in
     cat && cat<<EOF
     list                 List app
     status <app>         Status of specific app
-    start <app>	        Stop specific app
+    start <app>	        Start specific app
     stop <app>		        Stop specific app
     restart <app>        Restart specific app (not-redeploy)
     enable <app>         Re-enable specific app
