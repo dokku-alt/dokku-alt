@@ -324,7 +324,7 @@ First, create a data volume:
 Second, link the volume to an app:
 
     $ dokku volume:link node-js-sample shared-test-volume
-    -----> Volume shared-test-volume linked to an aplication: node-js-sample
+    -----> Volume shared-test-volume linked to an application: node-js-sample
     -----> Releasing node-js-sample ...
     -----> Deploying node-js-sample ...
     -----> Shutting down old containers
