@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BUILDSTEP_IMAGE="${BUILDSTEP_IMAGE:=ayufan/dokku-alt-buildstep:cedar-14}"
+BUILDSTEP_IMAGE="${BUILDSTEP_IMAGE:=ayufan/dokku-alt-buildstep:latest}"
 DOKKU_EXPOSED_PORTS="${DOKKU_EXPOSED_PORTS:=5000 8080 80}"
 
 set -eo pipefail
