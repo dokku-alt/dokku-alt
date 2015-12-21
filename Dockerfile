@@ -16,10 +16,15 @@ ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 
 # Install docker
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9 && \
-	echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list && \
+#RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D && \
+#	echo deb https://apt.dockerproject.org/repo ubuntu-wily main > /etc/apt/sources.list.d/docker.list && \
+#	apt-get update && \
+#	apt-get -y install docker-engine
+
+RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D && \
+	echo deb https://apt.dockerproject.org/repo ubuntu-trusty main > /etc/apt/sources.list.d/docker.list && \
 	apt-get update && \
-	apt-get install -y lxc-docker
+	apt-get -y install docker-engine
 
 # Install forego
 RUN curl -o /usr/bin/forego https://godist.herokuapp.com/projects/ddollar/forego/releases/current/linux-amd64/forego && chmod +x /usr/bin/forego
@@ -32,7 +37,7 @@ VOLUME /home/dokku
 VOLUME /var/lib/docker
 
 # Install dokku-alt
-ADD / /srv/dokku-alt
+ADD . /srv/dokku-alt
 WORKDIR /srv/dokku-alt
 RUN sed -i 's/linux-image-extra-virtual, //g' deb/dokku-alt/DEBIAN/control
 RUN make install
