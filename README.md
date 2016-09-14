@@ -1,5 +1,7 @@
 # Dokku Alternative
 
+> Unmaintained, Migrate to [Dokku](https://github.com/dokku/dokku) as soon as possible
+
 [![Join the chat at https://gitter.im/dokku-alt/dokku-alt](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dokku-alt/dokku-alt?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Docker powered mini-Heroku. The smallest PaaS implementation you've ever seen. It's a fork of the original [dokku](https://github.com/progrium/dokku). The idea behind this fork is to provide complete solution with plugins covering most use-cases which are stable and well tested.
