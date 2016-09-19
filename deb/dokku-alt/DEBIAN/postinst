@@ -11,6 +11,7 @@ case "$1" in
     modprobe aufs || echo "WARNING: Restart server to finish installing dokku!"
     sshcommand create dokku /usr/local/bin/dokku
     usermod -aG docker dokku
+    openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
     dokku plugins-install
     ;;
 
