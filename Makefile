@@ -55,7 +55,7 @@ endif
 	rm -rf deb-tmp/
 
 install: dpkg
-	sudo dpkg -i $(DEB_PKG) || sudo apt-get -f -y install && sudo dpkg -i $(DEB_PKG)
+	sudo dpkg --force-confnew -i $(DEB_PKG) || sudo apt-get -o Dpkg::Options::="--force-confnew" -f -y install && sudo dpkg--force-confnew -i $(DEB_PKG)
 
 devinstall:
 	[ -e /usr/local/bin/dokku ] || echo Please install dokku-alt first
