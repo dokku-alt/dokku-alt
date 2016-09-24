@@ -7,6 +7,10 @@ if [ ! -e /usr/lib/apt/methods/https ]; then
 	apt-get install -y apt-transport-https
 fi
 
+if [ ! -e /usr/bin/sudo ]; then
+  apt-get install sudo
+fi
+
 echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list
 echo deb https://dokku-alt.github.io/dokku-alt / > /etc/apt/sources.list.d/dokku-alt.list
 
