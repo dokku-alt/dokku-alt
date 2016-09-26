@@ -117,7 +117,7 @@ case "$1" in
     cat && cat<<EOF
     manager:install [revision]  Install and configure dokku-alt-manager
     manager:uninstall  Uninstall and wipe dokku-alt-manager
-    manager:upgrade [revision]  Disable dokku-alt-manager application
+    manager:upgrade [revision]  Upgrade dokku-alt-manager application
     manager:enable  Enable dokku-alt-manager application
     manager:disable  Disable dokku-alt-manager application
 EOF
