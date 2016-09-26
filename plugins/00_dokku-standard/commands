@@ -45,12 +45,14 @@ case "$1" in
 
     DOCKER_ARGS=$(: | pluginhook docker-args $APP run)
 
+    [[ ! -z "$PS1" ]] && DOKKU_RUN_OPTS="-i -t"
+
     if is_image_buildstep_based "$IMAGE"; then
       # buildstep
-      docker run --cidfile="$(get_cid_file_name run)" --rm --name="$(get_app_container_name run)" -i -t $DOCKER_ARGS "$IMAGE" /exec "$@"
+      docker run --cidfile="$(get_cid_file_name run)" --rm --name="$(get_app_container_name run)" $DOKKU_RUN_OPTS $DOCKER_ARGS "$IMAGE" /exec "$@"
     else
       # Dockerfile
-      docker run --cidfile="$(get_cid_file_name run)" --rm --name="$(get_app_container_name run)" --env-file=<(: | pluginhook env-vars "$APP") --entrypoint="/bin/bash" -i -t $DOCKER_ARGS "$IMAGE" -c "$@"
+      docker run --cidfile="$(get_cid_file_name run)" --rm --name="$(get_app_container_name run)" --env-file=<(: | pluginhook env-vars "$APP") --entrypoint="/bin/bash" $DOKKU_RUN_OPTS $DOCKER_ARGS "$IMAGE" -c "$@"
     fi
     ;;
 

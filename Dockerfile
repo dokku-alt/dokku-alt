@@ -16,10 +16,8 @@ ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 
 # Install docker
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9 && \
-	echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list && \
-	apt-get update && \
-	apt-get install -y lxc-docker
+RUN wget -qO- https://get.docker.com/gpg | sudo apt-key add -
+RUN wget -qO- https://get.docker.com/ | sh
 
 # Install forego
 RUN curl -o /usr/bin/forego https://godist.herokuapp.com/projects/ddollar/forego/releases/current/linux-amd64/forego && chmod +x /usr/bin/forego
