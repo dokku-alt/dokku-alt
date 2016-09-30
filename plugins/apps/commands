@@ -102,7 +102,7 @@ case "$1" in
 
   help)
     cat && cat<<EOF
-    list                 List app
+    list                 List apps
     status <app>         Status of specific app
     start <app>	        Stop specific app
     stop <app>		        Stop specific app
