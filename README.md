@@ -519,11 +519,11 @@ These parameters should only be changed when you are using a Redis image that ha
     postgresql:link <app> <db>                      Link database to app
     postgresql:list <app>                           List linked databases
     postgresql:unlink <app> <db>                    Unlink database from app
-    preboot:cooldown:time <app> <secs>              Re-enable specific app
-    preboot:disable <app>                           Stop specific app
-    preboot:enable <app>                            Stop specific app
-    preboot:status <app>                            Status of specific app
-    preboot:wait:time <app> <secs>                  Restart specific app (not-redeploy)
+    preboot:cooldown:time <app> <secs>              Time to wait for old container to finish serving
+    preboot:disable <app>                           Disables zero-downtime deploys
+    preboot:enable <app>                            Enables zero-downtime deploys
+    preboot:status <app>                            Display whether zero-downtime deploys are enabled
+    preboot:wait:time <app> <secs>                  Time to wait for new container to start serving
     rebuild:all                                     Rebuild all apps
     rebuild <app>                                   Rebuild an app
     redis:create <app>                              Create a Redis database
