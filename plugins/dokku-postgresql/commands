@@ -69,7 +69,7 @@ EOF
     if [[ ! -f "$DB_APP_PASSWORD" ]]; then
         DB_NEW_PASSWORD="$(generate_random_password)"
         pgsql_admin <<EOF
-CREATE USER "$APP" WITH PASSWORD '$DB_NEW_PASSWORD';
+CREATE USER "$APP" WITH PASSWORD '$DB_NEW_PASSWORD' --superuser;
 EOF
         echo "$DB_NEW_PASSWORD" > "$DB_APP_PASSWORD"
     fi
