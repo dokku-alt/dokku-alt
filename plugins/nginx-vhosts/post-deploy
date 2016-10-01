@@ -23,6 +23,9 @@ http_host() {
 
   DOKKU_LISTEN_IPV4="${DOKKU_LISTEN_IPV4:-*}"
   DOKKU_LISTEN_IPV6="${DOKKU_LISTEN_IPV6:-[::]}"
+  DOKKU_LISTEN_PORT="${DOKKU_LISTEN_PORT:-80}"
+  DOKKU_LISTEN_PORT_SSL="${DOKKU_LISTEN_PORT_SSL:-443}"
+
   SCHEME="$1"
   shift
 
@@ -32,12 +35,12 @@ EOF
 
   if [[ "$SCHEME" == "https" ]]; then
     cat <<EOF
-  listen      $DOKKU_LISTEN_IPV6:443 ssl spdy;
-  listen      $DOKKU_LISTEN_IPV4:443 ssl spdy;
+  listen      $DOKKU_LISTEN_IPV6:$DOKKU_LISTEN_PORT_SSL ssl spdy;
+  listen      $DOKKU_LISTEN_IPV4:$DOKKU_LISTEN_PORT_SSL ssl spdy;
   server_name $@;
 
   keepalive_timeout   70;
-  add_header Alternate-Protocol 443:npn-spdy/2;
+  add_header Alternate-Protocol $DOKKU_LISTEN_PORT_SSL:npn-spdy/2;
 
   underscores_in_headers on;
   ignore_invalid_headers off;
@@ -65,8 +68,8 @@ EOF
 
   else
     cat <<EOF
-  listen      $DOKKU_LISTEN_IPV6:80;
-  listen      $DOKKU_LISTEN_IPV4:80;
+  listen      $DOKKU_LISTEN_IPV6:$DOKKU_LISTEN_PORT;
+  listen      $DOKKU_LISTEN_IPV4:$DOKKU_LISTEN_PORT;
   server_name $@;
 
 EOF
