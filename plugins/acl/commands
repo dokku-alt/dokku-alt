@@ -131,7 +131,7 @@ case "$1" in
     cat && cat<<EOF
     access:add                          Add admin user
     access:list                         List all SSH keys: admins and deployments
-    access:info <fingeprint>            Show information about the key
+    access:info <fingerprint>            Show information about the key
     access:remove <fingerprint>         Revoke all permissions for specific SSH key
     deploy:allow <app>                  Allow push-access (aka. deployment) to an app
     deploy:list <app>                   List all push-acccesses for an application
