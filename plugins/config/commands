@@ -28,12 +28,17 @@ config_styled_hash () {
   sed 's/^\([^=]*\)=/\1:|/g' | column -t -s '|'
 }
 
+escape_single_quotes (){
+  sed "s|'|'\\\''|g"
+}
+
 config_shell_hash() {
   while read var
   do
     KEY=`echo "$var" | cut -d"=" -f1`
     VALUE=`echo "$var" | cut -d"=" -f2-`
-    echo "export $(printf "%q" "$KEY")=$(printf "%q" "$VALUE")"
+    # Prevent printf %q in env-var value, instead manually escape single quotes
+    echo "export $(printf "%q" "$KEY")='$(echo "$VALUE" | escape_single_quotes)'"
   done
 }
 
